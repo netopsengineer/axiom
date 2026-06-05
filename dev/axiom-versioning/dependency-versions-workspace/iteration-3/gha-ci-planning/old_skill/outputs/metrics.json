@@ -1,0 +1,16 @@
+{
+  "tool_calls": {
+    "ToolSearch": 7,
+    "Read": 4,
+    "WebFetch": 41,
+    "WebSearch": 11,
+    "mcp__plugin_github_github__get_tag": 5,
+    "mcp__plugin_github_github__list_tags": 8,
+    "mcp__plugin_github_github__get_file_contents": 6,
+    "Bash": 1,
+    "Write": 1
+  },
+  "total_tool_calls": 84,
+  "output_chars": 21375,
+  "transcript_chars": 327040
+}

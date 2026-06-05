@@ -1,0 +1,183 @@
+{
+  "task": "Plan a GitHub Actions CI workflow for this repo that runs pre-commit hooks on PRs, plus markdownlint and cspell. Use best practices for action pinning.",
+  "date_verified": "2026-03-23",
+  "skill_used": "dependency-versions",
+  "invariants_followed": {
+    "no_training_data_versions": true,
+    "no_silent_preserve_or_upgrade": true,
+    "security_advisories_checked": true,
+    "sha_pinning_used": true
+  },
+  "live_lookups_performed": {
+    "releases_latest_checked": [
+      "actions/checkout",
+      "actions/setup-python",
+      "pre-commit/action",
+      "streetsidesoftware/cspell-action",
+      "streetsidesoftware/cspell-cli",
+      "gitleaks/gitleaks",
+      "pre-commit/pre-commit-hooks",
+      "biomejs/pre-commit",
+      "DavidAnson/markdownlint-cli2-action"
+    ],
+    "tags_checked": [
+      "actions/checkout",
+      "actions/setup-python",
+      "pre-commit/action",
+      "streetsidesoftware/cspell-action",
+      "streetsidesoftware/cspell-cli",
+      "gitleaks/gitleaks",
+      "pre-commit/pre-commit-hooks",
+      "biomejs/pre-commit",
+      "DavidAnson/markdownlint-cli2",
+      "pre-commit/sync-pre-commit-deps"
+    ],
+    "divergences_found": [
+      {
+        "repo": "biomejs/pre-commit",
+        "releases_latest": "v0.6.1 (Dec 2024, stale)",
+        "tags_latest": "v2.4.8 (Mar 2026)",
+        "authoritative_source": "tags"
+      },
+      {
+        "repo": "DavidAnson/markdownlint-cli2",
+        "releases_latest": "404 Not Found",
+        "tags_latest": "v0.22.0",
+        "authoritative_source": "tags"
+      }
+    ]
+  },
+  "sha_pins_resolved": [
+    {
+      "action": "actions/checkout",
+      "version": "v6.0.2",
+      "sha": "de0fac2e4500dabe0009e67214ff5f5447ce83dd",
+      "tag_type": "direct_commit"
+    },
+    {
+      "action": "actions/setup-python",
+      "version": "v6.2.0",
+      "sha": "a309ff8b426b58ec0e2a45f0f869d46889d02405",
+      "tag_type": "direct_commit"
+    },
+    {
+      "action": "pre-commit/action",
+      "version": "v3.0.1",
+      "sha": "2c7b3805fd2a0fd8c1884dcaebf91fc102a13ecd",
+      "tag_type": "direct_commit"
+    },
+    {
+      "action": "DavidAnson/markdownlint-cli2-action",
+      "version": "v22.0.0",
+      "sha": "07035fd053f7be764496c0f8d8f9f41f98305101",
+      "tag_type": "direct_commit"
+    },
+    {
+      "action": "streetsidesoftware/cspell-action",
+      "version": "v8.3.0",
+      "sha": "9cd41bb518a24fefdafd9880cbab8f0ceba04d28",
+      "tag_type": "direct_commit"
+    },
+    {
+      "action": "biomejs/pre-commit (pre-commit hook context)",
+      "version": "v2.4.8",
+      "tag_object_sha": "d83759cbaf6baaa79e25ee04e4638d57ce7dc294",
+      "commit_sha": "08073d1253e725ff1fd0a0b1653e1ca4a911a2fc",
+      "tag_type": "annotated_tag",
+      "resolution_steps": 2
+    }
+  ],
+  "security_searches": [
+    {
+      "query": "actions/checkout CVE security advisory 2025 2026",
+      "finding": "No CVE for action itself; CVE-2025-61671 is a misuse pattern (pull_request_target), not a bug"
+    },
+    {
+      "query": "actions/setup-python CVE security advisory 2025 2026",
+      "finding": "No CVE found for the action itself"
+    },
+    {
+      "query": "pre-commit action CVE security advisory 2025 2026",
+      "finding": "No CVE found for the action itself"
+    },
+    {
+      "query": "markdownlint-cli2 DavidAnson CVE security advisory 2025 2026",
+      "finding": "No CVE found"
+    },
+    {
+      "query": "cspell streetsidesoftware CVE security advisory 2025 2026",
+      "finding": "CVE-2026-25931 (GHSA-mggq-68mr-58vj) scoped to vscode-spell-checker extension only; not applicable to cspell-cli or cspell-action"
+    },
+    {
+      "query": "gitleaks tool zricethezav security advisory CVE 2025 2026",
+      "finding": "No CVE found for the tool itself"
+    }
+  ],
+  "changelogs_read": [
+    {
+      "dependency": "DavidAnson/markdownlint-cli2",
+      "from": "v0.21.0",
+      "to": "v0.22.0",
+      "breaking_changes_for_this_project": false,
+      "notes": "Removed entry points (markdownlint-cli2-config, markdownlint-cli2-fix) not used by this project"
+    },
+    {
+      "dependency": "streetsidesoftware/cspell-cli",
+      "from": "v9.6.0",
+      "to": "v9.7.0",
+      "breaking_changes_for_this_project": false,
+      "notes": "Dependency bump only"
+    }
+  ],
+  "findings_by_risk_level": {
+    "SECURITY": 0,
+    "DEPRECATION": 0,
+    "BREAKING_UPGRADE": 0,
+    "ROUTINE": 4,
+    "CORRECTION": 0
+  },
+  "pre_commit_hook_deltas": [
+    {
+      "hook": "gitleaks/gitleaks",
+      "current": "v8.30.0",
+      "recommended": "v8.30.1",
+      "risk": "ROUTINE"
+    },
+    {
+      "hook": "streetsidesoftware/cspell-cli",
+      "current": "v9.6.0",
+      "recommended": "v9.7.0",
+      "risk": "ROUTINE"
+    },
+    {
+      "hook": "DavidAnson/markdownlint-cli2",
+      "current": "v0.21.0",
+      "recommended": "v0.22.0",
+      "risk": "ROUTINE"
+    },
+    {
+      "hook": "biomejs/pre-commit",
+      "current": "v2.4.4",
+      "recommended": "v2.4.8",
+      "risk": "ROUTINE",
+      "coordinated_update_required": [
+        "biome.json schema URL"
+      ]
+    }
+  ],
+  "architectural_decisions_surfaced": [
+    {
+      "decision": "Option A vs Option B for markdownlint and cspell in CI",
+      "recommended": "Option A (pre-commit/action only)",
+      "reason": "markdownlint-cli2-action@v22.0.0 bundles cli2 v0.20.0 which is older than the v0.21.0 already in pre-commit config; using the dedicated action creates a version split between local and CI",
+      "verified_via": "Bash gh api releases list for markdownlint-cli2-action"
+    }
+  ],
+  "key_pitfalls_encountered": [
+    "biomejs/pre-commit releases/latest returns stale v0.6.1 (Dec 2024); tags show v2.4.8 (Mar 2026) \u2014 documented in reference.md",
+    "DavidAnson/markdownlint-cli2 releases/latest returns 404 \u2014 tags-only repo",
+    "biomejs/pre-commit v2.4.8 is an annotated tag requiring two-step SHA resolution",
+    "markdownlint-cli2-action version (v22) is independent from markdownlint-cli2 package version (v0.22.0) \u2014 action bundles v0.20.0",
+    "CVE-2026-25931 (cspell) scoped to VS Code extension only \u2014 would be a false positive if not verified"
+  ]
+}

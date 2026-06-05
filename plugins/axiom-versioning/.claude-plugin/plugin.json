@@ -1,0 +1,29 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
+  "name": "axiom-versioning",
+  "displayName": "Axiom Versioning",
+  "description": "Audits and updates external versioned dependencies across application, infrastructure, and CI/CD configurations.",
+  "version": "1.0.0",
+  "author": {
+    "name": "axiom-plugins",
+    "email": "enterprise.code.developer@gmail.com"
+  },
+  "license": "MIT",
+  "repository": "https://github.com/netopsengineer/axiom",
+  "keywords": [
+    "dependencies",
+    "versioning",
+    "dependency-drift",
+    "dependency-updates",
+    "ci-cd",
+    "github-actions",
+    "docker",
+    "terraform",
+    "helm",
+    "kubernetes",
+    "dependabot",
+    "pre-commit",
+    "security",
+    "sha-pinning"
+  ]
+}

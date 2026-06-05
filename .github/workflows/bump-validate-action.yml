@@ -1,0 +1,91 @@
+name: Bump validate-plugins action
+
+# The official validate-plugins action (anthropics/claude-plugins-community)
+# publishes no release tags, so Dependabot can't track it. This is our
+# stand-in: daily, it re-pins the SHA in validate.yml to the latest upstream
+# commit, opens a PR, dispatches the Validate checks against the branch
+# (a GITHUB_TOKEN-created PR doesn't trigger them automatically), and enables
+# auto-merge so a green bump lands hands-off.
+
+on:
+  schedule:
+    - cron: "17 6 * * *" # daily 06:17 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+  actions: write # gh workflow run validate.yml --ref <branch>
+
+concurrency:
+  group: bump-validate-action
+  cancel-in-progress: false
+
+env:
+  ACTION_REPO: anthropics/claude-plugins-community
+  WORKFLOW_FILE: .github/workflows/validate.yml
+  BRANCH: chore/bump-validate-plugins-action
+
+jobs:
+  bump:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+
+      - name: Re-pin to latest upstream SHA
+        id: bump
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          latest="$(gh api "repos/$ACTION_REPO/commits/HEAD" --jq '.sha')"
+          current="$(grep -oE 'validate-plugins@[0-9a-f]{40}' "$WORKFLOW_FILE" | head -1 | cut -d@ -f2)"
+          echo "current=$current"
+          echo "latest=$latest"
+          if [ -z "$current" ]; then
+            echo "::error::Could not find a pinned validate-plugins SHA in $WORKFLOW_FILE"
+            exit 1
+          fi
+          if [ "$current" = "$latest" ]; then
+            echo "Already at latest; nothing to do."
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          sed -i "s/validate-plugins@${current}/validate-plugins@${latest}/" "$WORKFLOW_FILE"
+          {
+            echo "changed=true"
+            echo "latest=$latest"
+            echo "short=${latest:0:7}"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Open / update PR and enable auto-merge
+        if: steps.bump.outputs.changed == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          LATEST: ${{ steps.bump.outputs.latest }}
+          SHORT: ${{ steps.bump.outputs.short }}
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git checkout -B "$BRANCH"
+          git add "$WORKFLOW_FILE"
+          git commit -m "ci: bump validate-plugins action to ${SHORT}"
+          git push -f origin "$BRANCH"
+
+          # Create the PR if one isn't already open for this branch.
+          if [ "$(gh pr list --head "$BRANCH" --state open --json number --jq 'length')" = "0" ]; then
+            gh pr create --head "$BRANCH" --base main \
+              --title "ci: bump validate-plugins action to ${SHORT}" \
+              --body "Automated re-pin of \`${ACTION_REPO}/.github/actions/validate-plugins\` to latest upstream commit \`${LATEST}\` (no tags upstream, so Dependabot can't track it). Auto-merges once the dispatched Validate checks pass."
+          fi
+
+          # A GITHUB_TOKEN-created PR doesn't trigger workflows, so dispatch the
+          # checks explicitly against the branch (validate.yml on that branch
+          # now contains the new SHA, so this exercises the bumped action).
+          gh workflow run validate.yml --ref "$BRANCH"
+
+          # Land it hands-off once required checks are green.
+          gh pr merge --auto --squash "$BRANCH" \
+            || echo "::warning::Could not enable auto-merge — enable 'Allow auto-merge' in repo settings and protect main with the Validate checks."

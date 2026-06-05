@@ -1,0 +1,42 @@
+{
+  "expectations": [
+    {
+      "text": "Used live sources (WebFetch or WebSearch) to check versions for every hook, not training data",
+      "passed": true,
+      "evidence": "Verification Log shows WebFetch calls to api.github.com for all 6 repos: pre-commit-hooks ('v6.0.0 confirmed (Aug 9 2025)'), sync-pre-commit-deps ('v0.0.3 confirmed (latest)'), cspell-cli ('v9.7.0 (Feb 23 2026)'), markdownlint-cli2 ('v0.22.0 confirmed'), biomejs/pre-commit ('v2.4.8 confirmed (Mar 19 2026)'), gitleaks ('v8.30.1 (Mar 21 2026)'). Self-check confirms: 'Every version sourced from a live lookup: Yes.'"
+    },
+    {
+      "text": "Checked BOTH GitHub releases AND tags for at least one dependency where they might diverge",
+      "passed": true,
+      "evidence": "biomejs/pre-commit shows explicit divergence: 'releases/latest returns stale v0.6.1 (Dec 2024) \u2014 stale v0.x.x series' vs 'tags: v2.4.8 confirmed (Mar 19 2026); all 30 tags are v2.x.x'. Also documented for markdownlint-cli2 ('releases/latest = 404; tags = v0.22.0') and sync-pre-commit-deps ('releases/latest = 404; tags = v0.0.3'). Self-check: 'Both releases AND tags checked for all repos: Yes. Notable divergences found: biomejs/pre-commit...'"
+    },
+    {
+      "text": "Ran a security/CVE search for each of the 6 pre-commit hook repos",
+      "passed": true,
+      "evidence": "Verification Log contains WebSearch security entries for all 6 repos: cspell-cli ('streetsidesoftware cspell-cli CVE security advisory'), markdownlint-cli2 ('DavidAnson markdownlint-cli2 CVE security advisory'), biomejs ('biomejs biome CVE security advisory 2025 2026'), gitleaks ('gitleaks CVE security advisory 2025 2026' + 'gitleaks security advisory GitHub GHSA 2025 2026'), pre-commit-hooks ('pre-commit/pre-commit-hooks CVE security advisory 2025 2026'), sync-pre-commit-deps ('pre-commit sync-pre-commit-deps CVE security advisory'). Self-check: 'Every dependency covered by at least one security search: Yes.'"
+    },
+    {
+      "text": "Used the decision format (Risk level, Verified via, What changed, etc.) for each version delta",
+      "passed": true,
+      "evidence": "All 4 outdated hooks have full structured decision sections. Example from cspell-cli: '**Risk level:** ROUTINE', '**Verified via:** WebFetch...', '**What changed:** Minor CSpell version bump...', '**Breaking changes:** No.', '**Migration steps:** Version bump only...', '**Security advisories:** CVE-2026-25931...', '**Recommendation:** Safe to bump.', '**Your call:** Bump rev: v9.6.0 to rev: v9.7.0.' Same structure applied to markdownlint-cli2, biomejs/pre-commit, and gitleaks."
+    },
+    {
+      "text": "Included a verification log table at the end listing every external claim with tool and source",
+      "passed": true,
+      "evidence": "Report contains a '## Verification Log' section with a table of columns 'Claim | Tool | Source | Finding' covering 24 rows. Examples: 'pre-commit-hooks latest release = v6.0.0 | WebFetch | api.github.com/repos/pre-commit/pre-commit-hooks/releases/latest | v6.0.0 confirmed (Aug 9 2025)' and 'CVE-2026-25931 scope | WebFetch | sentinelone.com/vulnerability-database/cve-2026-25931/ | Affects vscode-spell-checker VS Code extension only, not cspell-cli'."
+    }
+  ],
+  "summary": {
+    "passed": 5,
+    "failed": 0,
+    "total": 5,
+    "pass_rate": 1.0
+  },
+  "eval_feedback": {
+    "suggestions": [
+      "The report is exemplary in its thoroughness. One minor area for future improvement: the 2 already-current hooks (pre-commit-hooks, sync-pre-commit-deps) have abbreviated entries compared to the full decision format used for the 4 outdated hooks. This is reasonable since there is no version delta to decide on, but a brief formal 'No action required' block using the same field names would be fully consistent.",
+      "The biomejs/pre-commit divergence (releases vs tags) is handled with exceptional clarity and matches the stated skill requirement exactly \u2014 this is the strongest part of the report."
+    ],
+    "overall": "Perfect score. All 5 assertions pass with strong, specific evidence. The report demonstrates rigorous grounded research: every version claim is backed by a live WebFetch to the GitHub API, releases and tags were both checked for all repos with real divergences documented, CVE searches were run for all 6 hooks, the decision format is fully applied to every version delta, and the verification log table comprehensively traces every external claim to its tool and source."
+  }
+}

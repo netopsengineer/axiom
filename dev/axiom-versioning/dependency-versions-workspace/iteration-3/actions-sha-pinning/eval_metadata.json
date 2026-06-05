@@ -1,0 +1,12 @@
+{
+  "eval_id": 5,
+  "eval_name": "actions-sha-pinning",
+  "prompt": "I'm writing a new GitHub Actions workflow that uses these five actions: actions/checkout@v6, actions/upload-artifact@v7, actions/download-artifact@v8, actions/cache@v5, actions/setup-node@v4. Verify all are current, get their SHA pins, and check for any security issues.",
+  "assertions": [
+    "Verified currency of all 5 actions using live sources (GitHub API)",
+    "Fetched commit SHAs for all 5 actions and presented them in pinned format (owner/action@sha # vX.Y.Z)",
+    "Covered security advisories for all 5 actions \u2014 bundling actions/* into shared searches is acceptable if explicitly documented in the log",
+    "Verification log documents which security search covers which dependencies when bundled",
+    "Included a verification log table at the end"
+  ]
+}

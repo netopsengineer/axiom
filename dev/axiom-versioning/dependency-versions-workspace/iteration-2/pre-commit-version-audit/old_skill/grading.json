@@ -1,0 +1,42 @@
+{
+  "expectations": [
+    {
+      "text": "Used live sources (WebFetch or WebSearch) to check versions for every hook, not training data",
+      "passed": true,
+      "evidence": "Verification Log table shows WebFetch calls for all 6 hooks: pre-commit/pre-commit-hooks (releases/latest + tags), sync-pre-commit-deps (releases/latest 404 + tags), cspell-cli (releases/latest + tags), markdownlint-cli2 (releases/latest 404 + tags), biomejs/pre-commit (releases/latest + tags), gitleaks (releases/latest + tags). Every hook has at least one live WebFetch source documented."
+    },
+    {
+      "text": "Checked BOTH GitHub releases AND tags for at least one dependency where they might diverge",
+      "passed": true,
+      "evidence": "biomejs/pre-commit entry states: 'WebFetch `https://api.github.com/repos/biomejs/pre-commit/releases/latest` returned v0.6.1 dated 2024-12-17 \u2014 this is a stale/diverged releases pointer. WebFetch `https://api.github.com/repos/biomejs/pre-commit/tags` confirmed v2.4.8 as the true latest. (This is a live example of the releases/tags divergence: `/releases/latest` is 4 months behind `/tags`.)' Verification Log rows confirm both checks with explicit divergence noted."
+    },
+    {
+      "text": "Ran a security/CVE search for each of the 6 pre-commit hook repos",
+      "passed": false,
+      "evidence": "The Verification Log contains security WebSearch entries for only 5 of the 6 hooks: pre-commit-hooks, cspell-cli, markdownlint-cli2, biomejs/biome, and gitleaks. There is no security search entry for 'pre-commit/sync-pre-commit-deps'. The 'Hooks Already Current' section for sync-pre-commit-deps also omits any security advisory check, unlike the pre-commit-hooks section which explicitly states 'No security advisories found via ...'."
+    },
+    {
+      "text": "Used the decision format (Risk level, Verified via, What changed, etc.) for each version delta",
+      "passed": true,
+      "evidence": "All 4 delta entries (gitleaks, biomejs/pre-commit, markdownlint-cli2, cspell-cli) each contain the full structured format: '**Risk level:**', '**Verified via:**', '**What changed:**', '**Breaking changes:**', '**Migration steps:**', '**Security advisories:**', '**Recommendation:**', and '**Your call:**'."
+    },
+    {
+      "text": "Included a verification log table at the end listing every external claim with tool and source",
+      "passed": true,
+      "evidence": "Report ends with a '## Verification Log' section containing a table with columns Claim, Tool, Source, Finding. It contains 21 rows covering version checks (releases and tags) for all 6 hooks, changelog fetches for 4 hooks, and security WebSearch queries for 5 hooks, with explicit tool name (WebFetch/WebSearch) and full URL or search query for each entry."
+    }
+  ],
+  "summary": {
+    "passed": 4,
+    "failed": 1,
+    "total": 5,
+    "pass_rate": 0.8
+  },
+  "eval_feedback": {
+    "suggestions": [
+      "Add a security/CVE search for pre-commit/sync-pre-commit-deps and record it in the Verification Log. Even if the result is 'no advisories found', it must be explicitly documented to satisfy the requirement that all 6 hooks are covered.",
+      "Consider noting in the sync-pre-commit-deps 'Hooks Already Current' section (similar to the pre-commit-hooks section) that a security search was performed and returned no results."
+    ],
+    "overall": "Strong execution overall. The report uses live sources for all version checks, explicitly surfaces the releases/tags divergence case for biomejs, applies the full decision format to every delta, and provides a thorough verification log. The single failure is a gap in security coverage: pre-commit/sync-pre-commit-deps has no documented CVE/advisory search in either the body or the verification log. All other assertions pass with clear, cited evidence."
+  }
+}

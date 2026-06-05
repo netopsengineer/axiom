@@ -1,0 +1,35 @@
+{
+  "expectations": [
+    {
+      "text": "Checked BOTH GitHub releases AND tags for biomejs (where they are known to diverge)",
+      "passed": true,
+      "evidence": "The executor fetched api.github.com/repos/biomejs/biome/releases/latest AND api.github.com/repos/biomejs/pre-commit/tags in parallel. The tags check revealed the divergence (releases/latest returns stale v0.6.1, tags show v2.4.8) and this was explicitly documented in the report's Verification Note."
+    },
+    {
+      "text": "Read or searched for the changelog between v2.4.4 and the latest version",
+      "passed": true,
+      "evidence": "Three sources consulted: biomejs.dev/internals/changelog/, github.com/biomejs/biome/releases, and the specific tag release page for 2.4.8. Content confirmed: no breaking changes, LSP crash fix, new nursery rules."
+    },
+    {
+      "text": "Checked for biomejs security advisories via WebSearch",
+      "passed": true,
+      "evidence": "Two checks: WebSearch 'biomejs biome CVE security advisory 2025 2026' returned no CVEs, and WebFetch of github.com/advisories?query=biomejs returned 'No results matched your search'."
+    },
+    {
+      "text": "Presented findings using the decision format with all required fields",
+      "passed": true,
+      "evidence": "report.md contains all required fields: Risk level (ROUTINE), Verified via, Latest version, What changed, Breaking changes, Migration steps, Security advisories, Recommendation, Your call."
+    },
+    {
+      "text": "Assessed whether the existing biome.json config needs changes for the new version",
+      "passed": true,
+      "evidence": "Every key in the biome.json was explicitly evaluated against 2.4.8. The executor also fetched the noImportantStyles rule page and ran a deprecation search to confirm validity."
+    }
+  ],
+  "summary": {
+    "passed": 5,
+    "failed": 0,
+    "total": 5,
+    "pass_rate": 1.0
+  }
+}

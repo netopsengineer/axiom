@@ -1,0 +1,12 @@
+{
+  "tool_calls": {
+    "WebFetch": 31,
+    "WebSearch": 8,
+    "Read": 2,
+    "Bash": 3,
+    "ToolSearch": 3
+  },
+  "total_tool_calls": 47,
+  "output_chars": 18331,
+  "transcript_chars": 52000
+}

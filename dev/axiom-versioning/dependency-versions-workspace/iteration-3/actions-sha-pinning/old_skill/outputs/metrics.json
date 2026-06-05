@@ -1,0 +1,111 @@
+{
+  "task": "actions-sha-pinning",
+  "date": "2026-03-23",
+  "skill_version": "dependency-versions (skill-snapshot-iter2)",
+  "actions_reviewed": 5,
+  "actions": [
+    {
+      "name": "actions/checkout",
+      "user_specified": "@v6",
+      "latest_version": "v6.0.2",
+      "latest_sha": "de0fac2e4500dabe0009e67214ff5f5447ce83dd",
+      "sha_type": "commit",
+      "annotated_tag_resolution_required": false,
+      "status": "patch_behind",
+      "risk_level": "ROUTINE",
+      "security_advisories_found": false,
+      "releases_checked": true,
+      "tags_checked": true
+    },
+    {
+      "name": "actions/upload-artifact",
+      "user_specified": "@v7",
+      "latest_version": "v7.0.0",
+      "latest_sha": "bbbca2ddaa5d8feaa63e36b76fdaad77386f024f",
+      "sha_type": "commit",
+      "annotated_tag_resolution_required": false,
+      "status": "current",
+      "risk_level": "ROUTINE",
+      "security_advisories_found": false,
+      "releases_checked": true,
+      "tags_checked": true
+    },
+    {
+      "name": "actions/download-artifact",
+      "user_specified": "@v8",
+      "latest_version": "v8.0.1",
+      "latest_sha": "3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c",
+      "sha_type": "commit",
+      "annotated_tag_resolution_required": false,
+      "status": "patch_behind",
+      "risk_level": "ROUTINE",
+      "security_advisories_found": false,
+      "releases_checked": true,
+      "tags_checked": true
+    },
+    {
+      "name": "actions/cache",
+      "user_specified": "@v5",
+      "latest_version": "v5.0.4",
+      "latest_sha": "668228422ae6a00e4ad889ee87cd7109ec5666a7",
+      "sha_type": "commit",
+      "annotated_tag_resolution_required": false,
+      "status": "patch_behind",
+      "risk_level": "ROUTINE",
+      "security_advisories_found": false,
+      "releases_checked": true,
+      "tags_checked": true
+    },
+    {
+      "name": "actions/setup-node",
+      "user_specified": "@v4",
+      "latest_version": "v6.3.0",
+      "latest_sha": "53b83947a5a98c8d113130e565377fae1a50d02f",
+      "sha_type": "commit",
+      "annotated_tag_resolution_required": false,
+      "status": "major_versions_behind",
+      "major_versions_behind": 2,
+      "risk_level": "BREAKING-UPGRADE",
+      "security_advisories_found": false,
+      "releases_checked": true,
+      "tags_checked": true,
+      "breaking_changes": true,
+      "migration_deadline": "2026-06-02"
+    }
+  ],
+  "skill_compliance": {
+    "no_training_data_for_versions": true,
+    "both_releases_and_tags_checked": true,
+    "security_advisories_checked_all": true,
+    "sha_pinning_performed_all": true,
+    "annotated_tag_resolution_logic_applied": true,
+    "changelogs_read_for_upgrades": true,
+    "decisions_grouped_by_risk": true,
+    "verification_log_included": true
+  },
+  "live_lookups_performed": {
+    "github_api_releases_latest": 5,
+    "github_api_tags": 5,
+    "github_api_git_refs_tags": 5,
+    "github_release_notes_pages": 4,
+    "web_searches_security": 5,
+    "web_searches_changelogs": 2,
+    "github_advisory_database": 1
+  },
+  "coordinated_groups_identified": [
+    {
+      "group": "artifact_actions",
+      "members": [
+        "actions/upload-artifact@v7",
+        "actions/download-artifact@v8"
+      ],
+      "reason": "archive:false feature requires v7/v8 pair alignment"
+    }
+  ],
+  "upcoming_deadlines": [
+    {
+      "date": "2026-06-02",
+      "description": "GitHub forces Node.js 24 as default for all actions; actions/setup-node@v4 must be upgraded before this date"
+    }
+  ]
+}

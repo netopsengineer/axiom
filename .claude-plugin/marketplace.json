@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-marketplace.json",
+  "name": "axiom",
+  "description": "A curated marketplace of plugins for Claude Code, built from first principles.",
+  "owner": {
+    "name": "axiom-plugins",
+    "email": "enterprise.code.developer@gmail.com"
+  },
+  "plugins": [
+    {
+      "name": "axiom-versioning",
+      "source": "./plugins/axiom-versioning",
+      "description": "Audits and updates external versioned dependencies across application, infrastructure, and CI/CD configurations.",
+      "category": "dependency-management"
+    }
+  ]
+}

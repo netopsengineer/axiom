@@ -1,0 +1,24 @@
+{
+  // Local schema resolves against the installed Biome, so editor validation
+  // always matches the CLI version in package.json — nothing to hand-bump when
+  // Dependabot moves Biome forward. (Avoids exactly the version drift this repo
+  // exists to catch.)
+  "$schema": "./node_modules/@biomejs/biome/configuration_schema.json",
+
+  // Honour .gitignore so node_modules/ and the ignored root-level scratch files
+  // are never linted.
+  "vcs": { "enabled": true, "clientKind": "git", "useIgnoreFile": true },
+
+  // Biome stays in its lane: only the repo's hand-written JS. The plugin
+  // manifest and CHANGELOG are machine-managed by semantic-release, and Markdown
+  // belongs to markdownlint-cli2. dev/ holds eval run data that never ships.
+  "files": {
+    "includes": ["**/*.{js,mjs}", "!dev"]
+  },
+
+  // 2-space indent matches the existing release tooling (Biome defaults to tabs).
+  "formatter": { "enabled": true, "indentStyle": "space" },
+
+  // Biome's recommended rule set (the default, stated explicitly for readers).
+  "linter": { "enabled": true, "rules": { "recommended": true } }
+}

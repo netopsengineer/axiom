@@ -1,0 +1,43 @@
+{
+  "expectations": [
+    {
+      "text": "SHA-pinned all GitHub Actions references (uses: owner/action@sha # vX.Y.Z format)",
+      "passed": true,
+      "evidence": "All three actions in the workflow YAML use full commit SHAs with inline version comments: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2, actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0, actions/cache@668228422ae6a00e4ad889ee87cd7109ec5666a7 # v5.0.4. Format matches exactly what was required."
+    },
+    {
+      "text": "Used live sources (GitHub API or WebSearch) to verify action versions exist",
+      "passed": true,
+      "evidence": "Step 6 verification log documents live WebFetch calls to api.github.com/repos/{owner}/{action}/releases/latest and api.github.com/repos/{owner}/{action}/git/refs/tags/{version} for all three actions (checkout, setup-python, cache). MCP list_tags was also used. Each SHA is traced to a specific live lookup with the exact URL cited."
+    },
+    {
+      "text": "Checked for CVEs/security advisories on referenced actions or tools",
+      "passed": true,
+      "evidence": "Step 4 SECURITY section and Step 6 verification log include explicit CVE/security WebSearch entries for every dependency: pre-commit/pre-commit-hooks, cspell, markdownlint-cli2, biomejs, gitleaks, and a combined actions/* search. Results are documented (no CVEs found for any specific dep). Broader ecosystem context (CVE-2025-30066, Trivy March 2026) is also noted to justify SHA pinning."
+    },
+    {
+      "text": "Used the decision format for version choices where the project has options",
+      "passed": true,
+      "evidence": "Step 4 contains a structured decision block for every upgradeable dependency (5 ROUTINE, 3 BREAKING-UPGRADE). Each block uses consistent fields: Risk level, Verified via, What changed, Breaking changes, Migration steps, Security advisories, Recommendation, and 'Your call.' Dependencies already at latest (pre-commit-hooks, sync-pre-commit-deps) are noted as no-action with justification."
+    },
+    {
+      "text": "Included a verification log table at the end",
+      "passed": true,
+      "evidence": "Step 6 is a comprehensive verification log table with columns Claim, Tool, Source, Finding. It covers 20+ rows spanning all dependencies and security checks. A self-check checklist below the table confirms all required checks were completed. The table appears at the end of the document as required."
+    }
+  ],
+  "summary": {
+    "passed": 5,
+    "failed": 0,
+    "total": 5,
+    "pass_rate": 1.0
+  },
+  "eval_feedback": {
+    "suggestions": [
+      "The decision format could explicitly label decisions as 'no-action' vs 'upgrade' at the top of each block for faster scanning, but the current format communicates this clearly via the Risk level field and opening sentence.",
+      "The SHA reference table (Step 5) and the verification log SHAs are consistent, which is good practice \u2014 future iterations could make this cross-reference explicit (e.g., a note in the log row pointing to the workflow line).",
+      "The report correctly notes that pre-commit hook repos do not require SHA pinning in .pre-commit-config.yaml, which shows good understanding of the trust boundary distinction."
+    ],
+    "overall": "Full pass across all five assertions. The report demonstrates rigorous version verification with live API sources, complete CVE coverage for every dependency, a well-structured decision format applied consistently, proper SHA-pinning in the correct format, and a thorough verification log. The skill produced a production-quality CI planning artifact."
+  }
+}

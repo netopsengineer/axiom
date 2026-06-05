@@ -1,0 +1,39 @@
+{
+  "expectations": [
+    {
+      "text": "Verified currency of all 5 actions using live sources (GitHub API)",
+      "passed": true,
+      "evidence": "Verification log shows WebFetch calls to api.github.com for all 5 actions: 'checkout latest release | WebFetch | api.github.com/repos/actions/checkout/releases/latest | v6.0.2', 'upload-artifact latest release | WebFetch | api.github.com/repos/actions/upload-artifact/releases/latest | v7.0.0', 'download-artifact latest release | WebFetch | api.github.com/repos/actions/download-artifact/releases/latest | v8.0.1', 'cache latest release | WebFetch | api.github.com/repos/actions/cache/releases/latest | v5.0.4', 'setup-node latest release | WebFetch | api.github.com/repos/actions/setup-node/releases/latest | v6.3.0'. Self-check also states: 'Every version sourced from a live lookup: Yes \u2014 all versions fetched from GitHub API, not training data'."
+    },
+    {
+      "text": "Fetched commit SHAs for all 5 actions and presented them in pinned format (owner/action@sha # vX.Y.Z)",
+      "passed": true,
+      "evidence": "SHA Pinning Reference section provides all 5 actions in the required format: 'actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2', 'actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0', 'actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1', 'actions/cache@668228422ae6a00e4ad889ee87cd7109ec5666a7 # v5.0.4', 'actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # v6.3.0'. SHAs were sourced via WebFetch from api.github.com git/refs/tags endpoints as documented in the verification log."
+    },
+    {
+      "text": "Covered security advisories for all 5 actions \u2014 bundling actions/* into shared searches is acceptable if explicitly documented in the log",
+      "passed": true,
+      "evidence": "Each of the 5 actions has its own dedicated security search row in the verification log: 'checkout security advisories | WebSearch | \"actions/checkout CVE security advisory 2025 2026\"', 'upload-artifact security advisories | WebSearch | \"actions/upload-artifact CVE security advisory 2025 2026\"', 'download-artifact security advisories | WebSearch | \"actions/download-artifact security advisory CVE 2025 2026\"', 'cache security advisories | WebSearch | \"actions/cache CVE security advisory 2025 2026\"', 'setup-node security advisories | WebSearch | \"actions/setup-node CVE security advisory 2025 2026\"'. All 5 dependencies have individual security search coverage \u2014 no bundling."
+    },
+    {
+      "text": "Verification log documents which security search covers which dependencies when bundled",
+      "passed": true,
+      "evidence": "No bundling was performed \u2014 each of the 5 actions received its own dedicated, individually-named security search row in the verification log. Because searches are 1:1 with dependencies, there is no bundling ambiguity to document. The self-check confirms: 'Security search entries match dependency count (5): Yes \u2014 checkout, upload-artifact, download-artifact, cache, setup-node each searched via WebSearch and GitHub Advisory Database'."
+    },
+    {
+      "text": "Included a verification log table at the end",
+      "passed": true,
+      "evidence": "The report includes a '## Verification Log' section near the end containing a markdown table with columns 'Claim | Tool | Source | Finding', covering all 5 actions with multiple rows each (releases, tags, SHA lookups, changelogs, security searches). The Self-Check section follows after the table."
+    }
+  ],
+  "summary": {
+    "passed": 5,
+    "failed": 0,
+    "total": 5,
+    "pass_rate": 1.0
+  },
+  "eval_feedback": {
+    "suggestions": [],
+    "overall": "The report fully satisfies all 5 assertions. All 5 actions were verified via live GitHub API calls with individual WebFetch entries per action. SHAs are presented in the required owner/action@sha # vX.Y.Z format. Security advisory searches are individually scoped 1:1 per dependency with no bundling. The verification log table is present and comprehensive. The self-check section further confirms completeness."
+  }
+}

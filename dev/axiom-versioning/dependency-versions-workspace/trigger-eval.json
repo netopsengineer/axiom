@@ -1,0 +1,86 @@
+[
+  {
+    "query": "We're on Node 18 and our package.json has express 4.18.2, helmet 7.0.0, and jsonwebtoken 9.0.0. I want to upgrade everything to latest before we ship next sprint. Can you check what's current and whether anything will break our auth middleware?",
+    "should_trigger": true
+  },
+  {
+    "query": "I need to set up a GitHub Actions workflow for our monorepo. It should run eslint, vitest, and build Docker images for 3 services. We're using pnpm workspaces. Make sure the actions are pinned properly \u2014 we got burned by the tj-actions thing last year.",
+    "should_trigger": true
+  },
+  {
+    "query": "hey can you look at our terraform/main.tf and check if the aws provider version and the module versions are still current? we havent touched infra in like 8 months and im worried stuff has drifted",
+    "should_trigger": true
+  },
+  {
+    "query": "We need to migrate from CircleCI to GitHub Actions. Current config is in .circleci/config.yml \u2014 it runs pytest, mypy, black, and deploys to AWS ECS via a custom orb. Can you plan out what the equivalent GHA workflow would look like?",
+    "should_trigger": true
+  },
+  {
+    "query": "Our Dockerfile uses python:3.11-slim as base and installs poetry 1.6.1. I think both might be behind. Also the multi-stage build copies from node:18-alpine for the frontend. Can you verify all the base images and tool versions are current and flag any CVEs?",
+    "should_trigger": true
+  },
+  {
+    "query": "I'm reviewing this PR that updates our Helm chart values \u2014 it bumps the ingress-nginx controller to 1.9.4 and cert-manager to 1.13.2. Are those actually the latest? Last time someone submitted outdated versions that had a known vuln.",
+    "should_trigger": true
+  },
+  {
+    "query": "we have a pre-commit config with ruff, mypy, black, and bandit. havent updated the revs in forever. also i think black might be deprecated now in favor of ruff format? can you check whats going on and tell me what to do",
+    "should_trigger": true
+  },
+  {
+    "query": "I wrote a CloudFormation template that creates an EKS cluster with managed node groups. Before I deploy it to prod, can you review the template and make sure the AMI types, Kubernetes version, and add-on versions are all current? I don't want to deploy something that's already EOL.",
+    "should_trigger": true
+  },
+  {
+    "query": "Planning to add Dependabot to the repo. I need a .github/dependabot.yml that covers npm, pip, GitHub Actions, and Docker. What are the current best practices for the config? I've heard the update schedule options changed recently.",
+    "should_trigger": true
+  },
+  {
+    "query": "Our pyproject.toml pins SQLAlchemy==2.0.23, alembic==1.12.1, and pydantic==2.5.2. We're about to start a new feature that needs the JSON column type improvements. Can you check if we need to upgrade and whether our existing models will still work?",
+    "should_trigger": true
+  },
+  {
+    "query": "Can you refactor the UserService class to use dependency injection instead of importing the repository directly? The class is in src/services/user_service.py and it's getting hard to test because of all the concrete dependencies.",
+    "should_trigger": false
+  },
+  {
+    "query": "I need to write a database migration that adds a status column to the orders table with a default value of 'pending' and backfills existing rows. We're using Alembic. Can you generate the migration script?",
+    "should_trigger": false
+  },
+  {
+    "query": "Explain how our authentication middleware works. It's in src/middleware/auth.ts and I think it validates JWTs but I'm not sure about the refresh token flow. Walk me through it.",
+    "should_trigger": false
+  },
+  {
+    "query": "Write unit tests for the calculate_shipping_cost function in logistics/shipping.py. It takes weight, dimensions, and destination zone. Cover edge cases like zero weight and oversized packages.",
+    "should_trigger": false
+  },
+  {
+    "query": "The CI pipeline is failing on the lint step \u2014 getting 'no matching version found for eslint-config-airbnb@latest'. Can you figure out what's wrong and fix it? The error started after someone merged a PR yesterday.",
+    "should_trigger": false
+  },
+  {
+    "query": "I need to design the REST API for our new notifications service. It should support email, SMS, and push notifications with templating. Can you sketch out the endpoints, request/response schemas, and suggest a queue-based architecture?",
+    "should_trigger": false
+  },
+  {
+    "query": "We're switching from our custom branching model to trunk-based development. Can you update the CONTRIBUTING.md to document the new workflow \u2014 short-lived feature branches, squash merges, release tags from main?",
+    "should_trigger": false
+  },
+  {
+    "query": "Our GitHub Actions workflow takes 18 minutes. Can you look at .github/workflows/ci.yml and find ways to speed it up? Maybe we can parallelize the test matrix or improve caching.",
+    "should_trigger": false
+  },
+  {
+    "query": "I need to set up proper error handling in our Express app. Right now uncaught exceptions crash the process. Add a global error handler middleware and make sure async route errors are caught.",
+    "should_trigger": false
+  },
+  {
+    "query": "Can you create a git hook that runs our formatting and lint checks before each commit? I want it in a .husky/ directory so the whole team gets it automatically when they install deps.",
+    "should_trigger": false
+  },
+  {
+    "query": "I want to create a script that connects to the Nautobot API using the latest OpenAPI schema.",
+    "should_trigger": true
+  }
+]

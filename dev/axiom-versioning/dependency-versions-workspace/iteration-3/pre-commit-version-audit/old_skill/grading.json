@@ -1,0 +1,42 @@
+{
+  "expectations": [
+    {
+      "text": "Used live sources (WebFetch or WebSearch) to check versions for every hook, not training data",
+      "passed": true,
+      "evidence": "All 6 hooks have an explicit 'Verified via: WebFetch <api.github.com URL>' entry in their sections, and the verification log table records a WebFetch call for each hook's version claim. No version figures are stated without a cited live lookup."
+    },
+    {
+      "text": "Checked BOTH GitHub releases AND tags for at least one dependency where they might diverge",
+      "passed": true,
+      "evidence": "biomejs/pre-commit is the clearest example: releases/latest returned stale v0.6.1 (Dec 2024) while tags showed v2.4.8 \u2014 a real divergence caught and documented. gitleaks, cspell-cli, and pre-commit-hooks also had both releases and tags checked (they agreed). markdownlint-cli2 had releases return an empty array while tags returned v0.22.0. Multiple divergence cases were identified and surfaced."
+    },
+    {
+      "text": "Ran a security/CVE search for each of the 6 pre-commit hook repos",
+      "passed": true,
+      "evidence": "The verification log (rows 18-23 of the table) shows individual WebSearch security queries for all 6 repos: pre-commit-hooks, cspell-cli, markdownlint-cli2, biomejs, gitleaks, and sync-pre-commit-deps. Each hook section also explicitly states the security search result."
+    },
+    {
+      "text": "Used the decision format (Risk level, Verified via, What changed, etc.) for each version delta",
+      "passed": true,
+      "evidence": "All 4 hooks with version deltas (cspell-cli, markdownlint-cli2, biomejs/pre-commit, gitleaks) include: Risk level, Verified via, What changed, Breaking changes, Migration steps, Security advisories, Recommendation, and Your call. The 2 current hooks use a lighter format, which is correct as there is no delta to describe."
+    },
+    {
+      "text": "Included a verification log table at the end listing every external claim with tool and source",
+      "passed": true,
+      "evidence": "The 'Verification Log' section is a 20-row table with Claim, Tool, Source, and Finding columns. It covers version lookups, tag lookups, changelog fetches, security advisory page checks, and security web searches for all 6 repos \u2014 every external claim made in the body of the report has a corresponding log entry."
+    }
+  ],
+  "summary": {
+    "passed": 5,
+    "failed": 0,
+    "total": 5,
+    "pass_rate": 1.0
+  },
+  "eval_feedback": {
+    "suggestions": [
+      "The decision format is only applied to hooks with a version delta, which is correct. Making this scoping rule explicit (e.g., a brief note that the full structured format applies only when a delta exists) would make the format contract clearer for future readers of the skill definition.",
+      "The self-check section at the end of the report is a strong quality signal beyond what the assertions require \u2014 worth preserving as a pattern."
+    ],
+    "overall": "Perfect score. The report fully satisfies all five assertions. Live lookups are cited for every hook, releases and tags were checked in parallel with a real divergence caught for biomejs/pre-commit, security searches were run for all six repos individually, the structured decision format was applied consistently to every version delta, and the verification log table comprehensively covers every external claim made in the document."
+  }
+}

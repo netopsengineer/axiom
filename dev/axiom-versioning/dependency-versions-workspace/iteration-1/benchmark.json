@@ -1,0 +1,332 @@
+{
+  "metadata": {
+    "skill_name": "dependency-versions",
+    "skill_path": "/Volumes/extreme/Projects/Work/DocumentationOnlyProjects/branching-strategy-redesign-upp/.claude/skills/dependency-versions",
+    "executor_model": "claude-sonnet-4-6",
+    "analyzer_model": "claude-opus-4-6",
+    "timestamp": "2026-03-21T03:00:00Z",
+    "evals_run": [
+      1,
+      2,
+      3
+    ],
+    "runs_per_configuration": 1
+  },
+  "runs": [
+    {
+      "eval_id": 1,
+      "eval_name": "pre-commit-version-audit",
+      "configuration": "with_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 0.8,
+        "passed": 4,
+        "failed": 1,
+        "total": 5,
+        "time_seconds": 203.1,
+        "tokens": 46203,
+        "tool_calls": 48,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "Used live sources (WebFetch or WebSearch) to check versions for every hook",
+          "passed": true,
+          "evidence": "All 6 hooks verified via GitHub MCP tools and WebFetch"
+        },
+        {
+          "text": "Checked BOTH GitHub releases AND tags for at least one dependency",
+          "passed": true,
+          "evidence": "biomejs/pre-commit divergence caught: releases/latest=v0.6.1, tags=v2.4.8"
+        },
+        {
+          "text": "Ran a security/CVE search for each of the 6 pre-commit hook repos",
+          "passed": false,
+          "evidence": "5 of 6 hooks had security searches; sync-pre-commit-deps was missed"
+        },
+        {
+          "text": "Used the decision format for each version delta",
+          "passed": true,
+          "evidence": "Full decision format for all 3 deltas with all required fields"
+        },
+        {
+          "text": "Included a verification log table",
+          "passed": true,
+          "evidence": "~22 row verification log with Tool and Source columns"
+        }
+      ]
+    },
+    {
+      "eval_id": 1,
+      "eval_name": "pre-commit-version-audit",
+      "configuration": "without_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 0.4,
+        "passed": 2,
+        "failed": 3,
+        "total": 5,
+        "time_seconds": 198.0,
+        "tokens": 26385,
+        "tool_calls": 30,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "Used live sources (WebFetch or WebSearch) to check versions for every hook",
+          "passed": true,
+          "evidence": "All 6 repos fetched via WebFetch to /releases/latest, /tags, and/or /releases"
+        },
+        {
+          "text": "Checked BOTH GitHub releases AND tags for at least one dependency",
+          "passed": true,
+          "evidence": "biomejs releases/latest vs tags divergence correctly resolved"
+        },
+        {
+          "text": "Ran a security/CVE search for each of the 6 pre-commit hook repos",
+          "passed": false,
+          "evidence": "sync-pre-commit-deps never had security advisory page fetched"
+        },
+        {
+          "text": "Used the decision format for each version delta",
+          "passed": false,
+          "evidence": "No structured decision format used; freeform report without Risk level/Verified via fields"
+        },
+        {
+          "text": "Included a verification log table",
+          "passed": false,
+          "evidence": "Bulleted URL list under Sources, not a verification log table"
+        }
+      ]
+    },
+    {
+      "eval_id": 2,
+      "eval_name": "gha-ci-planning",
+      "configuration": "with_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 1.0,
+        "passed": 5,
+        "failed": 0,
+        "total": 5,
+        "time_seconds": 444.1,
+        "tokens": 76865,
+        "tool_calls": 66,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "SHA-pinned all GitHub Actions references",
+          "passed": true,
+          "evidence": "All 5 actions use full 40-char SHA with # vX.Y.Z comment"
+        },
+        {
+          "text": "Used live sources to verify action versions exist",
+          "passed": true,
+          "evidence": "19 live lookups documented in verification log"
+        },
+        {
+          "text": "Checked for CVEs/security advisories on referenced actions",
+          "passed": true,
+          "evidence": "5 separate WebSearch CVE queries; CVE-2025-30066 discussed as motivation"
+        },
+        {
+          "text": "Used the decision format for version choices",
+          "passed": true,
+          "evidence": "Structured format with all required fields for 3 behind-version hooks"
+        },
+        {
+          "text": "Included a verification log table at the end",
+          "passed": true,
+          "evidence": "19-row table with Claim/Tool/Source/Finding columns plus self-check"
+        }
+      ]
+    },
+    {
+      "eval_id": 2,
+      "eval_name": "gha-ci-planning",
+      "configuration": "without_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 0.4,
+        "passed": 2,
+        "failed": 3,
+        "total": 5,
+        "time_seconds": 389.6,
+        "tokens": 37710,
+        "tool_calls": 39,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "SHA-pinned all GitHub Actions references",
+          "passed": true,
+          "evidence": "All 5 actions use full 40-char SHA pins with version comments"
+        },
+        {
+          "text": "Used live sources to verify action versions exist",
+          "passed": true,
+          "evidence": "Multiple WebFetch calls to live GitHub releases pages"
+        },
+        {
+          "text": "Checked for CVEs/security advisories on referenced actions",
+          "passed": false,
+          "evidence": "No CVE-specific searches or advisory database queries in transcript"
+        },
+        {
+          "text": "Used the decision format for version choices",
+          "passed": false,
+          "evidence": "Architectural decisions covered but no structured version-selection format"
+        },
+        {
+          "text": "Included a verification log table at the end",
+          "passed": false,
+          "evidence": "Sources section with URL list, not a verification log table"
+        }
+      ]
+    },
+    {
+      "eval_id": 3,
+      "eval_name": "biome-deep-dive",
+      "configuration": "with_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 1.0,
+        "passed": 5,
+        "failed": 0,
+        "total": 5,
+        "time_seconds": 203.7,
+        "tokens": 27825,
+        "tool_calls": 27,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "Checked BOTH GitHub releases AND tags for biomejs",
+          "passed": true,
+          "evidence": "Fetched releases/latest AND pre-commit/tags; divergence documented"
+        },
+        {
+          "text": "Read or searched for the changelog",
+          "passed": true,
+          "evidence": "Three sources: biomejs.dev/internals/changelog/, GitHub releases, tag page"
+        },
+        {
+          "text": "Checked for biomejs security advisories via WebSearch",
+          "passed": true,
+          "evidence": "WebSearch + GitHub Advisory Database both confirmed no CVEs"
+        },
+        {
+          "text": "Presented findings using the decision format",
+          "passed": true,
+          "evidence": "All required fields: Risk level, Verified via, What changed, etc."
+        },
+        {
+          "text": "Assessed biome.json config impact",
+          "passed": true,
+          "evidence": "Every key evaluated including noImportantStyles rule page lookup"
+        }
+      ]
+    },
+    {
+      "eval_id": 3,
+      "eval_name": "biome-deep-dive",
+      "configuration": "without_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 0.6,
+        "passed": 3,
+        "failed": 2,
+        "total": 5,
+        "time_seconds": 320.4,
+        "tokens": 32809,
+        "tool_calls": 31,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "Checked BOTH GitHub releases AND tags for biomejs",
+          "passed": false,
+          "evidence": "Checked releases for biomejs/biome and tags for biomejs/pre-commit, but not both on the same repo"
+        },
+        {
+          "text": "Read or searched for the changelog",
+          "passed": true,
+          "evidence": "Multiple sources including biomejs.dev/internals/changelog/ and GitHub releases"
+        },
+        {
+          "text": "Checked for biomejs security advisories via WebSearch",
+          "passed": true,
+          "evidence": "WebSearch CVE queries plus GitHub Advisory Database check"
+        },
+        {
+          "text": "Presented findings using the decision format",
+          "passed": false,
+          "evidence": "Comprehensive freeform report but no structured decision format with required fields"
+        },
+        {
+          "text": "Assessed biome.json config impact",
+          "passed": true,
+          "evidence": "Every biome.json key checked with per-version config status table"
+        }
+      ]
+    }
+  ],
+  "run_summary": {
+    "with_skill": {
+      "pass_rate": {
+        "mean": 0.93,
+        "stddev": 0.09,
+        "min": 0.8,
+        "max": 1.0
+      },
+      "time_seconds": {
+        "mean": 283.6,
+        "stddev": 113.1,
+        "min": 203.1,
+        "max": 444.1
+      },
+      "tokens": {
+        "mean": 50298,
+        "stddev": 20193,
+        "min": 27825,
+        "max": 76865
+      }
+    },
+    "without_skill": {
+      "pass_rate": {
+        "mean": 0.47,
+        "stddev": 0.09,
+        "min": 0.4,
+        "max": 0.6
+      },
+      "time_seconds": {
+        "mean": 302.7,
+        "stddev": 82.2,
+        "min": 198.0,
+        "max": 389.6
+      },
+      "tokens": {
+        "mean": 32301,
+        "stddev": 4650,
+        "min": 26385,
+        "max": 37710
+      }
+    },
+    "delta": {
+      "pass_rate": "+0.47",
+      "time_seconds": "-19.1",
+      "tokens": "+17997"
+    }
+  },
+  "notes": [
+    "Skill improves pass rate by +47% (93% vs 47%) across all 3 evals",
+    "Assertion 'Used live sources to verify versions' passes 100% in both configurations \u2014 non-discriminating for version-focused tasks",
+    "Decision format and verification log assertions pass 100% with skill, 0% without \u2014 these are the primary discriminators",
+    "CVE/security checking passes 67% with skill (missed sync-pre-commit-deps on eval 1) vs 33% without \u2014 skill helps but has a gap",
+    "SHA pinning passes in both configurations on eval 2 \u2014 baseline also SHA-pinned when the prompt mentioned 'best practices for action pinning'",
+    "Skill uses ~56% more tokens on average (50k vs 32k) but time is comparable (-19s on average) due to more parallel tool use",
+    "Eval 2 (GHA CI planning) shows the largest skill delta: 100% vs 40% \u2014 the broad planning task is where the skill is most additive",
+    "The one with-skill failure (eval 1, security check) was on sync-pre-commit-deps \u2014 a low-profile utility repo that may need explicit mention in the skill"
+  ]
+}

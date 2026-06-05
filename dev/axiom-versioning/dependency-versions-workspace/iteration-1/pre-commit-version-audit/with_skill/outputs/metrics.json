@@ -1,0 +1,14 @@
+{
+  "tool_calls": {
+    "WebFetch": 20,
+    "WebSearch": 12,
+    "Read": 10,
+    "Glob": 2,
+    "Grep": 0,
+    "Bash": 4
+  },
+  "total_tool_calls": 48,
+  "files_created": [
+    "report.md"
+  ]
+}

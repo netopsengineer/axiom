@@ -1,0 +1,43 @@
+{
+  "expectations": [
+    {
+      "text": "Surfaced stale action versions (checkout@v3, upload-artifact@v2) as version deltas with live-verified current versions",
+      "passed": true,
+      "evidence": "Issue 1 documents 'actions/checkout: v3 -> v6.0.2' and Issue 2 documents 'actions/upload-artifact: v2 -> v7.0.0', both with 'Verified via: GitHub API' citations. The Verification Log table shows live API lookups for releases/latest and /tags for both actions, including SHAs."
+    },
+    {
+      "text": "Flagged the false 'current stable' / 'latest stable release' claims as CORRECTION-level findings, not just version bumps",
+      "passed": false,
+      "evidence": "The report does surface the false claims \u2014 Issue 1 states 'The label \"current stable\" for v3 is factually wrong' and Issue 2 states 'The plan's description of v2 as \"the latest stable release\" is wrong by approximately five major versions.' However, the risk labels used are 'BREAKING-UPGRADE' and 'SECURITY / DEPRECATION' respectively. The report uses no CORRECTION risk level category at all \u2014 the prioritized issue list sections are headed 'SECURITY' and 'DEPRECATION', not CORRECTION."
+    },
+    {
+      "text": "Identified the cosign internal inconsistency (>= 1.x vs v3.0.5) as a CORRECTION-level finding",
+      "passed": false,
+      "evidence": "Issue 4 explicitly identifies the contradiction: 'Runner inventory: cosign >= 1.x' vs 'Verified versions table: cosign v3.0.5' and states 'These are inconsistent.' However, the assigned risk level is 'SECURITY (cosign v1.x contains unfixed CVEs and is deprecated)' and the prioritized issue list places it under the 'SECURITY (act now)' heading. There is no CORRECTION label anywhere in the report."
+    },
+    {
+      "text": "Did NOT ask about shipping timeline (this is a review task, not an implementation task)",
+      "passed": true,
+      "evidence": "The entire report contains no questions about shipping timeline, deployment schedule, or when the work needs to be completed. The report is purely analytical and recommendation-oriented."
+    },
+    {
+      "text": "Included a verification log table covering all checked dependencies",
+      "passed": true,
+      "evidence": "The 'Verification Log' section is a table with columns Claim, Tool, Source, Finding. It covers 16 rows including live API checks for actions/checkout (releases/latest, tags, v3 SHA, v6.0.2 SHA), actions/upload-artifact (releases/latest, tags, v2 SHA, v7.0.0 SHA), cosign (releases/latest, tags, v3.0.5 SHA), and security advisory WebSearches for all three dependencies."
+    }
+  ],
+  "summary": {
+    "passed": 3,
+    "failed": 2,
+    "total": 5,
+    "pass_rate": 0.6
+  },
+  "eval_feedback": {
+    "suggestions": [
+      "The old skill lacks a CORRECTION risk level category entirely. Assertions 2 and 3 require findings to be labeled CORRECTION \u2014 the skill needs to add this label to distinguish documentation inaccuracies and false claims from pure security or deprecation issues.",
+      "The prioritized issue list uses only SECURITY and DEPRECATION headings. A CORRECTION tier should be added for findings where the plan's stated facts are demonstrably wrong (wrong version labels, internal contradictions), separate from the security risk those errors create.",
+      "The cosign inconsistency is a documentation correctness problem as well as a security problem; labeling it only SECURITY misses the editorial-accuracy dimension that the CORRECTION label would capture."
+    ],
+    "overall": "The old skill performs well on substantive content \u2014 it finds the right issues, verifies them against live sources, produces a comprehensive verification log, and stays on task without asking off-topic questions. The gap is entirely in risk categorization: the skill has no CORRECTION label, so it cannot satisfy assertions that specifically require that classification. 3 of 5 assertions pass."
+  }
+}

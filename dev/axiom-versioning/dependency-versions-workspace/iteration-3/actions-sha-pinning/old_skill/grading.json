@@ -1,0 +1,39 @@
+{
+  "expectations": [
+    {
+      "text": "Verified currency of all 5 actions using live sources (GitHub API)",
+      "passed": true,
+      "evidence": "The verification log table documents WebFetch calls to api.github.com/repos/actions/{action}/releases/latest AND /tags for all five actions (checkout, upload-artifact, download-artifact, cache, setup-node). Each action has two log rows confirming both the latest release and latest tag were independently checked via live API calls."
+    },
+    {
+      "text": "Fetched commit SHAs for all 5 actions and presented them in pinned format (owner/action@sha # vX.Y.Z)",
+      "passed": true,
+      "evidence": "All five SHAs are present in the SHA Pin Reference Table, in the per-action code blocks, and in the consolidated workflow snippet, all using the required format (e.g., actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2). The verification log also records the /git/refs/tags/ fetch that retrieved each SHA, confirming live sourcing."
+    },
+    {
+      "text": "Covered security advisories for all 5 actions \u2014 bundling actions/* into shared searches is acceptable if explicitly documented in the log",
+      "passed": true,
+      "evidence": "checkout, cache, and setup-node each received individual WebSearch queries. upload-artifact and download-artifact were bundled into a single shared search ('actions/upload-artifact actions/download-artifact CVE security advisory 2025 2026'). All five actions are covered by at least one security search, satisfying the requirement."
+    },
+    {
+      "text": "Verification log documents which security search covers which dependencies when bundled",
+      "passed": true,
+      "evidence": "The bundled search row in the verification log table explicitly names both 'actions/upload-artifact' and 'actions/download-artifact' in the search query string. The self-check paragraph at the end of the log further states: 'upload-artifact and download-artifact covered by a shared search query that explicitly named both'. The mapping between the shared search and its two covered dependencies is unambiguous."
+    },
+    {
+      "text": "Included a verification log table at the end",
+      "passed": true,
+      "evidence": "A 'Verification Log' section with a four-column table (Claim, Tool, Source URL, Finding) appears at the end of the report after all action findings and the workflow snippet. It contains 22 rows covering version checks, SHA fetches, security advisory searches, and changelog reads, followed by a self-check summary paragraph."
+    }
+  ],
+  "summary": {
+    "passed": 5,
+    "failed": 0,
+    "total": 5,
+    "pass_rate": 1.0
+  },
+  "eval_feedback": {
+    "suggestions": [],
+    "overall": "Perfect score. The report satisfies all five assertions without exception. Live GitHub API sources are documented for every version and SHA claim. All five actions have SHA pins presented in the correct format. Security advisory coverage is complete \u2014 three actions received individual searches and the upload-artifact/download-artifact pair was bundled into a single search that explicitly names both dependencies in both the log table row and the self-check narrative. The verification log table is present, well-structured, and placed at the end of the report as required."
+  }
+}

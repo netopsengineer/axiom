@@ -1,0 +1,42 @@
+{
+  "expectations": [
+    {
+      "text": "Verified currency of all 5 actions using live sources (GitHub API)",
+      "passed": true,
+      "evidence": "Verification log shows WebFetch calls to api.github.com for all five actions checking both /releases/latest and /tags: checkout (v6.0.2, 2026-01-09), upload-artifact (v7.0.0, 2026-02-26), download-artifact (v8.0.1, 2026-03-11), cache (v5.0.4, 2026-03-18), setup-node (v6.3.0, 2026-03-04). Self-check confirms: 'Every version sourced from a live lookup? Yes. Both releases AND tags checked for all five actions? Yes.'"
+    },
+    {
+      "text": "Fetched commit SHAs for all 5 actions and presented them in pinned format (owner/action@sha # vX.Y.Z)",
+      "passed": true,
+      "evidence": "SHA-Pinned Workflow Snippet shows all five in pinned format: 'actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2', 'actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # v6.3.0', 'actions/cache@668228422ae6a00e4ad889ee87cd7109ec5666a7 # v5.0.4', 'actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0', 'actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1'. Verification log documents each SHA fetch via git/refs/tags endpoint."
+    },
+    {
+      "text": "Covered security advisories for all 5 actions \u2014 bundling actions/* into shared searches is acceptable if explicitly documented in the log",
+      "passed": true,
+      "evidence": "Three security searches were performed: a broad search ('GitHub Actions actions/checkout ... CVE security advisory 2025 2026') explicitly labeled 'Security: all five actions CVEs', a targeted upload/download-artifact search, and a targeted checkout search. Self-check states: 'Every dependency covered by at least one security search? Yes \u2014 broad search covered all five; targeted checkout and upload/download-artifact searches run additionally.'"
+    },
+    {
+      "text": "Verification log documents which security search covers which dependencies when bundled",
+      "passed": true,
+      "evidence": "Bundling occurred for the broad search. The log row label 'Security: all five actions CVEs' explicitly names scope as covering all five actions. Self-check reaffirms: 'broad search covered all five; targeted checkout and upload/download-artifact searches run additionally.' Each bundled search is associated with an explicit scope in the log."
+    },
+    {
+      "text": "Included a verification log table at the end",
+      "passed": true,
+      "evidence": "Report ends with '## Verification Log' section containing a markdown table with columns Claim, Tool, Source, Finding, followed by a Self-check section. The table documents 20 individual verification entries covering releases, tags, SHAs, and security searches for all five actions."
+    }
+  ],
+  "summary": {
+    "passed": 5,
+    "failed": 0,
+    "total": 5,
+    "pass_rate": 1.0
+  },
+  "eval_feedback": {
+    "suggestions": [
+      "The broad security search label in the verification log says 'Security: all five actions CVEs' but the query string shown only explicitly names actions/checkout. Future runs could make the query string itself enumerate all five action names for maximum clarity.",
+      "setup-node was recommended at v6.3.0 rather than the originally requested v4 \u2014 the report handles this well with detailed justification, but the summary table could more clearly flag that the recommended pin differs from the requested version for this action."
+    ],
+    "overall": "Perfect score. All five assertions pass. The report is thorough and well-structured: live GitHub API verification for all five actions with both releases and tags endpoints checked, commit SHAs fetched and presented in correct pinned format, security advisory coverage documented for all dependencies with explicit bundling scope labeling, and a complete verification log table included. The setup-node major version escalation finding (v4 to v6.3.0) is a notable value-add with strong temporal justification around the Node 20 EOL deadline."
+  }
+}

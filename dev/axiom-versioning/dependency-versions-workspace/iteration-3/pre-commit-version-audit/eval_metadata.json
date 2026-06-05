@@ -1,0 +1,12 @@
+{
+  "eval_id": 1,
+  "eval_name": "pre-commit-version-audit",
+  "prompt": "Check if my pre-commit hooks are all up to date. Flag any that have security issues or are way behind.",
+  "assertions": [
+    "Used live sources (WebFetch or WebSearch) to check versions for every hook, not training data",
+    "Checked BOTH GitHub releases AND tags for at least one dependency where they might diverge",
+    "Ran a security/CVE search for each of the 6 pre-commit hook repos",
+    "Used the decision format (Risk level, Verified via, What changed, etc.) for each version delta",
+    "Included a verification log table at the end listing every external claim with tool and source"
+  ]
+}

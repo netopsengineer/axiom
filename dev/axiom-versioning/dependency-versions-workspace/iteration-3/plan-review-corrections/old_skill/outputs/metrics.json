@@ -1,0 +1,102 @@
+{
+  "task": "plan-review-corrections",
+  "reviewed_date": "2026-03-23",
+  "skill_version": "dependency-versions-iter2-snapshot",
+  "total_issues_found": 4,
+  "issues": [
+    {
+      "id": 1,
+      "dependency": "actions/upload-artifact",
+      "plan_version": "v2",
+      "plan_description": "the latest stable release",
+      "actual_current_version": "v7.0.0",
+      "risk_level": "DEPRECATION",
+      "status": "active_ci_failure",
+      "deprecated_since": "2024-06-30",
+      "sha_current": "bbbca2ddaa5d8feaa63e36b76fdaad77386f024f",
+      "sha_plan_version": "82c141cc518b40d92cc801eee768e7aafc9c2fa2",
+      "verified_via": [
+        "github_api_releases_latest",
+        "github_api_tags",
+        "websearch_deprecation"
+      ]
+    },
+    {
+      "id": 2,
+      "dependency": "actions/checkout",
+      "plan_version": "v3",
+      "plan_description": "current stable",
+      "actual_current_version": "v6.0.2",
+      "risk_level": "BREAKING-UPGRADE",
+      "status": "stale_functional",
+      "major_versions_behind": 3,
+      "sha_current": "de0fac2e4500dabe0009e67214ff5f5447ce83dd",
+      "sha_plan_version": "f43a0e5ff2bd294095638e18286ca9a3d1956744",
+      "verified_via": [
+        "github_api_releases_latest",
+        "github_api_tags"
+      ]
+    },
+    {
+      "id": 3,
+      "dependency": "cosign",
+      "risk_level": "CORRECTION",
+      "issue_type": "internal_inconsistency",
+      "section_a": "runner_inventory",
+      "section_a_value": "cosign >= 1.x",
+      "section_b": "verified_versions_table",
+      "section_b_value": "cosign v3.0.5",
+      "actual_current_version": "v3.0.5",
+      "cve_relevant": [
+        "CVE-2026-24122",
+        "CVE-2023-46737",
+        "CVE-2022-36056",
+        "CVE-2022-35929"
+      ],
+      "fix": "Update runner inventory to cosign >= 3.0.5",
+      "verified_via": [
+        "github_api_releases_latest",
+        "websearch_cve"
+      ]
+    },
+    {
+      "id": 4,
+      "dependency": "all_github_actions",
+      "risk_level": "CORRECTION",
+      "issue_type": "sha_pinning_absent",
+      "affected_refs": [
+        "actions/checkout@v3",
+        "actions/upload-artifact@v2"
+      ],
+      "fix": "Replace mutable version tags with full commit SHA pins",
+      "reference_incidents": [
+        "CVE-2025-30066 (tj-actions)",
+        "trivy-action supply chain compromise March 2026"
+      ],
+      "verified_via": [
+        "github_api_git_refs",
+        "websearch_security_advisories"
+      ]
+    }
+  ],
+  "verification_coverage": {
+    "live_lookups_used": true,
+    "releases_and_tags_both_checked": true,
+    "security_search_per_dependency": true,
+    "changelogs_read": true,
+    "shas_fetched": true,
+    "annotated_tags_resolved": "not_applicable_all_direct_commits",
+    "internal_consistency_checked": true
+  },
+  "live_data_sources": [
+    "api.github.com/repos/actions/checkout/releases/latest",
+    "api.github.com/repos/actions/checkout/tags",
+    "api.github.com/repos/actions/checkout/git/refs/tags/v3",
+    "api.github.com/repos/actions/checkout/git/refs/tags/v6.0.2",
+    "api.github.com/repos/actions/upload-artifact/releases/latest",
+    "api.github.com/repos/actions/upload-artifact/tags",
+    "api.github.com/repos/actions/upload-artifact/git/refs/tags/v2",
+    "api.github.com/repos/actions/upload-artifact/git/refs/tags/v7.0.0",
+    "api.github.com/repos/sigstore/cosign/releases/latest"
+  ]
+}

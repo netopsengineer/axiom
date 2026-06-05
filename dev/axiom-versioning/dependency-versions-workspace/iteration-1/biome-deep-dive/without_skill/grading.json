@@ -1,0 +1,35 @@
+{
+  "expectations": [
+    {
+      "text": "Checked BOTH GitHub releases AND tags for biomejs (where they are known to diverge)",
+      "passed": false,
+      "evidence": "The executor fetched GitHub releases for biomejs/biome and tags for the separate biomejs/pre-commit repo, but never checked biomejs/biome/tags directly. The expectation requires checking both on the main biome repo itself."
+    },
+    {
+      "text": "Read or searched for the changelog between v2.4.4 and the latest version",
+      "passed": true,
+      "evidence": "Multiple WebFetch and WebSearch calls covered the changelog, including biomejs.dev/internals/changelog/, the GitHub releases page, and the v2.4 blog post. Detailed per-version change summaries appear in the report."
+    },
+    {
+      "text": "Checked for biomejs security advisories via WebSearch",
+      "passed": true,
+      "evidence": "Two WebSearch queries targeted security (CVE/advisory searches), plus a WebFetch to the GitHub Advisory Database which confirmed no advisories exist for biomejs."
+    },
+    {
+      "text": "Presented findings using the decision format with all required fields",
+      "passed": false,
+      "evidence": "The report is comprehensive but does not use the structured decision format (Risk level, Verified via, What changed, Breaking changes, Migration steps, Security advisories, Recommendation, Your call). Output is in freeform sections instead."
+    },
+    {
+      "text": "Assessed whether the existing biome.json config needs changes for the new version",
+      "passed": true,
+      "evidence": "Every key in biome.json was checked against the 2.4.5-2.4.8 changes, including a dedicated rule-docs lookup for noImportantStyles. The conclusion (only the $schema URL version string needs updating) is well-supported."
+    }
+  ],
+  "summary": {
+    "passed": 3,
+    "failed": 2,
+    "total": 5,
+    "pass_rate": 0.6
+  }
+}

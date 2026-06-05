@@ -1,0 +1,39 @@
+{
+  "expectations": [
+    {
+      "text": "Checked BOTH GitHub releases AND tags for biomejs (where they are known to diverge)",
+      "passed": true,
+      "evidence": "For biomejs/pre-commit: both /releases/latest (returned stale v0.6.1) and /tags (returned v2.4.8) were explicitly fetched and the divergence was reported in Step 2 and the self-check. For biomejs/biome core: /releases/latest and /releases?per_page=10 were used as primary; /tags was attempted but returned unrelated lsp-intellij namespace tags, which was noted in the verification log with the releases endpoint used as the authoritative substitute."
+    },
+    {
+      "text": "Read or searched for the changelog between v2.4.4 and the latest version",
+      "passed": true,
+      "evidence": "Individual GitHub release pages were fetched for v2.4.5, v2.4.6, v2.4.7, and v2.4.8 (all confirmed in Step 6 verification log). Additionally, the biomejs.dev changelog URL was fetched (https://biomejs.dev/internals/changelog/version/2-4-0...latest/). Per-version change summaries are present in Step 3 & 4."
+    },
+    {
+      "text": "Checked for biomejs security advisories via WebSearch",
+      "passed": true,
+      "evidence": "Three independent security checks are documented: WebSearch for 'biomejs biome CVE security advisory 2025 2026', WebSearch for 'biomejs biome security vulnerability supply chain 2025 2026', and a WebFetch of the GitHub Advisory Database at https://github.com/advisories?query=biomejs. All three are logged in the Step 6 verification table. The self-check also confirms every dependency was covered by at least one security search."
+    },
+    {
+      "text": "Presented findings using the decision format with all required fields",
+      "passed": true,
+      "evidence": "Step 5 contains a priority summary table with priority, dependency, current version, latest version, and action columns. The per-dependency block in Step 3 & 4 includes risk level, verification sources, per-version changelog findings, a per-config-key breaking change audit table, migration steps, security advisory findings, a recommendation, and a 'your call' directive. The format is structured and complete."
+    },
+    {
+      "text": "Assessed whether the existing biome.json config needs changes for the new version",
+      "passed": true,
+      "evidence": "Step 3 & 4 contains a per-key audit table covering all config keys present in the project's biome.json ($schema, vcs.*, files.ignoreUnknown, formatter.*, linter.rules.recommended, linter.rules.complexity.noImportantStyles, javascript.formatter.quoteStyle, css.parser.tailwindDirectives, overrides correctness rules, assist.actions.source.organizeImports). Each key is assessed for breaking changes across 2.4.5-2.4.8. The conclusion is that no behavioral breaking changes exist; the only required change is updating the $schema URL from 2.4.4 to 2.4.8."
+    }
+  ],
+  "summary": {
+    "passed": 5,
+    "failed": 0,
+    "total": 5,
+    "pass_rate": 1.0
+  },
+  "eval_feedback": {
+    "suggestions": [],
+    "overall": "Perfect score. The report is exemplary: it explicitly handles the releases-vs-tags divergence for both repos (and documents why the tags endpoint was not used for biome core), fetches and summarizes each intermediate release changelog, runs three independent security checks, provides a complete per-config-key breaking change audit, and presents all findings in a structured decision format with clear migration steps and a recommendation. No gaps identified."
+  }
+}

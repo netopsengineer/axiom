@@ -1,0 +1,44 @@
+# Local checks for the axiom marketplace — mirrors .github/workflows/validate.yml.
+# Runs with prek (https://prek.j178.dev), a drop-in for pre-commit:
+#
+#   prek install           # install the git pre-commit hook (one time)
+#   prek run --all-files   # run every hook against the whole repo
+#
+# Maintenance: Biome and the Claude CLI are single-sourced elsewhere (package.json
+# and your CLI install), so only the markdownlint-cli2 hook carries a version pin
+# here. It is SHA-frozen with a `# vX.Y.Z` comment, exactly like the SHA-pinned
+# GitHub Actions in the workflows. Bump it with `prek autoupdate --freeze`
+# (Dependabot does not track the pre-commit ecosystem).
+repos:
+  - repo: local
+    hooks:
+      # Mirrors the "JavaScript lint" job. Reuses the Biome version pinned in
+      # package.json (one source of truth, Dependabot-tracked); auto-fixes via
+      # `biome check --write`. If it rewrites a file, the commit stops so you
+      # can re-stage.
+      - id: biome
+        name: biome (check + write)
+        entry: npm run lint:fix
+        language: system
+        files: \.(js|mjs)$
+        pass_filenames: false
+
+      # Mirrors the "Plugin manifests" job — runs the same `claude plugin
+      # validate` that the CI action wraps (the marketplace invariant lints
+      # stay CI-only). Requires the Claude Code CLI on PATH.
+      - id: claude-plugin-validate
+        name: claude plugin validate
+        entry: claude plugin validate ./plugins/axiom-versioning
+        language: system
+        files: ^(plugins/|\.claude-plugin/)
+        pass_filenames: false
+
+  # Mirrors the "Markdown lint" job, using the repo's .markdownlint-cli2.jsonc.
+  # markdownlint-cli2 is not an npm dependency here (CI uses the action), so the
+  # hook is pinned — SHA-frozen to v0.22.1, the latest tag (this project ships
+  # NO GitHub releases; tags are the only source).
+  - repo: https://github.com/DavidAnson/markdownlint-cli2
+    rev: 996abf60411a8d954288ac9856aae7602b80cbda # v0.22.1
+    hooks:
+      - id: markdownlint-cli2
+        args: [--fix]

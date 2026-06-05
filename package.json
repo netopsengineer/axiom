@@ -1,0 +1,25 @@
+{
+  "name": "axiom-marketplace-tooling",
+  "version": "0.0.0-managed",
+  "private": true,
+  "description": "CI/release tooling for the axiom Claude Code plugin marketplace. Not published — shipped plugins live under plugins/*.",
+  "license": "MIT",
+  "type": "module",
+  "engines": {
+    "node": "^22.14.0 || >=24.10.0"
+  },
+  "scripts": {
+    "release": "semantic-release",
+    "release:dry": "semantic-release --dry-run --no-ci",
+    "lint": "biome ci",
+    "lint:fix": "biome check --write"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^2.4.16",
+    "@semantic-release/changelog": "^6.0.3",
+    "@semantic-release/exec": "^7.1.0",
+    "@semantic-release/git": "^10.0.1",
+    "conventional-changelog-conventionalcommits": "^9.3.1",
+    "semantic-release": "^25.0.3"
+  }
+}

@@ -1,0 +1,39 @@
+{
+  "expectations": [
+    {
+      "text": "Used live sources (WebFetch or WebSearch) to check versions for every hook, not training data",
+      "passed": true,
+      "evidence": "Verification Log lists explicit WebFetch calls to api.github.com releases/latest and/or tags for all 6 hooks. Self-check confirms 'Every version sourced from a live lookup: yes'."
+    },
+    {
+      "text": "Checked BOTH GitHub releases AND tags for at least one dependency where they might diverge",
+      "passed": true,
+      "evidence": "biomejs/pre-commit: releases/latest returned stale v0.6.1 (Dec 2024) while tags showed v2.4.8 (Mar 2026). Both endpoints fetched, discrepancy documented and flagged."
+    },
+    {
+      "text": "Ran a security/CVE search for each of the 6 pre-commit hook repos",
+      "passed": true,
+      "evidence": "Verification Log contains 6 distinct WebSearch rows covering every repo with CVE-targeted queries including pre-commit/sync-pre-commit-deps. Self-check confirms all 6 covered."
+    },
+    {
+      "text": "Used the decision format (Risk level, Verified via, What changed, etc.) for each version delta",
+      "passed": true,
+      "evidence": "All four delta findings (cspell-cli, markdownlint-cli2, biomejs/pre-commit, gitleaks) use the full structured format with all required fields."
+    },
+    {
+      "text": "Included a verification log table at the end listing every external claim with tool and source",
+      "passed": true,
+      "evidence": "21-row verification log table mapping every external claim to tool and source URL, including changelog fetches and all security searches."
+    }
+  ],
+  "summary": {
+    "passed": 5,
+    "failed": 0,
+    "total": 5,
+    "pass_rate": 1.0
+  },
+  "eval_feedback": {
+    "suggestions": [],
+    "overall": "5/5. Clean sweep. All 6 hooks covered including sync-pre-commit-deps security search (the previous miss)."
+  }
+}

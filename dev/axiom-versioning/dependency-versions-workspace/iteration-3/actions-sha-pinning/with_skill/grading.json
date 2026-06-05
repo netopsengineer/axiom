@@ -1,0 +1,39 @@
+{
+  "expectations": [
+    {
+      "text": "Verified currency of all 5 actions using live sources (GitHub API)",
+      "passed": true,
+      "evidence": "The verification log shows WebFetch calls to api.github.com/repos/actions/{name}/releases/latest AND /tags for all five actions (checkout, upload-artifact, download-artifact, cache, setup-node). Both releases and tags endpoints were checked for each action, and all findings are recorded in the log table."
+    },
+    {
+      "text": "Fetched commit SHAs for all 5 actions and presented them in pinned format (owner/action@sha # vX.Y.Z)",
+      "passed": true,
+      "evidence": "SHAs were fetched via /git/refs/tags/{version} for all five actions \u2014 six SHAs total (two for setup-node: v4.4.0 and v6.3.0). All are presented in owner/action@sha # vX.Y.Z format in both the individual action sections and the consolidated workflow snippet. All confirmed as lightweight tags (type: commit)."
+    },
+    {
+      "text": "Covered security advisories for all 5 actions \u2014 bundling actions/* into shared searches is acceptable if explicitly documented in the log",
+      "passed": true,
+      "evidence": "One bundled search covered all five actions (query explicitly names all five: 'actions/checkout actions/upload-artifact actions/download-artifact actions/cache actions/setup-node CVE security advisory 2025 2026'). Targeted follow-up searches were also conducted for setup-node, cache, upload-artifact, and download-artifact individually. A known CVE (CVE-2024-42471) for download-artifact was investigated and resolved. All five actions have documented security findings."
+    },
+    {
+      "text": "Verification log documents which security search covers which dependencies when bundled",
+      "passed": true,
+      "evidence": "The bundled search row in the verification log table includes the full query string that explicitly names all five actions. The self-check section additionally states: 'shared search covered all five; targeted searches confirmed for setup-node, cache, upload-artifact, and download-artifact.' All five dependencies are accounted for by name within the log itself."
+    },
+    {
+      "text": "Included a verification log table at the end",
+      "passed": true,
+      "evidence": "The report contains a 'Verification Log' section with a properly formatted markdown table (columns: Claim, Tool, Source, Finding) listing every lookup performed, including release checks, tag checks, SHA fetches, and security searches for all five actions. A self-check section follows the table summarising completeness."
+    }
+  ],
+  "summary": {
+    "passed": 5,
+    "failed": 0,
+    "total": 5,
+    "pass_rate": 1.0
+  },
+  "eval_feedback": {
+    "suggestions": [],
+    "overall": "Perfect score. The report satisfies all five assertions cleanly. Live GitHub API sources were used for every version and SHA lookup. All six SHA pins are presented in the correct owner/action@sha # vX.Y.Z format. The bundled security search explicitly names all five dependencies in its query string, meeting the documentation requirement for bundling. The verification log table is comprehensive and internally consistent with the rest of the report. No gaps or ambiguities found."
+  }
+}

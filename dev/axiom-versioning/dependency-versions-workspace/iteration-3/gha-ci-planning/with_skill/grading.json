@@ -1,0 +1,43 @@
+{
+  "expectations": [
+    {
+      "text": "SHA-pinned all GitHub Actions references (uses: owner/action@sha # vX.Y.Z format)",
+      "passed": true,
+      "evidence": "All five action references in both Option A and Option B YAML blocks use the full 40-character commit SHA followed by a version comment (e.g., 'actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2'). The format is applied consistently across every uses: line in the plan."
+    },
+    {
+      "text": "Used live sources (GitHub API or WebSearch) to verify action versions exist",
+      "passed": true,
+      "evidence": "The Step 6 verification log table documents explicit WebFetch calls to api.github.com /releases/latest and /tags endpoints for every action. Two divergence cases were caught and documented: biomejs/pre-commit (releases/latest returned stale v0.6.1; tags authoritative at v2.4.8) and DavidAnson/markdownlint-cli2 (releases/latest returns 404; tags used). This demonstrates live lookups were actually performed and not just assumed."
+    },
+    {
+      "text": "Checked for CVEs/security advisories on referenced actions or tools",
+      "passed": true,
+      "evidence": "Step 6 verification log includes dedicated WebSearch rows for actions/checkout, actions/setup-python, pre-commit/action, markdownlint-cli2, cspell/cspell-action, and gitleaks. CVE-2025-61671 (checkout misuse pattern), CVE-2026-25931 (cspell VS Code extension, explicitly scoped as not affecting cspell-cli/cspell-action), CVE-2025-30066 (tj-actions supply chain), and the March 2026 aquasecurity/trivy-action attack are all cited and scoped. Each action's finding section also includes a Security advisories subsection."
+    },
+    {
+      "text": "Used the decision format for version choices where the project has options",
+      "passed": true,
+      "evidence": "Step 5 ('Decision Summary') presents the architectural Option A vs Option B choice with an explicit recommendation, tradeoffs, and a 'Your call' prompt. Each individual action and hook finding section uses a consistent 'Risk level / Recommendation / Your call' structure. The Option A vs Option B architectural decision is introduced early (Step 1 architectural note) and carried through the plan with a named decision point in Step 5."
+    },
+    {
+      "text": "Included a verification log table at the end",
+      "passed": true,
+      "evidence": "Step 6 is a 30+ row verification log table placed at the end of the document. It covers every version claim, SHA resolution, security search, and changelog review. Columns include Claim, Tool, Source URL, and Finding. A self-check block follows the table summarising completeness across all verification dimensions."
+    }
+  ],
+  "summary": {
+    "passed": 5,
+    "failed": 0,
+    "total": 5,
+    "pass_rate": 1.0
+  },
+  "eval_feedback": {
+    "suggestions": [
+      "The report could note whether SHAs were independently cross-checked (e.g., comparing the tag ref SHA against a direct commit lookup) to close the theoretical risk of a compromised API response returning an incorrect SHA.",
+      "CVE search queries are documented but the actual advisory URLs or GHSA identifiers are not all recorded in the log. Storing the NVD or GHSA URL per row would make security checks independently auditable without re-running the searches.",
+      "The 'Your call' prompts at the end of each finding section are well-formed decision points, but the report does not record a final resolved decision (Option A or Option B). A follow-up note or commit capturing the chosen option would close the loop on the architectural decision."
+    ],
+    "overall": "Excellent output. All five assertions pass with strong evidence. The report demonstrates real live lookups (catching two version divergence cases that a static check would have missed), consistent SHA pinning in the correct format throughout all YAML, explicit security advisory searches for every dependency with correct CVE scoping, a clear decision format for the Option A/B architectural choice, and a comprehensive verification log table at the end. The plan is production-ready as a planning document."
+  }
+}

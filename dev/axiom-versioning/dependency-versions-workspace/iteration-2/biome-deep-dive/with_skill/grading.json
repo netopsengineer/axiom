@@ -1,0 +1,39 @@
+{
+  "expectations": [
+    {
+      "text": "Checked BOTH GitHub releases AND tags for biomejs (where they are known to diverge)",
+      "passed": true,
+      "evidence": "Verified via: `api.github.com/repos/biomejs/biome/releases/latest` -> `@biomejs/biome@2.4.8`; `api.github.com/repos/biomejs/pre-commit/tags` -> `v2.4.8` is the top tag. Self-Check: 'Both releases AND tags checked? Yes \u2014 /releases/latest confirmed 2.4.8; /tags for pre-commit repo confirmed 2.4.8.' The report also notes that biomejs/biome /tags returns LSP sub-project tags (not main package tags), demonstrating awareness of the divergence."
+    },
+    {
+      "text": "Read or searched for the changelog between v2.4.4 and the latest version",
+      "passed": true,
+      "evidence": "Verification Log entries: '2.4.5 changelog (no breaking changes, no promoted rules) | WebFetch | https://biomejs.dev/internals/changelog/version/2-4-5/' through '2.4.8 changelog (no breaking changes, no promoted rules) | WebFetch | https://biomejs.dev/internals/changelog/version/2-4-8/'. Detailed per-release summaries are provided covering all four patch versions between 2.4.4 and 2.4.8."
+    },
+    {
+      "text": "Checked for biomejs security advisories via WebSearch",
+      "passed": true,
+      "evidence": "Security section states: 'WebSearch for \"biomejs biome CVE security advisory\" returned no biome-specific CVEs.' Verification Log shows two separate WebSearch entries: Query 'biomejs biome security advisory CVE vulnerability' and Query 'biome CVE security advisory 2025 2026', both returning no biome CVEs. GitHub security advisories page also directly fetched."
+    },
+    {
+      "text": "Presented findings using the decision format with all required fields",
+      "passed": true,
+      "evidence": "Each dependency entry includes all required fields: 'Risk level: ROUTINE', 'Verified via: WebFetch of...', 'What changed:', 'Breaking changes: No.', 'Migration steps:', 'Security advisories: None found.', 'Recommendation:', and 'Your call:'. Both the biome.json and pre-commit hook entries follow this complete structure."
+    },
+    {
+      "text": "Assessed whether the existing biome.json config needs changes for the new version",
+      "passed": true,
+      "evidence": "'Config compatibility for YOUR biome.json:' section explicitly evaluates each config key in use: complexity.noImportantStyles, css.parser.tailwindDirectives, assist.actions.source.organizeImports, vcs, files.ignoreUnknown, formatter, javascript.formatter, and overrides. Conclusion: 'No config key changes needed \u2014 all existing keys remain valid.' Summary table also includes row 'Config breaking changes: None; all keys valid as-is'."
+    }
+  ],
+  "summary": {
+    "passed": 5,
+    "failed": 0,
+    "total": 5,
+    "pass_rate": 1.0
+  },
+  "eval_feedback": {
+    "suggestions": [],
+    "overall": "The report is thorough and meets all five assertions cleanly. It correctly distinguishes between the biomejs/biome releases endpoint and the tags endpoint (noting the divergence with LSP sub-project tags), reads changelogs for all four intermediate patch releases, conducts multiple security searches, uses the required decision format with all fields for each dependency, and explicitly evaluates every config key in biome.json for compatibility with the new version."
+  }
+}

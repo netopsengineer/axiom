@@ -1,0 +1,41 @@
+{
+  "expectations": [
+    {
+      "text": "Surfaced stale action versions (checkout@v3, upload-artifact@v2) as version deltas with live-verified current versions",
+      "passed": true,
+      "evidence": "Finding 1: 'actions/checkout@v3' -> 'Latest release is v6.0.2 (published 2026-01-09). The plan is three major versions behind.' Finding 2: 'actions/upload-artifact@v2' -> 'Latest release is v7.0.0 (published 2026-02-26). The plan is five major versions behind.' Both verified via 'WebFetch \u2014 api.github.com/repos/actions/checkout/releases/latest' and 'api.github.com/repos/actions/upload-artifact/releases/latest' with entries in the Verification Log table."
+    },
+    {
+      "text": "Flagged the false 'current stable' / 'latest stable release' claims as CORRECTION-level findings, not just version bumps",
+      "passed": false,
+      "evidence": "The report does explicitly flag the false label claims \u2014 'described as the latest stable release' and '\"current stable\" is factually false' \u2014 but assigns them risk levels of 'SECURITY / DEPRECATION' and 'DEPRECATION' respectively (not CORRECTION). The Summary of Findings table lists them as 'Version outdated + label false' under those non-CORRECTION risk levels. No CORRECTION label is used for these two findings."
+    },
+    {
+      "text": "Identified the cosign internal inconsistency (>= 1.x vs v3.0.5) as a CORRECTION-level finding",
+      "passed": true,
+      "evidence": "Summary table row 3: 'Runner inventory says cosign >= 1.x; verified versions table says cosign v3.0.5 | Internal inconsistency | CORRECTION'. Section heading: '### Runner inventory vs. verified versions table \u2014 cosign version: CORRECTION' and 'Risk level: CORRECTION'."
+    },
+    {
+      "text": "Did NOT ask about shipping timeline (this is a review task, not an implementation task)",
+      "passed": true,
+      "evidence": "No phrases such as 'what is your shipping timeline', 'when are you shipping', 'when do you need this', or similar deployment-schedule questions appear anywhere in the report."
+    },
+    {
+      "text": "Included a verification log table covering all checked dependencies",
+      "passed": true,
+      "evidence": "Section '## Verification Log' contains a full table with 14 rows covering actions/checkout, actions/upload-artifact, and cosign \u2014 including release lookups, tag lookups, SHA lookups, security advisory searches, deprecation searches, and changelog reads. Self-check confirms: 'Every dependency covered by at least one security search: Yes'."
+    }
+  ],
+  "summary": {
+    "passed": 4,
+    "failed": 1,
+    "total": 5,
+    "pass_rate": 0.8
+  },
+  "eval_feedback": {
+    "suggestions": [
+      "Assertion 2 requires that false label claims ('current stable', 'latest stable release') be classified at CORRECTION severity. The report correctly identifies these as factually false but assigns them DEPRECATION or SECURITY/DEPRECATION severity instead. To satisfy this assertion, the false-label aspect should be explicitly called out as a CORRECTION-level finding (separate from or in addition to the deprecation finding), making clear that the inaccurate label is itself a documentation correction issue independent of the version staleness."
+    ],
+    "overall": "Strong report overall: live verification is thorough, the cosign inconsistency is correctly classified as CORRECTION, the verification log is comprehensive, and no scope-creep questions appear. The one failure is a classification gap \u2014 the false 'current stable' / 'latest stable release' label claims were flagged as DEPRECATION/SECURITY risk rather than CORRECTION risk, which means a reader focused on CORRECTION-level items would miss the label-accuracy problem."
+  }
+}

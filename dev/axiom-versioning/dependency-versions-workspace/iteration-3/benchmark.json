@@ -1,0 +1,496 @@
+{
+  "metadata": {
+    "skill_name": "dependency-versions",
+    "executor_model": "claude-sonnet-4-6",
+    "timestamp": "2026-03-23T18:08:07Z",
+    "evals_run": [
+      1,
+      2,
+      3,
+      4,
+      5
+    ],
+    "runs_per_configuration": 1,
+    "iteration": 3,
+    "baseline": "old_skill (iter2 new_skill snapshot \u2014 pre dual-finding fix)"
+  },
+  "runs": [
+    {
+      "eval_id": 1,
+      "eval_name": "pre-commit-version-audit",
+      "configuration": "with_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 1.0,
+        "passed": 5,
+        "failed": 0,
+        "total": 5,
+        "time_seconds": 264.8,
+        "tokens": 40598,
+        "tool_calls": 45,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "Used live sources (WebFetch or WebSearch) to check versions for every hook, not training data",
+          "passed": true,
+          "evidence": "Verification Log lists explicit WebFetch calls to api.github.com releases/latest and/or tags for all 6 hooks. Self-check confirms 'Every version sourced from a live lookup: yes'."
+        },
+        {
+          "text": "Checked BOTH GitHub releases AND tags for at least one dependency where they might diverge",
+          "passed": true,
+          "evidence": "biomejs/pre-commit: releases/latest returned stale v0.6.1 (Dec 2024) while tags showed v2.4.8 (Mar 2026). Both endpoints fetched, discrepancy documented and flagged."
+        },
+        {
+          "text": "Ran a security/CVE search for each of the 6 pre-commit hook repos",
+          "passed": true,
+          "evidence": "Verification Log contains 6 distinct WebSearch rows covering every repo with CVE-targeted queries including pre-commit/sync-pre-commit-deps. Self-check confirms all 6 covered."
+        },
+        {
+          "text": "Used the decision format (Risk level, Verified via, What changed, etc.) for each version delta",
+          "passed": true,
+          "evidence": "All four delta findings (cspell-cli, markdownlint-cli2, biomejs/pre-commit, gitleaks) use the full structured format with all required fields."
+        },
+        {
+          "text": "Included a verification log table at the end listing every external claim with tool and source",
+          "passed": true,
+          "evidence": "21-row verification log table mapping every external claim to tool and source URL, including changelog fetches and all security searches."
+        }
+      ]
+    },
+    {
+      "eval_id": 1,
+      "eval_name": "pre-commit-version-audit",
+      "configuration": "old_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 1.0,
+        "passed": 5,
+        "failed": 0,
+        "total": 5,
+        "time_seconds": 239.4,
+        "tokens": 32884,
+        "tool_calls": 39,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "Used live sources (WebFetch or WebSearch) to check versions for every hook, not training data",
+          "passed": true,
+          "evidence": "All 6 hooks have an explicit 'Verified via: WebFetch <api.github.com URL>' entry in their sections, and the verification log table records a WebFetch call for each hook's version claim. No version figures are stated without a cited live lookup."
+        },
+        {
+          "text": "Checked BOTH GitHub releases AND tags for at least one dependency where they might diverge",
+          "passed": true,
+          "evidence": "biomejs/pre-commit is the clearest example: releases/latest returned stale v0.6.1 (Dec 2024) while tags showed v2.4.8 \u2014 a real divergence caught and documented. gitleaks, cspell-cli, and pre-commit-hooks also had both releases and tags checked (they agreed). markdownlint-cli2 had releases return an empty array while tags returned v0.22.0. Multiple divergence cases were identified and surfaced."
+        },
+        {
+          "text": "Ran a security/CVE search for each of the 6 pre-commit hook repos",
+          "passed": true,
+          "evidence": "The verification log (rows 18-23 of the table) shows individual WebSearch security queries for all 6 repos: pre-commit-hooks, cspell-cli, markdownlint-cli2, biomejs, gitleaks, and sync-pre-commit-deps. Each hook section also explicitly states the security search result."
+        },
+        {
+          "text": "Used the decision format (Risk level, Verified via, What changed, etc.) for each version delta",
+          "passed": true,
+          "evidence": "All 4 hooks with version deltas (cspell-cli, markdownlint-cli2, biomejs/pre-commit, gitleaks) include: Risk level, Verified via, What changed, Breaking changes, Migration steps, Security advisories, Recommendation, and Your call. The 2 current hooks use a lighter format, which is correct as there is no delta to describe."
+        },
+        {
+          "text": "Included a verification log table at the end listing every external claim with tool and source",
+          "passed": true,
+          "evidence": "The 'Verification Log' section is a 20-row table with Claim, Tool, Source, and Finding columns. It covers version lookups, tag lookups, changelog fetches, security advisory page checks, and security web searches for all 6 repos \u2014 every external claim made in the body of the report has a corresponding log entry."
+        }
+      ]
+    },
+    {
+      "eval_id": 2,
+      "eval_name": "gha-ci-planning",
+      "configuration": "with_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 1.0,
+        "passed": 5,
+        "failed": 0,
+        "total": 5,
+        "time_seconds": 543.3,
+        "tokens": 65047,
+        "tool_calls": 0,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "SHA-pinned all GitHub Actions references (uses: owner/action@sha # vX.Y.Z format)",
+          "passed": true,
+          "evidence": "All five action references in both Option A and Option B YAML blocks use the full 40-character commit SHA followed by a version comment (e.g., 'actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2'). The format is applied consistently across every uses: line in the plan."
+        },
+        {
+          "text": "Used live sources (GitHub API or WebSearch) to verify action versions exist",
+          "passed": true,
+          "evidence": "The Step 6 verification log table documents explicit WebFetch calls to api.github.com /releases/latest and /tags endpoints for every action. Two divergence cases were caught and documented: biomejs/pre-commit (releases/latest returned stale v0.6.1; tags authoritative at v2.4.8) and DavidAnson/markdownlint-cli2 (releases/latest returns 404; tags used). This demonstrates live lookups were actually performed and not just assumed."
+        },
+        {
+          "text": "Checked for CVEs/security advisories on referenced actions or tools",
+          "passed": true,
+          "evidence": "Step 6 verification log includes dedicated WebSearch rows for actions/checkout, actions/setup-python, pre-commit/action, markdownlint-cli2, cspell/cspell-action, and gitleaks. CVE-2025-61671 (checkout misuse pattern), CVE-2026-25931 (cspell VS Code extension, explicitly scoped as not affecting cspell-cli/cspell-action), CVE-2025-30066 (tj-actions supply chain), and the March 2026 aquasecurity/trivy-action attack are all cited and scoped. Each action's finding section also includes a Security advisories subsection."
+        },
+        {
+          "text": "Used the decision format for version choices where the project has options",
+          "passed": true,
+          "evidence": "Step 5 ('Decision Summary') presents the architectural Option A vs Option B choice with an explicit recommendation, tradeoffs, and a 'Your call' prompt. Each individual action and hook finding section uses a consistent 'Risk level / Recommendation / Your call' structure. The Option A vs Option B architectural decision is introduced early (Step 1 architectural note) and carried through the plan with a named decision point in Step 5."
+        },
+        {
+          "text": "Included a verification log table at the end",
+          "passed": true,
+          "evidence": "Step 6 is a 30+ row verification log table placed at the end of the document. It covers every version claim, SHA resolution, security search, and changelog review. Columns include Claim, Tool, Source URL, and Finding. A self-check block follows the table summarising completeness across all verification dimensions."
+        }
+      ]
+    },
+    {
+      "eval_id": 2,
+      "eval_name": "gha-ci-planning",
+      "configuration": "old_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 1.0,
+        "passed": 5,
+        "failed": 0,
+        "total": 5,
+        "time_seconds": 383.9,
+        "tokens": 56970,
+        "tool_calls": 84,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "SHA-pinned all GitHub Actions references (uses: owner/action@sha # vX.Y.Z format)",
+          "passed": true,
+          "evidence": "All three actions in the workflow YAML use full commit SHAs with inline version comments: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2, actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0, actions/cache@668228422ae6a00e4ad889ee87cd7109ec5666a7 # v5.0.4. Format matches exactly what was required."
+        },
+        {
+          "text": "Used live sources (GitHub API or WebSearch) to verify action versions exist",
+          "passed": true,
+          "evidence": "Step 6 verification log documents live WebFetch calls to api.github.com/repos/{owner}/{action}/releases/latest and api.github.com/repos/{owner}/{action}/git/refs/tags/{version} for all three actions (checkout, setup-python, cache). MCP list_tags was also used. Each SHA is traced to a specific live lookup with the exact URL cited."
+        },
+        {
+          "text": "Checked for CVEs/security advisories on referenced actions or tools",
+          "passed": true,
+          "evidence": "Step 4 SECURITY section and Step 6 verification log include explicit CVE/security WebSearch entries for every dependency: pre-commit/pre-commit-hooks, cspell, markdownlint-cli2, biomejs, gitleaks, and a combined actions/* search. Results are documented (no CVEs found for any specific dep). Broader ecosystem context (CVE-2025-30066, Trivy March 2026) is also noted to justify SHA pinning."
+        },
+        {
+          "text": "Used the decision format for version choices where the project has options",
+          "passed": true,
+          "evidence": "Step 4 contains a structured decision block for every upgradeable dependency (5 ROUTINE, 3 BREAKING-UPGRADE). Each block uses consistent fields: Risk level, Verified via, What changed, Breaking changes, Migration steps, Security advisories, Recommendation, and 'Your call.' Dependencies already at latest (pre-commit-hooks, sync-pre-commit-deps) are noted as no-action with justification."
+        },
+        {
+          "text": "Included a verification log table at the end",
+          "passed": true,
+          "evidence": "Step 6 is a comprehensive verification log table with columns Claim, Tool, Source, Finding. It covers 20+ rows spanning all dependencies and security checks. A self-check checklist below the table confirms all required checks were completed. The table appears at the end of the document as required."
+        }
+      ]
+    },
+    {
+      "eval_id": 3,
+      "eval_name": "biome-deep-dive",
+      "configuration": "with_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 1.0,
+        "passed": 5,
+        "failed": 0,
+        "total": 5,
+        "time_seconds": 296.8,
+        "tokens": 32600,
+        "tool_calls": 28,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "Checked BOTH GitHub releases AND tags for biomejs (where they are known to diverge)",
+          "passed": true,
+          "evidence": "Verification Log documents explicit WebFetch calls to both `api.github.com/repos/biomejs/biome/releases/latest` and `api.github.com/repos/biomejs/biome/tags`, and for the pre-commit repo both `api.github.com/repos/biomejs/pre-commit/releases/latest` and `api.github.com/repos/biomejs/pre-commit/tags`. The divergence is confirmed and highlighted: releases returns stale v0.6.1, tags returns current v2.4.8. The self-check line also explicitly states 'Both releases AND tags checked for biomejs/pre-commit: Yes \u2014 divergence confirmed and documented'."
+        },
+        {
+          "text": "Read or searched for the changelog between v2.4.4 and the latest version",
+          "passed": true,
+          "evidence": "Verification Log shows individual WebFetch calls to the GitHub release pages for each intermediate version: 2.4.5, 2.4.6, 2.4.7, and 2.4.8 (using encoded tag URLs). An additional WebFetch of `biomejs.dev/internals/changelog/version/2-4-0...latest/` is also logged. The Findings section summarises per-version changes derived from these reads."
+        },
+        {
+          "text": "Checked for biomejs security advisories via WebSearch",
+          "passed": true,
+          "evidence": "Verification Log records a WebSearch for 'biomejs biome CVE security advisory 2025 2026' and a separate WebFetch of `github.com/advisories?query=biome`. Results document one unrelated advisory (GHSA-hr3g-62w3-g764 for a third-party 'biome-mcp-server') and confirm no CVEs for @biomejs/biome."
+        },
+        {
+          "text": "Presented findings using the decision format with all required fields",
+          "passed": true,
+          "evidence": "Both dependency sections (biome npm package and biomejs/pre-commit hook) contain all expected decision fields: Risk level, Verified via, What changed, Breaking changes, Migration steps, Security advisories, Recommendation, and Your call. The biome npm section additionally includes 'Config schema impact for this project's biome.json'."
+        },
+        {
+          "text": "Assessed whether the existing biome.json config needs changes for the new version",
+          "passed": true,
+          "evidence": "The report inventories every key in biome.json and explicitly validates each against the 2.4.8 schema and official docs: css.parser.tailwindDirectives (valid, introduced v2.3.0), assist.actions.source.organizeImports (confirmed via docs), linter.rules.complexity.noImportantStyles (active, not deprecated), vcs.useIgnoreFile (valid), and all other keys. Conclusion: no schema changes required; only the $schema URL line needs updating."
+        }
+      ]
+    },
+    {
+      "eval_id": 3,
+      "eval_name": "biome-deep-dive",
+      "configuration": "old_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 1.0,
+        "passed": 5,
+        "failed": 0,
+        "total": 5,
+        "time_seconds": 304.7,
+        "tokens": 33193,
+        "tool_calls": 0,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "Checked BOTH GitHub releases AND tags for biomejs (where they are known to diverge)",
+          "passed": true,
+          "evidence": "For biomejs/pre-commit: both /releases/latest (returned stale v0.6.1) and /tags (returned v2.4.8) were explicitly fetched and the divergence was reported in Step 2 and the self-check. For biomejs/biome core: /releases/latest and /releases?per_page=10 were used as primary; /tags was attempted but returned unrelated lsp-intellij namespace tags, which was noted in the verification log with the releases endpoint used as the authoritative substitute."
+        },
+        {
+          "text": "Read or searched for the changelog between v2.4.4 and the latest version",
+          "passed": true,
+          "evidence": "Individual GitHub release pages were fetched for v2.4.5, v2.4.6, v2.4.7, and v2.4.8 (all confirmed in Step 6 verification log). Additionally, the biomejs.dev changelog URL was fetched (https://biomejs.dev/internals/changelog/version/2-4-0...latest/). Per-version change summaries are present in Step 3 & 4."
+        },
+        {
+          "text": "Checked for biomejs security advisories via WebSearch",
+          "passed": true,
+          "evidence": "Three independent security checks are documented: WebSearch for 'biomejs biome CVE security advisory 2025 2026', WebSearch for 'biomejs biome security vulnerability supply chain 2025 2026', and a WebFetch of the GitHub Advisory Database at https://github.com/advisories?query=biomejs. All three are logged in the Step 6 verification table. The self-check also confirms every dependency was covered by at least one security search."
+        },
+        {
+          "text": "Presented findings using the decision format with all required fields",
+          "passed": true,
+          "evidence": "Step 5 contains a priority summary table with priority, dependency, current version, latest version, and action columns. The per-dependency block in Step 3 & 4 includes risk level, verification sources, per-version changelog findings, a per-config-key breaking change audit table, migration steps, security advisory findings, a recommendation, and a 'your call' directive. The format is structured and complete."
+        },
+        {
+          "text": "Assessed whether the existing biome.json config needs changes for the new version",
+          "passed": true,
+          "evidence": "Step 3 & 4 contains a per-key audit table covering all config keys present in the project's biome.json ($schema, vcs.*, files.ignoreUnknown, formatter.*, linter.rules.recommended, linter.rules.complexity.noImportantStyles, javascript.formatter.quoteStyle, css.parser.tailwindDirectives, overrides correctness rules, assist.actions.source.organizeImports). Each key is assessed for breaking changes across 2.4.5-2.4.8. The conclusion is that no behavioral breaking changes exist; the only required change is updating the $schema URL from 2.4.4 to 2.4.8."
+        }
+      ]
+    },
+    {
+      "eval_id": 4,
+      "eval_name": "plan-review-corrections",
+      "configuration": "with_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 1.0,
+        "passed": 5,
+        "failed": 0,
+        "total": 5,
+        "time_seconds": 256.6,
+        "tokens": 31645,
+        "tool_calls": 31,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "Surfaced stale action versions (checkout@v3, upload-artifact@v2) as version deltas with live-verified current versions",
+          "passed": true,
+          "evidence": "Finding #1 documents checkout@v3 -> v6.0.2 and Finding #3 documents upload-artifact@v2 -> v7.0.0, both live-verified via WebFetch against the GitHub API with exact SHAs in the verification log."
+        },
+        {
+          "text": "Flagged the false 'current stable' / 'latest stable release' claims as CORRECTION-level findings, not just version bumps",
+          "passed": true,
+          "evidence": "Finding #2 is a fully dedicated section with **Risk level:** CORRECTION for the 'current stable' label on checkout@v3. Finding #4 is a fully dedicated section with **Risk level:** CORRECTION for the 'latest stable release' label on upload-artifact@v2. Both are separate from their respective DEPRECATION blocks."
+        },
+        {
+          "text": "Identified the cosign internal inconsistency (>= 1.x vs v3.0.5) as a CORRECTION-level finding",
+          "passed": true,
+          "evidence": "Finding #5 is a dedicated **Risk level:** CORRECTION block for the cosign inconsistency, quoting both conflicting claims (>= 1.x and v3.0.5) and explaining the CVE-2026-24122 exposure."
+        },
+        {
+          "text": "Did NOT ask about shipping timeline (this is a review task, not an implementation task)",
+          "passed": true,
+          "evidence": "No shipping timeline or deadline questions appear anywhere in the report. The 'Your call:' prompts ask only about upgrade target version selection."
+        },
+        {
+          "text": "Included a verification log table covering all checked dependencies",
+          "passed": true,
+          "evidence": "Verification Log table (14 rows) covers all three in-scope dependencies with explicit API sources, SHAs, EOL/deprecation dates, and CVE searches. Self-check section confirms all coverage criteria were met."
+        }
+      ]
+    },
+    {
+      "eval_id": 4,
+      "eval_name": "plan-review-corrections",
+      "configuration": "old_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 0.8,
+        "passed": 4,
+        "failed": 1,
+        "total": 5,
+        "time_seconds": 280.5,
+        "tokens": 34018,
+        "tool_calls": 0,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "Surfaced stale action versions (checkout@v3, upload-artifact@v2) as version deltas with live-verified current versions",
+          "passed": true,
+          "evidence": "Finding 1 identifies upload-artifact@v2 vs current v7.0.0, Finding 2 identifies checkout@v3 vs current v6.0.2, both verified via live WebFetch with SHA values in the verification log."
+        },
+        {
+          "text": "Flagged the false 'current stable' / 'latest stable release' claims as CORRECTION-level findings, not just version bumps",
+          "passed": false,
+          "evidence": "False label issue mentioned within the DEPRECATION and BREAKING-UPGRADE findings but no dedicated **Risk level: CORRECTION** entry for the false labels. The two CORRECTION findings (3 and 4) address cosign inconsistency and SHA pinning only."
+        },
+        {
+          "text": "Identified the cosign internal inconsistency (>= 1.x vs v3.0.5) as a CORRECTION-level finding",
+          "passed": true,
+          "evidence": "Finding 3 is titled 'cosign version cross-reference: CORRECTION \u2014 Internal Inconsistency' with explicit **Risk level:** CORRECTION, directly calling out the >= 1.x vs v3.0.5 contradiction."
+        },
+        {
+          "text": "Did NOT ask about shipping timeline (this is a review task, not an implementation task)",
+          "passed": true,
+          "evidence": "The report contains no mention of shipping timelines, deadlines, delivery dates, or implementation scheduling."
+        },
+        {
+          "text": "Included a verification log table covering all checked dependencies",
+          "passed": true,
+          "evidence": "Verification Log section contains a 13-row table covering all three dependencies (checkout, upload-artifact, cosign) with live-fetched sources plus a self-check list."
+        }
+      ]
+    },
+    {
+      "eval_id": 5,
+      "eval_name": "actions-sha-pinning",
+      "configuration": "with_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 1.0,
+        "passed": 5,
+        "failed": 0,
+        "total": 5,
+        "time_seconds": 482.9,
+        "tokens": 49820,
+        "tool_calls": 0,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "Verified currency of all 5 actions using live sources (GitHub API)",
+          "passed": true,
+          "evidence": "The verification log shows WebFetch calls to api.github.com/repos/actions/{name}/releases/latest AND /tags for all five actions (checkout, upload-artifact, download-artifact, cache, setup-node). Both releases and tags endpoints were checked for each action, and all findings are recorded in the log table."
+        },
+        {
+          "text": "Fetched commit SHAs for all 5 actions and presented them in pinned format (owner/action@sha # vX.Y.Z)",
+          "passed": true,
+          "evidence": "SHAs were fetched via /git/refs/tags/{version} for all five actions \u2014 six SHAs total (two for setup-node: v4.4.0 and v6.3.0). All are presented in owner/action@sha # vX.Y.Z format in both the individual action sections and the consolidated workflow snippet. All confirmed as lightweight tags (type: commit)."
+        },
+        {
+          "text": "Covered security advisories for all 5 actions \u2014 bundling actions/* into shared searches is acceptable if explicitly documented in the log",
+          "passed": true,
+          "evidence": "One bundled search covered all five actions (query explicitly names all five: 'actions/checkout actions/upload-artifact actions/download-artifact actions/cache actions/setup-node CVE security advisory 2025 2026'). Targeted follow-up searches were also conducted for setup-node, cache, upload-artifact, and download-artifact individually. A known CVE (CVE-2024-42471) for download-artifact was investigated and resolved. All five actions have documented security findings."
+        },
+        {
+          "text": "Verification log documents which security search covers which dependencies when bundled",
+          "passed": true,
+          "evidence": "The bundled search row in the verification log table includes the full query string that explicitly names all five actions. The self-check section additionally states: 'shared search covered all five; targeted searches confirmed for setup-node, cache, upload-artifact, and download-artifact.' All five dependencies are accounted for by name within the log itself."
+        },
+        {
+          "text": "Included a verification log table at the end",
+          "passed": true,
+          "evidence": "The report contains a 'Verification Log' section with a properly formatted markdown table (columns: Claim, Tool, Source, Finding) listing every lookup performed, including release checks, tag checks, SHA fetches, and security searches for all five actions. A self-check section follows the table summarising completeness."
+        }
+      ]
+    },
+    {
+      "eval_id": 5,
+      "eval_name": "actions-sha-pinning",
+      "configuration": "old_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 1.0,
+        "passed": 5,
+        "failed": 0,
+        "total": 5,
+        "time_seconds": 408.1,
+        "tokens": 46214,
+        "tool_calls": 0,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "Verified currency of all 5 actions using live sources (GitHub API)",
+          "passed": true,
+          "evidence": "The verification log table documents WebFetch calls to api.github.com/repos/actions/{action}/releases/latest AND /tags for all five actions (checkout, upload-artifact, download-artifact, cache, setup-node). Each action has two log rows confirming both the latest release and latest tag were independently checked via live API calls."
+        },
+        {
+          "text": "Fetched commit SHAs for all 5 actions and presented them in pinned format (owner/action@sha # vX.Y.Z)",
+          "passed": true,
+          "evidence": "All five SHAs are present in the SHA Pin Reference Table, in the per-action code blocks, and in the consolidated workflow snippet, all using the required format (e.g., actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2). The verification log also records the /git/refs/tags/ fetch that retrieved each SHA, confirming live sourcing."
+        },
+        {
+          "text": "Covered security advisories for all 5 actions \u2014 bundling actions/* into shared searches is acceptable if explicitly documented in the log",
+          "passed": true,
+          "evidence": "checkout, cache, and setup-node each received individual WebSearch queries. upload-artifact and download-artifact were bundled into a single shared search ('actions/upload-artifact actions/download-artifact CVE security advisory 2025 2026'). All five actions are covered by at least one security search, satisfying the requirement."
+        },
+        {
+          "text": "Verification log documents which security search covers which dependencies when bundled",
+          "passed": true,
+          "evidence": "The bundled search row in the verification log table explicitly names both 'actions/upload-artifact' and 'actions/download-artifact' in the search query string. The self-check paragraph at the end of the log further states: 'upload-artifact and download-artifact covered by a shared search query that explicitly named both'. The mapping between the shared search and its two covered dependencies is unambiguous."
+        },
+        {
+          "text": "Included a verification log table at the end",
+          "passed": true,
+          "evidence": "A 'Verification Log' section with a four-column table (Claim, Tool, Source URL, Finding) appears at the end of the report after all action findings and the workflow snippet. It contains 22 rows covering version checks, SHA fetches, security advisory searches, and changelog reads, followed by a self-check summary paragraph."
+        }
+      ]
+    }
+  ],
+  "run_summary": {
+    "with_skill": {
+      "pass_rate": {
+        "mean": 1.0,
+        "stddev": 0.0,
+        "min": 1.0,
+        "max": 1.0
+      },
+      "time_seconds": {
+        "mean": 368.88,
+        "stddev": 134.218,
+        "min": 256.6,
+        "max": 543.3
+      },
+      "tokens": {
+        "mean": 43942.0,
+        "stddev": 13883.546,
+        "min": 31645,
+        "max": 65047
+      }
+    },
+    "old_skill": {
+      "pass_rate": {
+        "mean": 0.96,
+        "stddev": 0.089,
+        "min": 0.8,
+        "max": 1.0
+      },
+      "time_seconds": {
+        "mean": 323.32,
+        "stddev": 70.853,
+        "min": 239.4,
+        "max": 408.1
+      },
+      "tokens": {
+        "mean": 40655.8,
+        "stddev": 10691.134,
+        "min": 32884,
+        "max": 56970
+      }
+    },
+    "delta": {
+      "pass_rate": "+0.040",
+      "time_seconds": "+45.6",
+      "tokens": "+3286"
+    }
+  }
+}

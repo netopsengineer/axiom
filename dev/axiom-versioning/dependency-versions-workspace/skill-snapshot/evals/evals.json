@@ -1,0 +1,52 @@
+{
+  "skill_name": "dependency-versions",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Check if my pre-commit hooks are all up to date. Flag any that have security issues or are way behind.",
+      "expected_output": "A structured report using the decision format for each hook that needs updating, with live-verified versions, security checks, and a verification log.",
+      "files": [
+        ".pre-commit-config.yaml"
+      ],
+      "expectations": [
+        "Used live sources (WebFetch or WebSearch) to check versions for every hook, not training data",
+        "Checked BOTH GitHub releases AND tags for at least one dependency where they might diverge",
+        "Ran a security/CVE search for each of the 6 pre-commit hook repos",
+        "Used the decision format (Risk level, Verified via, What changed, etc.) for each version delta",
+        "Included a verification log table at the end listing every external claim with tool and source"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "Plan a GitHub Actions CI workflow for this repo that runs pre-commit hooks on PRs, plus markdownlint and cspell. Use best practices for action pinning.",
+      "expected_output": "A workflow plan with SHA-pinned actions, live-verified versions, security checks on all referenced actions, and decisions presented for user approval.",
+      "files": [
+        ".pre-commit-config.yaml",
+        "biome.json"
+      ],
+      "expectations": [
+        "SHA-pinned all GitHub Actions references (uses: owner/action@sha # vX.Y.Z format)",
+        "Used live sources (GitHub API or WebSearch) to verify action versions exist",
+        "Checked for CVEs/security advisories on referenced actions or tools",
+        "Used the decision format for version choices where the project has options",
+        "Included a verification log table at the end"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "I need to upgrade biome from 2.4.4 to the latest. What's the latest version, are there breaking changes for my biome.json config, and any security issues?",
+      "expected_output": "A deep-dive analysis of the biome upgrade path with changelog review, config impact assessment, security check, and decision format presentation.",
+      "files": [
+        "biome.json",
+        ".pre-commit-config.yaml"
+      ],
+      "expectations": [
+        "Checked BOTH GitHub releases AND tags for biomejs (where they are known to diverge)",
+        "Read or searched for the changelog between v2.4.4 and the latest version",
+        "Checked for biomejs security advisories via WebSearch",
+        "Presented findings using the decision format with all required fields",
+        "Assessed whether the existing biome.json config needs changes for the new version"
+      ]
+    }
+  ]
+}

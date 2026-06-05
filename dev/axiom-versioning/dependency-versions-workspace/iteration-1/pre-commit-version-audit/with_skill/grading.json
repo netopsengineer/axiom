@@ -1,0 +1,111 @@
+{
+  "expectations": [
+    {
+      "text": "Used live sources (WebFetch or WebSearch) to check versions for every hook, not training data",
+      "passed": true,
+      "evidence": "Transcript shows live lookups for all 6 hooks via GitHub MCP tools (mcp__plugin_github_github__get_latest_release and list_tags) and WebFetch to GitHub API. For pre-commit-hooks: get_latest_release returned v6.0.0 with full JSON, list_tags confirmed. For sync-pre-commit-deps: list_tags showed v0.0.3. For cspell-cli: get_latest_release returned v9.7.0 with release body. For markdownlint-cli2: list_tags showed v0.21.0. For biomejs/pre-commit: get_latest_release (stale v0.6.1) and list_tags (v2.4.8) both called. For gitleaks: get_latest_release returned v8.30.1 with full assets list. WebFetch calls to changelogs confirmed version details. No training data claims present."
+    },
+    {
+      "text": "Checked BOTH GitHub releases AND tags for at least one dependency where they might diverge",
+      "passed": true,
+      "evidence": "The executor checked both releases and tags for every hook. The biomejs/pre-commit case shows clear divergence: mcp__plugin_github_github__get_latest_release returned stale v0.6.1 (Dec 2024), while mcp__plugin_github_github__list_tags returned v2.4.8 (current). The executor explicitly flagged this in the report: 'Note: /releases/latest from this repo returns stale v0.6.1 (Dec 2024) \u2014 the tags list is the authoritative source here.' Two repos (sync-pre-commit-deps and markdownlint-cli2) returned 404 on releases/latest, confirming both checks were attempted for every repo."
+    },
+    {
+      "text": "Ran a security/CVE search for each of the 6 pre-commit hook repos",
+      "passed": false,
+      "evidence": "Only 5 of the 6 hooks received dedicated security/CVE searches. WebSearch queries ran for: pre-commit-hooks ('pre-commit-hooks CVE security advisory 2025 2026'), gitleaks ('gitleaks CVE security advisory 2025 2026'), cspell-cli ('cspell-cli security advisory CVE 2025 2026'), markdownlint-cli2 ('markdownlint-cli2 security advisory CVE 2025 2026'), and biomejs ('biomejs biome CVE security advisory 2025 2026'). No security or CVE search was run for sync-pre-commit-deps. The only search mentioning sync-pre-commit-deps was a version check ('sync-pre-commit-deps hook latest version 2026'), not a security check. The report claims 'Security searches run against all six hooks' but this is inaccurate per the transcript."
+    },
+    {
+      "text": "Used the decision format (Risk level, Verified via, What changed, etc.) for each version delta",
+      "passed": true,
+      "evidence": "The report.md contains full decision format blocks for all 3 version deltas (cspell-cli, biomejs/pre-commit, gitleaks). Each block includes all required fields: Risk level (ROUTINE), Verified via (specific MCP tool and source URL), What changed (specific changes with detail), Breaking changes (No with explanation), Migration steps (version bump only), Security advisories (none found with search terms cited), Recommendation, and Your call. Example: biomejs/pre-commit block contains '**Risk level:** ROUTINE', '**Verified via:** mcp__plugin_github_github__list_tags (biomejs/pre-commit) \u2014 v2.4.8 is the newest tag (SHA: 08073d1253e725ff1fd0a0b1653e1ca4a911a2fc). Note: /releases/latest returns stale v0.6.1', full what-changed description, breaking changes: No, migration: version bump only, security: none found, recommendation and your call."
+    },
+    {
+      "text": "Included a verification log table at the end listing every external claim with tool and source",
+      "passed": true,
+      "evidence": "The report.md includes a 'Verification Log' section with a table of approximately 22 rows. Columns are: Claim, Tool, Source, Finding. Rows cover: version lookups for all 6 hooks (both releases and tags), changelog fetches, security searches for 5 of 6 hooks, and the biomejs divergence finding. Example rows: 'biomejs/pre-commit latest release | mcp__plugin_github_github__get_latest_release | github.com/biomejs/pre-commit releases | Returns stale v0.6.1 (Dec 2024) \u2014 DO NOT USE' and 'biomejs/pre-commit newest tag is v2.4.8 | mcp__plugin_github_github__list_tags | github.com/biomejs/pre-commit tags | v2.4.8, SHA: 08073d1253e725ff1fd0a0b1653e1ca4a911a2fc'. The table is followed by a self-check section."
+    }
+  ],
+  "summary": {
+    "passed": 4,
+    "failed": 1,
+    "total": 5,
+    "pass_rate": 0.8
+  },
+  "execution_metrics": {
+    "tool_calls": {
+      "WebFetch": 20,
+      "WebSearch": 12,
+      "Read": 10,
+      "Glob": 2,
+      "Grep": 0,
+      "Bash": 4
+    },
+    "total_tool_calls": 48,
+    "files_created": [
+      "report.md"
+    ],
+    "output_chars": 7850,
+    "transcript_chars": 85000
+  },
+  "timing": {
+    "executor_duration_seconds": 203.1,
+    "grader_duration_seconds": null,
+    "total_duration_seconds": 203.1
+  },
+  "claims": [
+    {
+      "claim": "biomejs/pre-commit /releases/latest returns stale v0.6.1 (Dec 2024). The actual latest is v2.4.8 from /tags.",
+      "type": "factual",
+      "verified": true,
+      "evidence": "Transcript line 58 shows get_latest_release returned {tag_name: v0.6.1, published_at: 2024-12-17}. Transcript line 74 shows list_tags returned v2.4.8 as first entry. The divergence is real and correctly identified."
+    },
+    {
+      "claim": "Security searches run against all six hooks \u2014 no CVEs or advisories found for any of them.",
+      "type": "quality",
+      "verified": false,
+      "evidence": "Only 5 of 6 hooks received dedicated security/CVE searches. sync-pre-commit-deps had no CVE search. The 'all six' claim in the report is inaccurate. The 'no CVEs found' conclusion is likely still correct given how low-profile this hook is, but it was not verified against a live search."
+    },
+    {
+      "claim": "gitleaks security advisories page states there are no published security advisories.",
+      "type": "factual",
+      "verified": true,
+      "evidence": "WebFetch of github.com/gitleaks/gitleaks/security/advisories returned: 'The Security Advisories page explicitly states: There aren't any published security advisories.'"
+    },
+    {
+      "claim": "All three routine updates are version-bump-only with no breaking changes.",
+      "type": "quality",
+      "verified": true,
+      "evidence": "Changelogs checked: cspell-cli CHANGELOG.md confirmed no breaking changes. markdownlint-cli2 CHANGELOG.md confirmed no breaking changes. Gitleaks v8.30.1 release page confirmed maintenance-only changes. Biome v2.4.5-v2.4.8 releases reviewed and showed only patch-level bug fixes and opt-in lint rules. Decision format blocks in report reflect this correctly."
+    },
+    {
+      "claim": "gitleaks v8.30.1 was released 'yesterday' (2026-03-21) relative to the audit date (2026-03-20).",
+      "type": "factual",
+      "verified": false,
+      "evidence": "The MCP get_latest_release result shows published_at: 2026-03-21T02:17:58Z. The audit transcript started at 2026-03-21T02:41:39Z. So gitleaks v8.30.1 was released about 24 minutes before the audit ran \u2014 both on 2026-03-21, not on 2026-03-20. The report's 'released yesterday' framing slightly misattributes the date. Minor inaccuracy."
+    }
+  ],
+  "user_notes_summary": {
+    "uncertainties": [],
+    "needs_review": [],
+    "workarounds": [
+      "Write tool was denied during executor's run (transcript line 128). The executor output the full report content inline in its final assistant message instead. The report.md present in the outputs directory was written by a separate mechanism (the test harness), not by the executor's Write call."
+    ]
+  },
+  "eval_feedback": {
+    "suggestions": [
+      {
+        "assertion": "Ran a security/CVE search for each of the 6 pre-commit hook repos",
+        "reason": "The assertion is hard to verify without full transcript inspection \u2014 the report's self-check claimed all 6 were covered but it was wrong. Consider requiring the verification log table to include at least one security-search row per hook by name, making the assertion mechanically verifiable from the output file alone without needing to trace every transcript line."
+      },
+      {
+        "assertion": "Checked BOTH GitHub releases AND tags for at least one dependency where they might diverge",
+        "reason": "The 'at least one' bar is too low \u2014 the skill requires checking both for all repos. A stronger assertion would be: 'The verification log includes both a releases row and a tags row for each of the 6 hooks.' This would catch an executor that only checked both for the one repo it knew would diverge."
+      },
+      {
+        "reason": "No assertion checks whether the changelogs were actually read for the three updated hooks (not just version existence confirmed). This run did read changelogs, but an executor that only confirmed version numbers without reading what changed would still pass all current expectations. An assertion like 'For each of the 3 deltas, the decision block contains specific changelog-sourced change descriptions (not just version bump confirmed)' would enforce this."
+      }
+    ],
+    "overall": "The evals cover the critical skill behaviors well. The main gap is that expectation 3 (security search for all 6) cannot be verified from the output report alone \u2014 it requires transcript inspection \u2014 and this run's report contained a false claim ('all six') that the output-only check would have missed. Requiring the verification log to include named security-search rows for each hook would close this gap."
+  }
+}

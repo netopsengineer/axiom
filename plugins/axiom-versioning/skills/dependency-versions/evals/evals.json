@@ -1,0 +1,78 @@
+{
+  "skill_name": "dependency-versions",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Check if my pre-commit hooks are all up to date. Flag any that have security issues or are way behind.",
+      "expected_output": "A structured report using the decision format for each hook that needs updating, with live-verified versions, security checks, and a verification log.",
+      "files": [
+        ".pre-commit-config.yaml"
+      ],
+      "expectations": [
+        "Used live sources (WebFetch or WebSearch) to check versions for every hook, not training data",
+        "Checked BOTH GitHub releases AND tags for at least one dependency where they might diverge",
+        "Ran a security/CVE search for each of the 6 pre-commit hook repos",
+        "Used the decision format (Risk level, Verified via, What changed, etc.) for each version delta",
+        "Included a verification log table at the end listing every external claim with tool and source"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "Plan a GitHub Actions CI workflow for this repo that runs pre-commit hooks on PRs, plus markdownlint and cspell. Use best practices for action pinning.",
+      "expected_output": "A workflow plan with SHA-pinned actions, live-verified versions, security checks on all referenced actions, and decisions presented for user approval.",
+      "files": [
+        ".pre-commit-config.yaml",
+        "biome.json"
+      ],
+      "expectations": [
+        "SHA-pinned all GitHub Actions references (uses: owner/action@sha # vX.Y.Z format)",
+        "Used live sources (GitHub API or WebSearch) to verify action versions exist",
+        "Checked for CVEs/security advisories on referenced actions or tools",
+        "Used the decision format for version choices where the project has options",
+        "Included a verification log table at the end"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "I need to upgrade biome from 2.4.4 to the latest. What's the latest version, are there breaking changes for my biome.json config, and any security issues?",
+      "expected_output": "A deep-dive analysis of the biome upgrade path with changelog review, config impact assessment, security check, and decision format presentation.",
+      "files": [
+        "biome.json",
+        ".pre-commit-config.yaml"
+      ],
+      "expectations": [
+        "Checked BOTH GitHub releases AND tags for biomejs (where they are known to diverge)",
+        "Read or searched for the changelog between v2.4.4 and the latest version",
+        "Checked for biomejs security advisories via WebSearch",
+        "Presented findings using the decision format with all required fields",
+        "Assessed whether the existing biome.json config needs changes for the new version"
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "Review this deployment plan for currency and accuracy. It documents these GitHub Action pins: actions/checkout@v3 (described in the plan as 'current stable'), actions/upload-artifact@v2 (described as 'the latest stable release'). The plan also has two sections that reference cosign: the runner inventory says 'cosign >= 1.x' but the verified versions table says 'cosign v3.0.5'. Flag all issues you find.",
+      "expected_output": "A review that surfaces stale action versions as version deltas, flags the false 'latest stable' claim on upload-artifact v2 and checkout v3 as CORRECTION-level findings, surfaces the cosign internal inconsistency as a CORRECTION, and presents everything without asking about shipping timeline (this is a review task).",
+      "files": [],
+      "expectations": [
+        "Surfaced stale action versions (checkout@v3, upload-artifact@v2) as version deltas with live-verified current versions",
+        "Flagged the false 'current stable' / 'latest stable release' claims as CORRECTION-level findings, not just version bumps",
+        "Identified the cosign internal inconsistency (>= 1.x vs v3.0.5) as a CORRECTION-level finding",
+        "Did NOT ask about shipping timeline (this is a review task, not an implementation task)",
+        "Included a verification log table covering all checked dependencies"
+      ]
+    },
+    {
+      "id": 5,
+      "prompt": "I'm writing a new GitHub Actions workflow that uses these five actions: actions/checkout@v6, actions/upload-artifact@v7, actions/download-artifact@v8, actions/cache@v5, actions/setup-node@v4. Verify all are current, get their SHA pins, and check for any security issues.",
+      "expected_output": "Verification that all 5 actions are current (or flags any that aren't), full SHA pins for each, security check coverage for all 5 (bundled searches acceptable for same-vendor deps), and a verification log.",
+      "files": [],
+      "expectations": [
+        "Verified currency of all 5 actions using live sources (GitHub API)",
+        "Fetched commit SHAs for all 5 actions and presented them in pinned format (owner/action@sha # vX.Y.Z)",
+        "Covered security advisories for all 5 actions \u2014 bundling actions/* into shared searches is acceptable if explicitly documented in the log",
+        "Verification log documents which security search covers which dependencies when bundled",
+        "Included a verification log table at the end"
+      ]
+    }
+  ]
+}

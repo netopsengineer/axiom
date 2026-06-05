@@ -1,0 +1,12 @@
+{
+  "eval_id": 2,
+  "eval_name": "gha-ci-planning",
+  "prompt": "Plan a GitHub Actions CI workflow for this repo that runs pre-commit hooks on PRs, plus markdownlint and cspell. Use best practices for action pinning.",
+  "assertions": [
+    "SHA-pinned all GitHub Actions references (uses: owner/action@sha # vX.Y.Z format)",
+    "Used live sources (GitHub API or WebSearch) to verify action versions exist",
+    "Checked for CVEs/security advisories on referenced actions or tools",
+    "Used the decision format for version choices where the project has options",
+    "Included a verification log table at the end"
+  ]
+}

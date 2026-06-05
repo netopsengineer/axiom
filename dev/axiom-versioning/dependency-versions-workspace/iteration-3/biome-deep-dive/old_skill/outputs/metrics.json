@@ -1,0 +1,60 @@
+{
+  "task": "biome-deep-dive",
+  "skill_version": "dependency-versions (skill-snapshot-iter2)",
+  "date": "2026-03-23",
+  "model": "claude-sonnet-4-6",
+  "inputs": {
+    "files_read": [
+      "/Volumes/extreme/Projects/Work/DocumentationOnlyProjects/branching-strategy-redesign-upp/biome.json",
+      "/Volumes/extreme/Projects/Work/DocumentationOnlyProjects/branching-strategy-redesign-upp/.pre-commit-config.yaml"
+    ],
+    "current_version": "2.4.4",
+    "config_keys_audited": 11
+  },
+  "live_lookups": {
+    "total": 13,
+    "webfetch_calls": 10,
+    "websearch_calls": 3,
+    "sources": [
+      "https://api.github.com/repos/biomejs/biome/releases/latest",
+      "https://api.github.com/repos/biomejs/biome/releases?per_page=10",
+      "https://api.github.com/repos/biomejs/biome/tags",
+      "https://api.github.com/repos/biomejs/pre-commit/releases/latest",
+      "https://api.github.com/repos/biomejs/pre-commit/tags",
+      "https://github.com/biomejs/biome/releases/tag/%40biomejs%2Fbiome%402.4.5",
+      "https://github.com/biomejs/biome/releases/tag/%40biomejs%2Fbiome%402.4.6",
+      "https://github.com/biomejs/biome/releases/tag/%40biomejs%2Fbiome%402.4.7",
+      "https://github.com/biomejs/biome/releases/tag/%40biomejs%2Fbiome%402.4.8",
+      "https://biomejs.dev/internals/changelog/version/2-4-0...latest/",
+      "https://github.com/advisories?query=biomejs",
+      "websearch:biomejs biome CVE security advisory 2025 2026",
+      "websearch:biomejs biome security vulnerability supply chain 2025 2026",
+      "websearch:biome noImportantStyles complexity rule removed renamed 2025 2026",
+      "websearch:biome 2.4.4 to 2.4.8 changelog breaking changes migration"
+    ]
+  },
+  "findings": {
+    "latest_version": "2.4.8",
+    "latest_published": "2026-03-18",
+    "versions_behind": 4,
+    "breaking_changes_for_project": false,
+    "config_changes_required": 2,
+    "security_advisories_found": 0,
+    "cves_found": 0,
+    "risk_level": "ROUTINE",
+    "tags_releases_divergence_found": true,
+    "divergence_detail": "biomejs/pre-commit /releases/latest returns v0.6.1 (Dec 2024); /tags shows v2.4.8 (Mar 2026)"
+  },
+  "skill_invariants_checked": {
+    "no_training_data_versions": true,
+    "every_version_from_live_lookup": true,
+    "both_releases_and_tags_checked": true,
+    "security_checked_for_all_deps": true,
+    "sha_pinning_required": false,
+    "sha_pinning_note": "No GitHub Actions in scope; pre-commit hook uses rev not SHA"
+  },
+  "output_files": [
+    "report.md",
+    "metrics.json"
+  ]
+}

@@ -1,0 +1,10 @@
+{
+  "tool_calls": {
+    "WebFetch": 18,
+    "WebSearch": 7,
+    "Read": 2
+  },
+  "total_tool_calls": 27,
+  "output_chars": 10050,
+  "transcript_chars": 65000
+}

@@ -1,0 +1,35 @@
+{
+  "expectations": [
+    {
+      "text": "SHA-pinned all GitHub Actions references (uses: owner/action@sha # vX.Y.Z format)",
+      "passed": true,
+      "evidence": "Every uses: line in the workflow YAML uses a full 40-character commit SHA with a # vX.Y.Z comment (e.g., actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2). All 5 distinct action references follow the exact required format."
+    },
+    {
+      "text": "Used live sources (GitHub API or WebSearch) to verify action versions exist",
+      "passed": true,
+      "evidence": "Step 8 verification log documents 19 live lookup results using mcp__plugin_github_github__get_latest_release and list_tags for every action. A real discrepancy was surfaced (biomejs/pre-commit releases/latest is stale at v0.6.1 while tags show v2.4.8)."
+    },
+    {
+      "text": "Checked for CVEs/security advisories on referenced actions or tools",
+      "passed": true,
+      "evidence": "Five separate WebSearch CVE queries are logged for every referenced tool. Step 4 explicitly discusses CVE-2025-30066 (tj-actions supply-chain incident) as motivation for SHA pinning. Each version decision includes a dedicated Security advisories field."
+    },
+    {
+      "text": "Used the decision format for version choices where the project has options",
+      "passed": true,
+      "evidence": "Steps 2 and 3 use a structured decision format with Risk level, Verified via, What changed, Breaking changes, Migration steps, Security advisories, Recommendation, and Your call for each of the three behind-version hooks."
+    },
+    {
+      "text": "Included a verification log table at the end",
+      "passed": true,
+      "evidence": "Step 8 is a 19-row table with columns Claim/Tool/Source/Finding, followed by a self-check section with 5 boolean questions all answered Yes."
+    }
+  ],
+  "summary": {
+    "passed": 5,
+    "failed": 0,
+    "total": 5,
+    "pass_rate": 1.0
+  }
+}

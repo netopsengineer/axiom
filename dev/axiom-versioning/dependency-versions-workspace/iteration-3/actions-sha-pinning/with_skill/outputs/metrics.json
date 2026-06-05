@@ -1,0 +1,56 @@
+{
+  "task": "actions-sha-pinning",
+  "iteration": 3,
+  "variant": "with_skill",
+  "date": "2026-03-23",
+  "skill_used": "dependency-versions",
+  "actions_reviewed": 5,
+  "actions_current_on_major_version": 4,
+  "actions_outdated": 1,
+  "findings": {
+    "BREAKING-UPGRADE": 1,
+    "SECURITY": 0,
+    "DEPRECATION": 0,
+    "ROUTINE": 0,
+    "CORRECTION": 0
+  },
+  "outdated_action": "actions/setup-node",
+  "outdated_details": {
+    "requested": "v4",
+    "latest_on_requested_major": "v4.4.0",
+    "overall_latest": "v6.3.0",
+    "major_versions_behind": 2,
+    "hard_deadline": "2026-06-02",
+    "deadline_reason": "Node 20 deprecation on GitHub-hosted runners"
+  },
+  "sha_pins_provided": 6,
+  "sha_pins": {
+    "actions/checkout@v6.0.2": "de0fac2e4500dabe0009e67214ff5f5447ce83dd",
+    "actions/upload-artifact@v7.0.0": "bbbca2ddaa5d8feaa63e36b76fdaad77386f024f",
+    "actions/download-artifact@v8.0.1": "3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c",
+    "actions/cache@v5.0.4": "668228422ae6a00e4ad889ee87cd7109ec5666a7",
+    "actions/setup-node@v4.4.0": "49933ea5288caeca8642d1e84afbd3f7d6820020",
+    "actions/setup-node@v6.3.0": "53b83947a5a98c8d113130e565377fae1a50d02f"
+  },
+  "annotated_tags_requiring_resolution": 0,
+  "security_searches_performed": 4,
+  "cves_applicable": 0,
+  "cves_noted_but_not_applicable": [
+    {
+      "id": "CVE-2024-42471",
+      "action": "actions/download-artifact",
+      "affected_versions": "4.0.0-4.1.2",
+      "user_version": "v8",
+      "applicable": false
+    },
+    {
+      "id": "CVE-2025-61671",
+      "action": "actions/checkout (workflow pattern, not action binary)",
+      "note": "Workflow design vulnerability (pull_request_target misuse), not a flaw in checkout action itself",
+      "applicable": false
+    }
+  ],
+  "live_api_lookups": 16,
+  "both_releases_and_tags_checked": true,
+  "all_versions_verified_against_live_source": true
+}

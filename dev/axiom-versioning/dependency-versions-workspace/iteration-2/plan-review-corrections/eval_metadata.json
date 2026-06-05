@@ -1,0 +1,12 @@
+{
+  "eval_id": 4,
+  "eval_name": "plan-review-corrections",
+  "prompt": "Review this deployment plan for currency and accuracy. It documents these GitHub Action pins: actions/checkout@v3 (described in the plan as 'current stable'), actions/upload-artifact@v2 (described as 'the latest stable release'). The plan also has two sections that reference cosign: the runner inventory says 'cosign >= 1.x' but the verified versions table says 'cosign v3.0.5'. Flag all issues you find.",
+  "assertions": [
+    "Surfaced stale action versions (checkout@v3, upload-artifact@v2) as version deltas with live-verified current versions",
+    "Flagged the false 'current stable' / 'latest stable release' claims as CORRECTION-level findings, not just version bumps",
+    "Identified the cosign internal inconsistency (>= 1.x vs v3.0.5) as a CORRECTION-level finding",
+    "Did NOT ask about shipping timeline (this is a review task, not an implementation task)",
+    "Included a verification log table covering all checked dependencies"
+  ]
+}

@@ -1,0 +1,60 @@
+{
+    // Import only the root .gitignore file.
+    // This is faster than scanning every nested .gitignore across the tree.
+    "gitignore": ".gitignore",
+    // Markdownlint rule configuration used by markdownlint-cli2.
+    // If a standalone .markdownlint.* file sits beside this, it will override this "config".
+    "config": {
+        // Start from the default rule set (true means enable all rules by default).
+        "default": true,
+        // MD007: Unordered list indentation
+        // - "indent": number of spaces per nesting level.
+        // - "start_indent": indentation for the first list item after a paragraph.
+        // - "start_indented": whether the first list item must be indented.
+        "MD007": {
+            "indent": 4,
+            "start_indent": 2,
+            "start_indented": false
+        },
+        // MD010: Hard tabs
+        // - "code_blocks": if false, do not flag hard tabs inside fenced code blocks.
+        "MD010": {
+            "code_blocks": false
+        },
+        // MD013: Line length
+        // - "line_length": maximum allowed line length.
+        // - "code_blocks": if false, ignore line length inside fenced code blocks.
+        // - "tables": if false, ignore line length inside tables.
+        // Optional knobs if you need them later:
+        //   "heading_line_length": 400
+        //   "strict": false
+        //   "stern": false
+        "MD013": false,
+        // MD024: Multiple headings with the same content
+        // false disables the rule.
+        "MD024": false,
+        // MD029: Ordered list item prefix
+        // - "style": "one_or_ordered" allows either all 1.'s or a correctly incrementing sequence.
+        "MD029": {
+            "style": "one_or_ordered"
+        },
+        // MD036: Emphasis used in place of a heading
+        // false disables the rule.
+        "MD036": false,
+        // MD059: Inline HTML
+        // false disables the rule.
+        "MD059": false,
+        "MD060": {
+            "style": "aligned"
+        }
+    },
+    // Optional quality of life flags for markdownlint-cli2 output:
+    // - "noBanner": hide the startup banner.
+    // - "noProgress": hide the progress bar.
+    // - "showFound": when true, echo the files found before linting.
+    "noBanner": true,
+    "noProgress": false,
+    "showFound": false,
+    // Exclude files or glob patterns from linting.
+    "ignores": []
+}

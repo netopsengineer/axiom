@@ -1,0 +1,42 @@
+{
+  "expectations": [
+    {
+      "text": "SHA-pinned all GitHub Actions references (uses: owner/action@sha # vX.Y.Z format)",
+      "passed": true,
+      "evidence": "All four actions used in the recommended workflow are SHA-pinned with inline version comments: 'uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2', 'uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0', 'uses: pre-commit/action@2c7b3805fd2a0fd8c1884dcaebf91fc102a13ecd # v3.0.1'. The optional standalone jobs reference 'actions/setup-node@<SHA>' as a placeholder, explicitly flagged as an open item with a note that the SHA must be fetched before shipping."
+    },
+    {
+      "text": "Used live sources (GitHub API or WebSearch) to verify action versions exist",
+      "passed": true,
+      "evidence": "The Verification Log documents live WebFetch calls to api.github.com for every action and hook repo. Examples: 'WebFetch | api.github.com/repos/actions/checkout/releases/latest | v6.0.2, published 2026-01-09' and 'WebFetch | api.github.com/repos/actions/checkout/git/refs/tags/v6.0.2 | de0fac2e4500dabe0009e67214ff5f5447ce83dd (type: commit)'. Both releases and tags endpoints were checked for each dependency, with divergence noted for biomejs/pre-commit and markdownlint-cli2."
+    },
+    {
+      "text": "Checked for CVEs/security advisories on referenced actions or tools",
+      "passed": true,
+      "evidence": "The Security Summary section and Verification Log both document explicit WebSearch CVE lookups for every tool. Examples: 'WebSearch | \"cspell streetsidesoftware CVE security advisory 2025 2026\" | CVE-2026-25931 is for vscode-spell-checker extension, not cspell-cli', 'WebSearch | \"gitleaks CVE security advisory 2025 2026\" | Results were for Git VCS, no Gitleaks-specific advisories found', 'WebSearch | \"actions/checkout actions/setup-python CVE security advisory 2025 2026\" | No CVEs for these actions directly'. All six hook repos and all four GitHub Actions were covered."
+    },
+    {
+      "text": "Used the decision format for version choices where the project has options",
+      "passed": true,
+      "evidence": "Each of the four ROUTINE delta assessments uses a structured decision format with labeled fields: 'Risk level:', 'Verified via:', 'What changed:', 'Breaking changes:', 'Migration steps:', 'Security advisories:', 'Recommendation:', and 'Your call:'. For example the gitleaks section ends with 'Your call: Include in this batch or defer? (No urgency, but upgrading a secret scanner is always low-risk high-value.)'"
+    },
+    {
+      "text": "Included a verification log table at the end",
+      "passed": true,
+      "evidence": "The report contains a '## Verification Log (Step 6)' section near the end with a four-column table (Claim | Tool | Source | Finding) covering approximately 30 rows across all actions and hook repos, followed by a self-check section confirming 'Every version sourced from a live lookup? Yes.' and 'SHA fetched for every GitHub Action reference? Yes'."
+    }
+  ],
+  "summary": {
+    "passed": 5,
+    "failed": 0,
+    "total": 5,
+    "pass_rate": 1.0
+  },
+  "eval_feedback": {
+    "suggestions": [
+      "The optional standalone markdownlint and cspell jobs leave 'actions/setup-node@<SHA>' as an unfilled placeholder. While correctly flagged as an open item, future skill executions could either fetch the missing SHA or omit the optional jobs from the plan rather than leaving a placeholder that would break if copied verbatim.",
+      "The self-check section at the end of the Verification Log is a strong pattern and should be retained in future iterations \u2014 it provides clear traceability that all checklist items were completed."
+    ],
+    "overall": "Full pass on all five assertions. The report demonstrates thorough SHA pinning with verified commit SHAs fetched from live GitHub API sources, explicit CVE/advisory searches for every referenced action and hook, a structured decision format applied to each version delta, and a detailed verification log table. The single minor gap \u2014 setup-node SHA not fetched for optional jobs \u2014 is correctly disclosed in Open Items and does not affect the primary recommended workflow."
+  }
+}

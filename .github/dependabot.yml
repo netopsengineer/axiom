@@ -1,0 +1,34 @@
+version: 2
+
+updates:
+  # GitHub Actions referenced in workflows. Actions are SHA-pinned with a
+  # `# vX.Y.Z` comment; Dependabot bumps both the SHA and the comment.
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "daily"
+    groups:
+      github-actions:
+        patterns: ["*"]
+    commit-message:
+      # ci:/chore: are non-releasing commit types, so dependency bumps never
+      # trigger a semantic-release version bump.
+      prefix: "ci"
+    labels: ["dependencies", "github-actions"]
+    ignore:
+      # The official validate-plugins action publishes no tags, so Dependabot
+      # can't track it. .github/workflows/bump-validate-action.yml re-pins it.
+      - dependency-name: "anthropics/claude-plugins-community*"
+
+  # Release tooling (semantic-release + plugins).
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "daily"
+    versioning-strategy: "increase"
+    groups:
+      release-tooling:
+        patterns: ["*"]
+    commit-message:
+      prefix: "chore"
+    labels: ["dependencies", "npm"]

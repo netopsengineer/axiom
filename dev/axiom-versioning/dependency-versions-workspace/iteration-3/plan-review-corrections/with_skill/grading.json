@@ -1,0 +1,39 @@
+{
+  "expectations": [
+    {
+      "text": "Surfaced stale action versions (checkout@v3, upload-artifact@v2) as version deltas with live-verified current versions",
+      "passed": true,
+      "evidence": "Finding #1 documents checkout@v3 -> v6.0.2 and Finding #3 documents upload-artifact@v2 -> v7.0.0, both live-verified via WebFetch against the GitHub API with exact SHAs in the verification log."
+    },
+    {
+      "text": "Flagged the false 'current stable' / 'latest stable release' claims as CORRECTION-level findings, not just version bumps",
+      "passed": true,
+      "evidence": "Finding #2 is a fully dedicated section with **Risk level:** CORRECTION for the 'current stable' label on checkout@v3. Finding #4 is a fully dedicated section with **Risk level:** CORRECTION for the 'latest stable release' label on upload-artifact@v2. Both are separate from their respective DEPRECATION blocks."
+    },
+    {
+      "text": "Identified the cosign internal inconsistency (>= 1.x vs v3.0.5) as a CORRECTION-level finding",
+      "passed": true,
+      "evidence": "Finding #5 is a dedicated **Risk level:** CORRECTION block for the cosign inconsistency, quoting both conflicting claims (>= 1.x and v3.0.5) and explaining the CVE-2026-24122 exposure."
+    },
+    {
+      "text": "Did NOT ask about shipping timeline (this is a review task, not an implementation task)",
+      "passed": true,
+      "evidence": "No shipping timeline or deadline questions appear anywhere in the report. The 'Your call:' prompts ask only about upgrade target version selection."
+    },
+    {
+      "text": "Included a verification log table covering all checked dependencies",
+      "passed": true,
+      "evidence": "Verification Log table (14 rows) covers all three in-scope dependencies with explicit API sources, SHAs, EOL/deprecation dates, and CVE searches. Self-check section confirms all coverage criteria were met."
+    }
+  ],
+  "summary": {
+    "passed": 5,
+    "failed": 0,
+    "total": 5,
+    "pass_rate": 1.0
+  },
+  "eval_feedback": {
+    "suggestions": [],
+    "overall": "5/5. Dual-finding pattern fired correctly: separate CORRECTION entries for both false labels and the cosign inconsistency, distinct from the version delta findings."
+  }
+}
