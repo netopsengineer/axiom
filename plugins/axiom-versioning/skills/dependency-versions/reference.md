@@ -33,7 +33,7 @@ WebFetch: https://registry.npmjs.org/{package-name}/latest
 ### Security checking
 
 ```plaintext
-WebSearch: "{package-name} CVE"
+WebSearch: "{package-name} CVE 2025 2026"
 WebSearch: "{package-name} security advisory"
 WebFetch: https://github.com/advisories?query={package-name}
 ```
