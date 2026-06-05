@@ -55,6 +55,10 @@
     "noBanner": true,
     "noProgress": false,
     "showFound": false,
-    // Exclude files or glob patterns from linting.
-    "ignores": []
+    // Exclude machine-generated Markdown from linting. CHANGELOG.md is written by
+    // semantic-release (its asterisk bullets clash with MD004 against the
+    // hand-seeded section, and the release commit is [skip ci] so CI never lints
+    // it at write time), and dev/ holds eval run reports produced by eval runs.
+    // Neither is hand-authored, so neither should be held to the prose lint rules.
+    "ignores": ["**/CHANGELOG.md", "dev/**"]
 }
