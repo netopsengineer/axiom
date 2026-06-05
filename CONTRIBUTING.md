@@ -86,10 +86,13 @@ All workflows live in `.github/`; every third-party action is SHA-pinned.
 | `bump-validate-action.yml`                     | daily + manual      | re-pins the tagless validate action to the latest upstream SHA via an auto-merged PR  |
 | `dependabot.yml` + `dependabot-auto-merge.yml` | daily               | bump GitHub Actions + npm tooling, auto-merged once CI is green                       |
 
-No Anthropic credentials are needed anywhere: `claude plugin validate` runs
-offline and releases use the built-in `GITHUB_TOKEN`. `package.json` /
-`package-lock.json` are **release- and lint-tooling only** - this is not an npm
-project, and the shipped plugin carries no npm dependencies.
+No Anthropic credentials are needed anywhere, and `claude plugin validate` runs
+offline. Releases run under a short-lived **GitHub App token** - the
+`axiom-release-bot` app is the bypass actor on the `main` ruleset, because the
+built-in `GITHUB_TOKEN` can't push to a branch with required status checks. The
+app's ID and key live in the `APP_ID` variable and `APP_PRIVATE_KEY` secret.
+`package.json` / `package-lock.json` are **release- and lint-tooling only** -
+this is not an npm project, and the shipped plugin carries no npm dependencies.
 
 ## Adding a plugin
 
