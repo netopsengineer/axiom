@@ -39,7 +39,15 @@ jobs:
           node-version: 24 # current LTS; semantic-release@25 needs ^22.14 || >=24.10
           cache: npm
       - run: npm ci
-      - run: npm run release
+      - name: Release changed plugins
+        run: |
+          set -euo pipefail
+          for dir in plugins/*/; do
+            name="$(basename "$dir")"
+            echo "::group::semantic-release: $name"
+            ( cd "$dir" && npx --no-install semantic-release )
+            echo "::endgroup::"
+          done
         env:
           # App-minted token (not the default GITHUB_TOKEN) — required to push to
           # protected main and to create the tag, Release, and success comments.

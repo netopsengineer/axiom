@@ -1,13 +1,13 @@
 #!/usr/bin/env node
 // Validates that a PR title is a valid Conventional Commit. This repo
 // squash-merges, so the PR title becomes the commit subject, and
-// semantic-release derives the version bump from it (release.config.js).
+// per-plugin semantic-release configs derive version bumps from it.
 //
 // Per the Conventional Commits spec the type is the PREFIX of the header —
 // nothing may precede it — and the description follows the colon and space. So
 // a gitmoji, if used at all, belongs AFTER the colon as the start of the
 // subject (`feat(scope): ✨ subject`), never before the type (`✨ feat: ...`).
-// This gate enforces type-first; release.config.js's default parser agrees.
+// This gate enforces type-first; semantic-release's default parser agrees.
 //
 //   PR_TITLE="feat: add thing" node .github/scripts/check-pr-title.mjs
 const title = process.env.PR_TITLE ?? "";

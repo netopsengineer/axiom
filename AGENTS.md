@@ -15,6 +15,8 @@
 plugins/<plugin>/.claude-plugin/plugin.json
 plugins/<plugin>/README.md
 plugins/<plugin>/CHANGELOG.md
+plugins/<plugin>/package.json
+plugins/<plugin>/release.config.js
 plugins/<plugin>/skills/<skill>/SKILL.md
 plugins/<plugin>/skills/<skill>/evals/evals.json
 plugins/<plugin>/skills/<skill>/reference.md
@@ -23,7 +25,6 @@ dev/<plugin>/
 .github/scripts/
 package.json
 package-lock.json
-release.config.js
 ```
 
 ## Edit Rules
