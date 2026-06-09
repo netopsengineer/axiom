@@ -3,7 +3,7 @@
   "name": "axiom-git",
   "displayName": "Axiom Git",
   "description": "Composes Conventional Commits messages with gitmoji from the staged diff, deciding type, scope, emoji, subject, and body, and gating on protected branches, staged secrets, and pre-commit hooks.",
-  "version": "0.0.0",
+  "version": "1.0.0",
   "author": {
     "name": "axiom-plugins",
     "email": "enterprise.code.developer@gmail.com"
