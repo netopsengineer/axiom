@@ -17,6 +17,7 @@
     "docs:plugins:check": "node .github/scripts/sync-readme-plugins.mjs --check",
     "docs:readme": "npm run docs:badges && npm run docs:evals && npm run docs:plugins",
     "docs:readme:check": "npm run docs:badges:check && npm run docs:evals:check && npm run docs:plugins:check",
+    "check:branch-name": "node .github/scripts/check-branch-name.mjs",
     "check:plugins:local": "node .github/scripts/validate-local-plugins.mjs",
     "check:repo": "node .github/scripts/check-repo-invariants.mjs",
     "check:precommit:security": "prek run actionlint --all-files && prek run shellcheck --all-files && prek run zizmor --all-files",

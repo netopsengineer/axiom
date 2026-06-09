@@ -22,7 +22,8 @@ prek install       # install the pre-commit hook that mirrors CI
 
 ## Make a change
 
-1. Branch off `main`.
+1. Branch off `main` using `feat/<short-kebab-slug>`,
+   `fix/<short-kebab-slug>`, or `chore/<short-kebab-slug>`.
 2. Make your edit, following the conventions in `CLAUDE.md` (kebab-case names,
    directory-format skills, register new plugins in `marketplace.json`, ...).
 3. Run the checks below until they pass.
@@ -35,6 +36,7 @@ prek install       # install the pre-commit hook that mirrors CI
 
 | Check      | Tool                                           | Auto-fix                                   |
 |------------|------------------------------------------------|--------------------------------------------|
+| Branch     | `.github/scripts/check-branch-name.mjs`        | rename the PR source branch                |
 | JavaScript | Biome (`biome.jsonc`)                          | `npm run lint:fix`                         |
 | Markdown   | markdownlint-cli2 (`.markdownlint-cli2.jsonc`) | `npx -y markdownlint-cli2 --fix "**/*.md"` |
 | Manifests  | `claude plugin validate ./plugins/<name>`      | fix the flagged manifest                   |
@@ -44,12 +46,25 @@ stops so you can `git add` the result and commit again. Other useful commands:
 
 ```bash
 npm run lint           # Biome, read-only — exactly what CI runs
+PR_BRANCH="$(git rev-parse --abbrev-ref HEAD)" npm run check:branch-name
 BR="$(git rev-parse --abbrev-ref HEAD)"
 cd plugins/<plugin>
 npx --no-install semantic-release --dry-run --no-ci --branches "$BR"
 ```
 
 ## Commit & PR conventions
+
+PR source branches must use one of these forms:
+
+```text
+feat/<short-kebab-slug>
+fix/<short-kebab-slug>
+chore/<short-kebab-slug>
+```
+
+Dependabot branches under `dependabot/**` are allowed separately so dependency
+automation can keep running. Branch names do not decide release behavior; the PR
+title does.
 
 [Conventional Commits](https://www.conventionalcommits.org) are required. The
 type must be the first text in the title. A [gitmoji](https://gitmoji.dev) can
@@ -93,7 +108,9 @@ All workflows live in `.github/`; every third-party action is SHA-pinned.
 
 | Workflow                                       | Trigger             | What it does                                                                                                                                              |
 |------------------------------------------------|---------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `validate.yml`                                 | PR + push to `main` | `claude plugin validate` + markdownlint + Biome - the three required checks                                                                               |
+| `branch-name.yml`                              | PR                  | enforce predictable PR source branch names for human and agent branches                                                                                   |
+| `pr-title.yml`                                 | PR                  | enforce Conventional Commit PR titles, which become squash commit subjects                                                                                |
+| `validate.yml`                                 | PR + push to `main` | plugin validation, markdownlint, Biome, secret scanning, repository invariants, YAML syntax, spelling, Markdown links, workflow security lint, npm audit  |
 | `release.yml`                                  | push to `main`      | run semantic-release for each plugin; changed plugin paths with releasable titles bump the manifest, update `CHANGELOG.md`, tag, and cut a GitHub Release |
 | `bump-validate-action.yml`                     | daily + manual      | re-pins the tagless validate action to the latest upstream SHA via an auto-merged PR                                                                      |
 | `dependabot.yml` + `dependabot-auto-merge.yml` | daily               | bump GitHub Actions + npm tooling, auto-merged once CI is green                                                                                           |
@@ -146,6 +163,9 @@ the evals exist and clear the bar before approving.
   emoji (`feat: ✨ ...`, not just `✨ ...`).
 - **The commit was rejected by the hook.** A formatter rewrote a file - re-stage
   with `git add` and commit again. Run `prek run --all-files` to see what fired.
+- **The Branch name check failed.** Rename the PR source branch to
+  `feat/<short-kebab-slug>`, `fix/<short-kebab-slug>`, or
+  `chore/<short-kebab-slug>`, then push the renamed branch.
 - **`bump-validate-action` PR is stuck with no checks.** A `GITHUB_TOKEN`-created
   PR can't trigger workflows, so the job dispatches the checks against the branch.
   If your ruleset doesn't honor dispatched checks, add a fine-grained PAT (repo
