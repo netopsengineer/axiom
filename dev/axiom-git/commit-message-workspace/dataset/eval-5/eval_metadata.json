@@ -1,0 +1,10 @@
+{
+  "eval_id": 5,
+  "eval_name": "on-main-refuses-and-offers-branch",
+  "prompt": "commit this",
+  "assertions": [
+    "Detected the repo is on `main` and refused to commit directly to it.",
+    "Offered to create a new branch and move the staged change there.",
+    "Did NOT create a commit on main — no new commit describing feature.py exists; HEAD is unchanged from the seeded history."
+  ]
+}

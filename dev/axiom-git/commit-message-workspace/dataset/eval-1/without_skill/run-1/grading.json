@@ -1,0 +1,39 @@
+{
+  "expectations": [
+    {
+      "text": "Chose commit type `refactor`.",
+      "passed": true,
+      "evidence": "type=refactor for pure renames (result.md Decisions)."
+    },
+    {
+      "text": "Used the 🚚 emoji (the renames/moves alternate called out in the signal table), not the default ♻️.",
+      "passed": false,
+      "evidence": "No gitmoji used (Emoji: n/a); subject 'refactor: rename placeholder modules to descriptive names' has no 🚚."
+    },
+    {
+      "text": "Subject is imperative mood, capitalized, with no trailing period, and ≤72 chars.",
+      "passed": false,
+      "evidence": "Subject is NOT capitalized — lowercase 'rename'; the skill requires capitalizing the first word."
+    },
+    {
+      "text": "Did not repeat the type word at the start of the subject (subject does not begin with 'refactor').",
+      "passed": true,
+      "evidence": "Subject begins with 'rename', not the type word."
+    },
+    {
+      "text": "Committed the change on the non-main branch (chore/rename-modules); git log shows the new commit.",
+      "passed": true,
+      "evidence": "Commit 5ea95ea on branch chore/rename-modules."
+    }
+  ],
+  "summary": {
+    "passed": 3,
+    "failed": 2,
+    "total": 5,
+    "pass_rate": 0.6
+  },
+  "execution_metrics": {
+    "total_tool_calls": 8,
+    "errors_encountered": 0
+  }
+}

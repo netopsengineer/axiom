@@ -54,4 +54,5 @@ jobs:
       # scoped to the repo's hand-written JS. Installed via npm, so there is no
       # extra action to SHA-pin — reuses the pinned checkout + setup-node above.
       - run: npm ci
+      - run: npm run docs:badges:check
       - run: npm run lint

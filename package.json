@@ -9,6 +9,8 @@
     "node": "^22.14.0 || >=24.10.0"
   },
   "scripts": {
+    "docs:badges": "node .github/scripts/sync-readme-badges.mjs",
+    "docs:badges:check": "node .github/scripts/sync-readme-badges.mjs --check",
     "lint": "biome ci",
     "lint:fix": "biome check --write"
   },

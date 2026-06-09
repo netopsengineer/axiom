@@ -1,0 +1,26 @@
+{
+  "skill": "commit-message",
+  "skill_path": "/Volumes/extreme/Projects/Work/Nautobot/PythonScripts/TERRY/.claude/skills/commit-message",
+  "models": [
+    "claude-sonnet-4-6",
+    "claude-opus-4-8"
+  ],
+  "improver": {
+    "model": "claude-opus-4-8",
+    "effort": "high"
+  },
+  "baseline_description": "Use ANY time the user signals they want to commit staged changes \u2014 including bare \"commit\", \"/commit\", \"commit this\", \"commit these changes\", \"let's commit\", \"make a commit\", \"git commit\", \"write a commit message\", \"make a conventional commit\", \"use conventional commits\", or any equivalent phrasing in context (e.g., right after staging files, \"ready to commit\", \"okay ship it\"). Composes a Conventional Commits message with a gitmoji prefix: reads the staged diff, decides type, scope, emoji, subject, body, and footer using the rubrics in this file, shows one assembled message in a fenced block, and commits after a single yes/no confirmation. It writes the commit message only \u2014 NOT other prose about the staged changes: not PR/MR descriptions, not release notes, not changelogs or summaries. Also do NOT use for questions *about* git or *about* conventional commits, amending, rebasing, cherry-picking, reverting/undoing commits, or viewing log history.",
+  "best_description": "Use ANY time the user signals they want to commit staged changes \u2014 including bare \"commit\", \"/commit\", \"commit this\", \"commit these changes\", \"let's commit\", \"make a commit\", \"git commit\", \"write a commit message\", \"make a conventional commit\", \"use conventional commits\", or any equivalent phrasing in context (e.g., right after staging files, \"ready to commit\", \"okay ship it\"). Composes a Conventional Commits message with a gitmoji prefix: reads the staged diff, decides type, scope, emoji, subject, body, and footer using the rubrics in this file, shows one assembled message in a fenced block, and commits after a single yes/no confirmation. It writes the commit message only \u2014 NOT other prose about the staged changes: not PR/MR descriptions, not release notes, not changelogs or summaries. Also do NOT use for questions *about* git or *about* conventional commits, amending, rebasing, cherry-picking, reverting/undoing commits, or viewing log history.",
+  "best_test_mean": 1.0,
+  "best_test_min": 1.0,
+  "select_epsilon": 0.05,
+  "history": [
+    {
+      "stage": "baseline",
+      "description": "Use ANY time the user signals they want to commit staged changes \u2014 including bare \"commit\", \"/commit\", \"commit this\", \"commit these changes\", \"let's commit\", \"make a commit\", \"git commit\", \"write a commit message\", \"make a conventional commit\", \"use conventional commits\", or any equivalent phrasing in context (e.g., right after staging files, \"ready to commit\", \"okay ship it\"). Composes a Conventional Commits message with a gitmoji prefix: reads the staged diff, decides type, scope, emoji, subject, body, and footer using the rubrics in this file, shows one assembled message in a fenced block, and commits after a single yes/no confirmation. It writes the commit message only \u2014 NOT other prose about the staged changes: not PR/MR descriptions, not release notes, not changelogs or summaries. Also do NOT use for questions *about* git or *about* conventional commits, amending, rebasing, cherry-picking, reverting/undoing commits, or viewing log history.",
+      "full_mean": 0.9722,
+      "test_mean": 1.0,
+      "test_min": 1.0
+    }
+  ]
+}

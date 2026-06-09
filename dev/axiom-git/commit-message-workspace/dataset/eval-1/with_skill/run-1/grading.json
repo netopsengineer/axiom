@@ -1,0 +1,39 @@
+{
+  "expectations": [
+    {
+      "text": "Chose commit type `refactor`.",
+      "passed": true,
+      "evidence": "result.md Decisions: type=`refactor`; rationale cites R100 rename rows."
+    },
+    {
+      "text": "Used the 🚚 emoji (the renames/moves alternate called out in the signal table), not the default ♻️.",
+      "passed": true,
+      "evidence": "Emoji 🚚 in committed subject 'refactor: 🚚 Rename alpha/beta/gamma modules to handlers/models/services'."
+    },
+    {
+      "text": "Subject is imperative mood, capitalized, with no trailing period, and ≤72 chars.",
+      "passed": true,
+      "evidence": "Subject 'Rename ... services' = 59 chars (≤72), imperative 'Rename', capitalized, no trailing period; inline warn noted."
+    },
+    {
+      "text": "Did not repeat the type word at the start of the subject (subject does not begin with 'refactor').",
+      "passed": true,
+      "evidence": "Subject begins with 'Rename', not the type word."
+    },
+    {
+      "text": "Committed the change on the non-main branch (chore/rename-modules); git log shows the new commit.",
+      "passed": true,
+      "evidence": "git log shows new commit e187e39 on branch chore/rename-modules."
+    }
+  ],
+  "summary": {
+    "passed": 5,
+    "failed": 0,
+    "total": 5,
+    "pass_rate": 1.0
+  },
+  "execution_metrics": {
+    "total_tool_calls": 13,
+    "errors_encountered": 0
+  }
+}

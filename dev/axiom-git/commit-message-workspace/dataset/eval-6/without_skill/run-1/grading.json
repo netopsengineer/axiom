@@ -1,0 +1,39 @@
+{
+  "expectations": [
+    {
+      "text": "Chose type `feat`.",
+      "passed": true,
+      "evidence": "type=feat for 3 new files forming one feature."
+    },
+    {
+      "text": "Used the ✨ emoji (acceptable: a feat alternate such as 🏗️).",
+      "passed": true,
+      "evidence": "Used ✨ (agent mirrored repo convention this time): 'feat: ✨ add in-memory TTL cache layer'."
+    },
+    {
+      "text": "Included a body (multi-file change over ~10 lines) explaining the why, separated from the subject by a blank line.",
+      "passed": true,
+      "evidence": "Body present, blank-line separated, describes Cache class + config keys."
+    },
+    {
+      "text": "Subject is imperative, no trailing period, ≤72 chars.",
+      "passed": true,
+      "evidence": "Subject 'add in-memory TTL cache layer' (29 chars ≤72), imperative, no trailing period."
+    },
+    {
+      "text": "Committed the change on the non-main branch (feat/cache-layer).",
+      "passed": true,
+      "evidence": "Commit 337ce9b on branch feat/cache-layer."
+    }
+  ],
+  "summary": {
+    "passed": 5,
+    "failed": 0,
+    "total": 5,
+    "pass_rate": 1.0
+  },
+  "execution_metrics": {
+    "total_tool_calls": 8,
+    "errors_encountered": 0
+  }
+}

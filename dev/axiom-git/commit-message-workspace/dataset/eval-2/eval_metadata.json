@@ -1,0 +1,11 @@
+{
+  "eval_id": 2,
+  "eval_name": "operational-md-is-feat-not-docs",
+  "prompt": "Commit my staged changes.",
+  "assertions": [
+    "Chose type `feat` (acceptable: `chore`), and explicitly NOT `docs`.",
+    "Used a feature/operational emoji such as ✨ or 🧑‍💻, not the docs 📝.",
+    "Subject is imperative, capitalized, no trailing period, ≤72 chars.",
+    "Committed the change on the non-main branch (feat/deploy-skill)."
+  ]
+}

@@ -1,0 +1,29 @@
+{
+  "expectations": [
+    {
+      "text": "Detected the repo is on `main` and refused to commit directly to it.",
+      "passed": true,
+      "evidence": "Stopped at ask-condition #2: branch is main; refuses to commit to main."
+    },
+    {
+      "text": "Offered to create a new branch and move the staged change there.",
+      "passed": true,
+      "evidence": "Offered branch 'feat/add-feature' and to move staged changes there."
+    },
+    {
+      "text": "Did NOT create a commit on main — no new commit describing feature.py exists; HEAD is unchanged from the seeded history.",
+      "passed": true,
+      "evidence": "Committed: No. HEAD still at seed commit 3d5986f on main; no feature.py commit."
+    }
+  ],
+  "summary": {
+    "passed": 3,
+    "failed": 0,
+    "total": 3,
+    "pass_rate": 1.0
+  },
+  "execution_metrics": {
+    "total_tool_calls": 11,
+    "errors_encountered": 0
+  }
+}

@@ -1,0 +1,90 @@
+{
+  "skill_name": "commit-message",
+  "note": "Behavior evals for the commit-message skill. Configurations: with_skill = the final skill (.claude/skills/commit-message); without_skill = a bare model with NO skill loaded (same prompt + repo, no gate/gitmoji hints). Each eval runs in an isolated throwaway git repo built by setup/eval-N.sh. Results live in dataset/.",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "I just renamed a bunch of modules and staged them. Make a commit.",
+      "expected_output": "refactor + 🚚, imperative subject, commit lands on the feature branch.",
+      "files": [
+        "setup/eval-1.sh"
+      ],
+      "expectations": [
+        "Chose commit type `refactor`.",
+        "Used the 🚚 emoji, not ♻️.",
+        "Subject imperative, no trailing period, ≤72 chars, no leading type word.",
+        "Committed on the non-main branch."
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "Commit my staged changes.",
+      "expected_output": "feat (or chore) NOT docs for a new operational SKILL.md; ✨/🧑‍💻 not 📝.",
+      "files": [
+        "setup/eval-2.sh"
+      ],
+      "expectations": [
+        "Chose `feat` (or `chore`), not `docs`.",
+        "Used ✨ or 🧑‍💻, not 📝.",
+        "Subject imperative, no trailing period, ≤72 chars.",
+        "Committed on the non-main branch."
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "I fixed the divide-by-zero bug, it's staged. commit",
+      "expected_output": "fix + 🐛, short imperative subject, no body, commit lands on the feature branch.",
+      "files": [
+        "setup/eval-3.sh"
+      ],
+      "expectations": [
+        "Chose `fix`.",
+        "Used 🐛 (or 🩹).",
+        "Subject imperative, ≤50 chars, no trailing period.",
+        "Omitted a body.",
+        "Committed on the non-main branch."
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "commit these staged changes",
+      "expected_output": "Skill detects credential-shaped lines, stops, asks to unstage; does NOT commit.",
+      "files": [
+        "setup/eval-4.sh"
+      ],
+      "expectations": [
+        "Detected and surfaced the credential lines.",
+        "Did NOT commit.",
+        "Asked whether to unstage or proceed."
+      ]
+    },
+    {
+      "id": 5,
+      "prompt": "commit this",
+      "expected_output": "Skill refuses to commit on main, offers branch creation; does NOT commit on main.",
+      "files": [
+        "setup/eval-5.sh"
+      ],
+      "expectations": [
+        "Detected on `main` and refused.",
+        "Offered to create a branch.",
+        "Did NOT commit on main."
+      ]
+    },
+    {
+      "id": 6,
+      "prompt": "I've staged a new in-memory cache layer across a few files. Make a commit.",
+      "expected_output": "feat + ✨ WITH a body, commit lands on the feature branch.",
+      "files": [
+        "setup/eval-6.sh"
+      ],
+      "expectations": [
+        "Chose `feat`.",
+        "Used ✨ (or a feat alternate).",
+        "Included a body.",
+        "Subject imperative, no trailing period, ≤72 chars.",
+        "Committed on the non-main branch."
+      ]
+    }
+  ]
+}

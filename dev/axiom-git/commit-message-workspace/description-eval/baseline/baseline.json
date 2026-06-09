@@ -1,0 +1,186 @@
+{
+  "description": "Use ANY time the user signals they want to commit staged changes \u2014 including bare \"commit\", \"/commit\", \"commit this\", \"commit these changes\", \"let's commit\", \"make a commit\", \"git commit\", \"write a commit message\", \"make a conventional commit\", \"use conventional commits\", or any equivalent phrasing in context (e.g., right after staging files, \"ready to commit\", \"okay ship it\"). Composes a Conventional Commits message with a gitmoji prefix: reads the staged diff, decides type, scope, emoji, subject, body, and footer using the rubrics in this file, shows one assembled message in a fenced block, and commits after a single yes/no confirmation. Do NOT use for questions *about* git or *about* conventional commits, amending existing commits, rebasing, cherry-picking, reverting/undoing commits, viewing log history, writing PR or MR descriptions, or any other non-commit git operation.",
+  "per_model_accuracy": {
+    "claude-sonnet-4-6": 0.875
+  },
+  "mean_accuracy": 0.875,
+  "min_accuracy": 0.875,
+  "per_query": [
+    {
+      "query": "commit",
+      "should_trigger": true,
+      "models": {
+        "claude-sonnet-4-6": {
+          "trigger_rate": 1.0,
+          "pass": true
+        }
+      },
+      "all_pass": true
+    },
+    {
+      "query": "/commit",
+      "should_trigger": true,
+      "models": {
+        "claude-sonnet-4-6": {
+          "trigger_rate": 0.0,
+          "pass": false
+        }
+      },
+      "all_pass": false
+    },
+    {
+      "query": "commit this",
+      "should_trigger": true,
+      "models": {
+        "claude-sonnet-4-6": {
+          "trigger_rate": 1.0,
+          "pass": true
+        }
+      },
+      "all_pass": true
+    },
+    {
+      "query": "I've staged the bug fix for the OAuth timeout. Commit it with a good message.",
+      "should_trigger": true,
+      "models": {
+        "claude-sonnet-4-6": {
+          "trigger_rate": 1.0,
+          "pass": true
+        }
+      },
+      "all_pass": true
+    },
+    {
+      "query": "I just renamed a bunch of files and staged them. Make a commit.",
+      "should_trigger": true,
+      "models": {
+        "claude-sonnet-4-6": {
+          "trigger_rate": 1.0,
+          "pass": true
+        }
+      },
+      "all_pass": true
+    },
+    {
+      "query": "Make a conventional commit for my staged changes.",
+      "should_trigger": true,
+      "models": {
+        "claude-sonnet-4-6": {
+          "trigger_rate": 1.0,
+          "pass": true
+        }
+      },
+      "all_pass": true
+    },
+    {
+      "query": "Write a commit message for these changes.",
+      "should_trigger": true,
+      "models": {
+        "claude-sonnet-4-6": {
+          "trigger_rate": 1.0,
+          "pass": true
+        }
+      },
+      "all_pass": true
+    },
+    {
+      "query": "ok ready to commit, go ahead",
+      "should_trigger": true,
+      "models": {
+        "claude-sonnet-4-6": {
+          "trigger_rate": 1.0,
+          "pass": true
+        }
+      },
+      "all_pass": true
+    },
+    {
+      "query": "Can you walk me through how to amend a git commit?",
+      "should_trigger": false,
+      "models": {
+        "claude-sonnet-4-6": {
+          "trigger_rate": 0.0,
+          "pass": true
+        }
+      },
+      "all_pass": true
+    },
+    {
+      "query": "I want to rebase my feature branch onto main. What's the safest way?",
+      "should_trigger": false,
+      "models": {
+        "claude-sonnet-4-6": {
+          "trigger_rate": 0.0,
+          "pass": true
+        }
+      },
+      "all_pass": true
+    },
+    {
+      "query": "How do I cherry-pick a commit from another branch?",
+      "should_trigger": false,
+      "models": {
+        "claude-sonnet-4-6": {
+          "trigger_rate": 0.0,
+          "pass": true
+        }
+      },
+      "all_pass": true
+    },
+    {
+      "query": "Show me my last 10 commits.",
+      "should_trigger": false,
+      "models": {
+        "claude-sonnet-4-6": {
+          "trigger_rate": 0.0,
+          "pass": true
+        }
+      },
+      "all_pass": true
+    },
+    {
+      "query": "Explain what conventional commits is and why people use it.",
+      "should_trigger": false,
+      "models": {
+        "claude-sonnet-4-6": {
+          "trigger_rate": 0.0,
+          "pass": true
+        }
+      },
+      "all_pass": true
+    },
+    {
+      "query": "What does the `git commit -a` flag do?",
+      "should_trigger": false,
+      "models": {
+        "claude-sonnet-4-6": {
+          "trigger_rate": 0.0,
+          "pass": true
+        }
+      },
+      "all_pass": true
+    },
+    {
+      "query": "I want to undo my last commit but keep the changes staged.",
+      "should_trigger": false,
+      "models": {
+        "claude-sonnet-4-6": {
+          "trigger_rate": 0.0,
+          "pass": true
+        }
+      },
+      "all_pass": true
+    },
+    {
+      "query": "Help me write a PR description for these changes.",
+      "should_trigger": false,
+      "models": {
+        "claude-sonnet-4-6": {
+          "trigger_rate": 1.0,
+          "pass": false
+        }
+      },
+      "all_pass": false
+    }
+  ]
+}

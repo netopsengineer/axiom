@@ -1,0 +1,281 @@
+{
+  "description": "Use ANY time the user signals they want to commit staged changes \u2014 including bare \"commit\", \"/commit\", \"commit this\", \"commit these changes\", \"let's commit\", \"make a commit\", \"git commit\", \"write a commit message\", \"make a conventional commit\", \"use conventional commits\", or any equivalent phrasing in context (e.g., right after staging files, \"ready to commit\", \"okay ship it\"). Composes a Conventional Commits message with a gitmoji prefix: reads the staged diff, decides type, scope, emoji, subject, body, and footer using the rubrics in this file, shows one assembled message in a fenced block, and commits after a single yes/no confirmation. It writes the commit message only \u2014 NOT other prose about the staged changes: not PR/MR descriptions, not release notes, not changelogs or summaries. Also do NOT use for questions *about* git or *about* conventional commits, amending, rebasing, cherry-picking, reverting/undoing commits, or viewing log history.",
+  "per_model_accuracy": {
+    "claude-sonnet-4-6": 0.9444,
+    "claude-opus-4-8": 1.0
+  },
+  "mean_accuracy": 0.9722,
+  "min_accuracy": 0.9444,
+  "per_query": [
+    {
+      "query": "commit",
+      "should_trigger": true,
+      "models": {
+        "claude-sonnet-4-6": {
+          "trigger_rate": 1.0,
+          "pass": true
+        },
+        "claude-opus-4-8": {
+          "trigger_rate": 1.0,
+          "pass": true
+        }
+      },
+      "all_pass": true
+    },
+    {
+      "query": "ok the oauth timeout fix is staged, commit it with a good message",
+      "should_trigger": true,
+      "models": {
+        "claude-sonnet-4-6": {
+          "trigger_rate": 1.0,
+          "pass": true
+        },
+        "claude-opus-4-8": {
+          "trigger_rate": 1.0,
+          "pass": true
+        }
+      },
+      "all_pass": true
+    },
+    {
+      "query": "I just staged the rename of our db model modules, make a commit",
+      "should_trigger": true,
+      "models": {
+        "claude-sonnet-4-6": {
+          "trigger_rate": 1.0,
+          "pass": true
+        },
+        "claude-opus-4-8": {
+          "trigger_rate": 1.0,
+          "pass": true
+        }
+      },
+      "all_pass": true
+    },
+    {
+      "query": "commit these staged changes",
+      "should_trigger": true,
+      "models": {
+        "claude-sonnet-4-6": {
+          "trigger_rate": 1.0,
+          "pass": true
+        },
+        "claude-opus-4-8": {
+          "trigger_rate": 1.0,
+          "pass": true
+        }
+      },
+      "all_pass": true
+    },
+    {
+      "query": "can you write a conventional commit for what's staged in billing.py?",
+      "should_trigger": true,
+      "models": {
+        "claude-sonnet-4-6": {
+          "trigger_rate": 1.0,
+          "pass": true
+        },
+        "claude-opus-4-8": {
+          "trigger_rate": 1.0,
+          "pass": true
+        }
+      },
+      "all_pass": true
+    },
+    {
+      "query": "staged the pyproject bump to pydantic 2.9, commit that for me",
+      "should_trigger": true,
+      "models": {
+        "claude-sonnet-4-6": {
+          "trigger_rate": 1.0,
+          "pass": true
+        },
+        "claude-opus-4-8": {
+          "trigger_rate": 1.0,
+          "pass": true
+        }
+      },
+      "all_pass": true
+    },
+    {
+      "query": "alright everything's staged and ready, go ahead and commit",
+      "should_trigger": true,
+      "models": {
+        "claude-sonnet-4-6": {
+          "trigger_rate": 1.0,
+          "pass": true
+        },
+        "claude-opus-4-8": {
+          "trigger_rate": 1.0,
+          "pass": true
+        }
+      },
+      "all_pass": true
+    },
+    {
+      "query": "write me the commit message for my staged changes",
+      "should_trigger": true,
+      "models": {
+        "claude-sonnet-4-6": {
+          "trigger_rate": 1.0,
+          "pass": true
+        },
+        "claude-opus-4-8": {
+          "trigger_rate": 1.0,
+          "pass": true
+        }
+      },
+      "all_pass": true
+    },
+    {
+      "query": "just finished staging the null-pointer fix in parser.py \u2014 ship it",
+      "should_trigger": true,
+      "models": {
+        "claude-sonnet-4-6": {
+          "trigger_rate": 1.0,
+          "pass": true
+        },
+        "claude-opus-4-8": {
+          "trigger_rate": 1.0,
+          "pass": true
+        }
+      },
+      "all_pass": true
+    },
+    {
+      "query": "walk me through how to amend my last commit",
+      "should_trigger": false,
+      "models": {
+        "claude-sonnet-4-6": {
+          "trigger_rate": 0.0,
+          "pass": true
+        },
+        "claude-opus-4-8": {
+          "trigger_rate": 0.0,
+          "pass": true
+        }
+      },
+      "all_pass": true
+    },
+    {
+      "query": "what's the safest way to rebase my feature branch onto main?",
+      "should_trigger": false,
+      "models": {
+        "claude-sonnet-4-6": {
+          "trigger_rate": 0.0,
+          "pass": true
+        },
+        "claude-opus-4-8": {
+          "trigger_rate": 0.0,
+          "pass": true
+        }
+      },
+      "all_pass": true
+    },
+    {
+      "query": "how do I cherry-pick a commit from another branch?",
+      "should_trigger": false,
+      "models": {
+        "claude-sonnet-4-6": {
+          "trigger_rate": 0.0,
+          "pass": true
+        },
+        "claude-opus-4-8": {
+          "trigger_rate": 0.0,
+          "pass": true
+        }
+      },
+      "all_pass": true
+    },
+    {
+      "query": "show me my last 10 commits",
+      "should_trigger": false,
+      "models": {
+        "claude-sonnet-4-6": {
+          "trigger_rate": 0.0,
+          "pass": true
+        },
+        "claude-opus-4-8": {
+          "trigger_rate": 0.0,
+          "pass": true
+        }
+      },
+      "all_pass": true
+    },
+    {
+      "query": "explain what conventional commits is and why teams adopt it",
+      "should_trigger": false,
+      "models": {
+        "claude-sonnet-4-6": {
+          "trigger_rate": 0.0,
+          "pass": true
+        },
+        "claude-opus-4-8": {
+          "trigger_rate": 0.0,
+          "pass": true
+        }
+      },
+      "all_pass": true
+    },
+    {
+      "query": "what does the `git commit -a` flag actually do?",
+      "should_trigger": false,
+      "models": {
+        "claude-sonnet-4-6": {
+          "trigger_rate": 0.0,
+          "pass": true
+        },
+        "claude-opus-4-8": {
+          "trigger_rate": 0.0,
+          "pass": true
+        }
+      },
+      "all_pass": true
+    },
+    {
+      "query": "I want to undo my last commit but keep the changes staged",
+      "should_trigger": false,
+      "models": {
+        "claude-sonnet-4-6": {
+          "trigger_rate": 0.0,
+          "pass": true
+        },
+        "claude-opus-4-8": {
+          "trigger_rate": 0.0,
+          "pass": true
+        }
+      },
+      "all_pass": true
+    },
+    {
+      "query": "help me write a PR description for these staged changes",
+      "should_trigger": false,
+      "models": {
+        "claude-sonnet-4-6": {
+          "trigger_rate": 0.333,
+          "pass": true
+        },
+        "claude-opus-4-8": {
+          "trigger_rate": 0.0,
+          "pass": true
+        }
+      },
+      "all_pass": true
+    },
+    {
+      "query": "draft release notes for the changes I just staged",
+      "should_trigger": false,
+      "models": {
+        "claude-sonnet-4-6": {
+          "trigger_rate": 0.667,
+          "pass": false
+        },
+        "claude-opus-4-8": {
+          "trigger_rate": 0.0,
+          "pass": true
+        }
+      },
+      "all_pass": false
+    }
+  ]
+}

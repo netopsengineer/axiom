@@ -1,0 +1,39 @@
+{
+  "expectations": [
+    {
+      "text": "Chose type `fix`.",
+      "passed": true,
+      "evidence": "type=`fix` (2-line guard on existing function)."
+    },
+    {
+      "text": "Used the 🐛 emoji (acceptable alternate: 🩹).",
+      "passed": true,
+      "evidence": "Emoji 🩹 (accepted fix one-liner alternate) in subject."
+    },
+    {
+      "text": "Subject is imperative, no trailing period, and ≤50 chars.",
+      "passed": true,
+      "evidence": "Subject 'Guard divide against zero denominator' (38 chars ≤50), imperative, no period."
+    },
+    {
+      "text": "Omitted a body (single file, under ~10 lines changed).",
+      "passed": true,
+      "evidence": "Body omitted (Decisions row: <10 lines, single file)."
+    },
+    {
+      "text": "Committed the change on the non-main branch (fix/zero-division).",
+      "passed": true,
+      "evidence": "git log commit 36bfb3c on branch fix/zero-division."
+    }
+  ],
+  "summary": {
+    "passed": 5,
+    "failed": 0,
+    "total": 5,
+    "pass_rate": 1.0
+  },
+  "execution_metrics": {
+    "total_tool_calls": 13,
+    "errors_encountered": 0
+  }
+}
