@@ -112,6 +112,10 @@ When adding a shipped plugin:
 
 ## Release Inputs
 
+- PR source branch names must be `feat/<short-kebab-slug>`,
+  `fix/<short-kebab-slug>`, or `chore/<short-kebab-slug>`. Dependabot branches
+  under `dependabot/**` are allowed automation. The `Branch name` PR check
+  enforces this.
 - PR squash commit title must be a valid Conventional Commit.
 - Version impact:
     - `feat:` gives a minor release.
@@ -132,6 +136,12 @@ For generated root README blocks:
 
 ```bash
 npm run docs:readme:check
+```
+
+For branch-name convention changes or local testing of a branch name:
+
+```bash
+PR_BRANCH=chore/example-slug npm run check:branch-name
 ```
 
 For JavaScript tooling changes:

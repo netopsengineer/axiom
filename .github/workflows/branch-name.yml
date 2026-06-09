@@ -1,0 +1,23 @@
+name: Branch Name
+
+# Branch names do not drive releases; PR titles do. This check only keeps PR
+# source branches predictable for humans and autonomous agents.
+on:
+  pull_request:
+    types: [opened, reopened, synchronize]
+
+permissions:
+  contents: read
+
+jobs:
+  branch-name:
+    name: Branch name
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+        with:
+          persist-credentials: false
+      - name: Validate branch name
+        env:
+          PR_BRANCH: ${{ github.head_ref }}
+        run: node .github/scripts/check-branch-name.mjs
