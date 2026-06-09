@@ -33,14 +33,15 @@ repos:
         files: ^(plugins/|\.claude-plugin/)
         pass_filenames: false
 
-      # Keeps README plugin version badges derived from the marketplace catalog.
-      # If a plugin is added or renamed, the hook updates README.md and stops the
-      # commit so the generated block can be staged with the content change.
-      - id: readme-plugin-badges
-        name: README plugin badges
-        entry: npm run docs:badges
+      # Keeps all generated README regions derived from canonical structured
+      # sources. If a plugin is added or renamed, the hook updates README.md and
+      # stops the commit so the generated blocks can be staged with the content
+      # change.
+      - id: readme-generated-blocks
+        name: README generated blocks
+        entry: npm run docs:readme
         language: system
-        files: ^(\.claude-plugin/marketplace\.json|plugins/.*/\.claude-plugin/plugin\.json|README\.md|\.github/scripts/sync-readme-badges\.mjs)$
+        files: ^(\.claude-plugin/marketplace\.json|plugins/.*/README\.md|plugins/.*/\.claude-plugin/plugin\.json|plugins/.*/skills/.*/evals/evals\.json|README\.md|\.github/scripts/sync-readme-.*\.mjs)$
         pass_filenames: false
 
   # Mirrors the "Markdown lint" job, using the repo's .markdownlint-cli2.jsonc.

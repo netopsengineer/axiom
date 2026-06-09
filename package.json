@@ -11,6 +11,12 @@
   "scripts": {
     "docs:badges": "node .github/scripts/sync-readme-badges.mjs",
     "docs:badges:check": "node .github/scripts/sync-readme-badges.mjs --check",
+    "docs:evals": "node .github/scripts/sync-readme-evals.mjs",
+    "docs:evals:check": "node .github/scripts/sync-readme-evals.mjs --check",
+    "docs:plugins": "node .github/scripts/sync-readme-plugins.mjs",
+    "docs:plugins:check": "node .github/scripts/sync-readme-plugins.mjs --check",
+    "docs:readme": "npm run docs:badges && npm run docs:evals && npm run docs:plugins",
+    "docs:readme:check": "npm run docs:badges:check && npm run docs:evals:check && npm run docs:plugins:check",
     "lint": "biome ci",
     "lint:fix": "biome check --write"
   },
