@@ -44,6 +44,15 @@ infrastructure, and CI/CD configurations.
 /plugin install axiom-versioning@axiom
 ```
 
+### [axiom-git](plugins/axiom-git/README.md)
+
+Compose Conventional Commits messages with gitmoji from the staged diff, with
+safety gates for protected branches, staged secrets, and pre-commit hooks.
+
+```shell
+/plugin install axiom-git@axiom
+```
+
 ## Repo layout
 
 ```text

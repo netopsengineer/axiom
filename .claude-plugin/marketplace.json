@@ -12,6 +12,12 @@
       "source": "./plugins/axiom-versioning",
       "description": "Audits and updates external versioned dependencies across application, infrastructure, and CI/CD configurations.",
       "category": "dependency-management"
+    },
+    {
+      "name": "axiom-git",
+      "source": "./plugins/axiom-git",
+      "description": "Composes Conventional Commits messages with gitmoji from the staged diff, with safety gates for protected branches, staged secrets, and pre-commit hooks.",
+      "category": "version-control"
     }
   ]
 }
