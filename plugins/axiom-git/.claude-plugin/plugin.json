@@ -1,0 +1,27 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
+  "name": "axiom-git",
+  "displayName": "Axiom Git",
+  "description": "Composes Conventional Commits messages with gitmoji from the staged diff, deciding type, scope, emoji, subject, and body, and gating on protected branches, staged secrets, and pre-commit hooks.",
+  "version": "0.0.0",
+  "author": {
+    "name": "axiom-plugins",
+    "email": "enterprise.code.developer@gmail.com"
+  },
+  "license": "MIT",
+  "repository": "https://github.com/netopsengineer/axiom",
+  "keywords": [
+    "git",
+    "commit",
+    "commit-message",
+    "conventional-commits",
+    "gitmoji",
+    "semantic-commits",
+    "git-workflow",
+    "staged-diff",
+    "pre-commit-hooks",
+    "gitleaks",
+    "branch-safety",
+    "version-control"
+  ]
+}
