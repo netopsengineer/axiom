@@ -17,16 +17,26 @@
     "docs:plugins:check": "node .github/scripts/sync-readme-plugins.mjs --check",
     "docs:readme": "npm run docs:badges && npm run docs:evals && npm run docs:plugins",
     "docs:readme:check": "npm run docs:badges:check && npm run docs:evals:check && npm run docs:plugins:check",
+    "check:plugins:local": "node .github/scripts/validate-local-plugins.mjs",
+    "check:repo": "node .github/scripts/check-repo-invariants.mjs",
+    "check:precommit:security": "prek run actionlint --all-files && prek run shellcheck --all-files && prek run zizmor --all-files",
+    "lint:links": "node .github/scripts/check-markdown-links.mjs",
+    "lint:spelling": "cspell --no-progress --show-suggestions --gitignore",
+    "lint:yaml": "node .github/scripts/check-yaml.mjs",
     "lint": "biome ci",
     "lint:fix": "biome check --write"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.4.16",
+    "@j178/prek": "^0.4.4",
     "@semantic-release/changelog": "^6.0.3",
     "@semantic-release/exec": "^7.1.0",
     "@semantic-release/git": "^10.0.1",
     "conventional-changelog-conventionalcommits": "^9.3.1",
+    "cspell": "^10.0.1",
+    "markdown-link-check": "^3.14.2",
     "semantic-release": "^25.0.3",
-    "semantic-release-monorepo": "8.0.2"
+    "semantic-release-monorepo": "8.0.2",
+    "yaml": "^2.9.0"
   }
 }

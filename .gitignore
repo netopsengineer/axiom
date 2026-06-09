@@ -9,3 +9,5 @@ DEMO-file-example-spec.md
 DEMO-skill-creator-evals.md
 skill-evals-showcase.html
 what-is-a-skill.png
+gitleaks-report.*
+*.sarif

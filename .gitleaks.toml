@@ -1,0 +1,4 @@
+title = "Axiom Gitleaks configuration"
+
+[extend]
+useDefault = true

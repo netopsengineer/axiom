@@ -144,10 +144,49 @@ npm run lint
 npm run lint:fix
 ```
 
-For plugin manifest or shipped plugin structure changes:
+For marketplace entries, shipped plugin layout, skill directories, or shipped
+eval manifests:
+
+```bash
+npm run check:repo
+```
+
+For plugin manifest or shipped plugin structure changes, validate the specific
+plugin. If multiple shipped plugins changed, run `npm run check:plugins:local`
+instead.
 
 ```bash
 claude plugin validate ./plugins/<plugin>
+```
+
+For workflow, Dependabot, pre-commit, or repository YAML changes:
+
+```bash
+npm run lint:yaml
+```
+
+For GitHub Actions or pre-commit security hook changes:
+
+```bash
+npm run check:precommit:security
+```
+
+For spelling-sensitive docs/config changes:
+
+```bash
+npm run lint:spelling
+```
+
+For Markdown edits that add or change links:
+
+```bash
+npm run lint:links
+```
+
+For broad pre-commit parity before handing off a cross-cutting change:
+
+```bash
+npx prek run --all-files
 ```
 
 For Markdown edits, run the targeted Markdown quality pass in

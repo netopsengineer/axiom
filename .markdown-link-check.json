@@ -1,0 +1,21 @@
+{
+  "aliveStatusCodes": [
+    200,
+    206,
+    301,
+    302,
+    303,
+    307,
+    308,
+    403,
+    429
+  ],
+  "ignorePatterns": [
+    {
+      "pattern": "^mailto:"
+    }
+  ],
+  "retryCount": 2,
+  "retryOn429": true,
+  "timeout": "15s"
+}

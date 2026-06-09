@@ -7,6 +7,11 @@ updates:
     directory: "/"
     schedule:
       interval: "daily"
+    cooldown:
+      default-days: 7
+      semver-major-days: 30
+      semver-minor-days: 7
+      semver-patch-days: 3
     groups:
       github-actions:
         patterns: ["*"]
@@ -25,6 +30,11 @@ updates:
     directory: "/"
     schedule:
       interval: "daily"
+    cooldown:
+      default-days: 7
+      semver-major-days: 30
+      semver-minor-days: 7
+      semver-patch-days: 3
     versioning-strategy: "increase"
     groups:
       release-tooling:
@@ -32,3 +42,20 @@ updates:
     commit-message:
       prefix: "chore"
     labels: ["dependencies", "npm"]
+
+  # Third-party pre-commit hooks in .pre-commit-config.yaml.
+  - package-ecosystem: "pre-commit"
+    directory: "/"
+    schedule:
+      interval: "daily"
+    cooldown:
+      default-days: 7
+      semver-major-days: 30
+      semver-minor-days: 7
+      semver-patch-days: 3
+    groups:
+      pre-commit:
+        patterns: ["*"]
+    commit-message:
+      prefix: "chore"
+    labels: ["dependencies", "pre-commit"]
