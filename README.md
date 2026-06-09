@@ -23,9 +23,22 @@ install is backed by empirical data, not good intentions. No toys, no vibe-coded
 filler, no tokens burned on output that doesn't move the needle. If it can't be
 measured, it doesn't ship.
 
-Want receipts? [axiom-versioning's eval results](plugins/axiom-versioning/README.md#eval-history)
-show a **47% no-skill baseline lifted to 100% task accuracy across three measured
-iterations**.
+Want receipts? Each plugin keeps a scored eval history in its own README, and
+the index below is generated so new plugin evals surface here automatically.
+
+<!-- eval-index:start -->
+The eval index is generated from `.claude-plugin/marketplace.json` and each
+shipped skill's `evals/evals.json` manifest. Plugin READMEs are the canonical
+scored histories.
+
+| Plugin                                                 | Evaluated skill manifests                                                                   | Scenarios | Manifest expectations | Scored history                                                  |
+|--------------------------------------------------------|---------------------------------------------------------------------------------------------|----------:|----------------------:|-----------------------------------------------------------------|
+| [axiom-versioning](plugins/axiom-versioning/README.md) | [dependency-versions](plugins/axiom-versioning/skills/dependency-versions/evals/evals.json) |         5 |                    25 | [Eval history](plugins/axiom-versioning/README.md#eval-history) |
+| [axiom-git](plugins/axiom-git/README.md)               | [commit-message](plugins/axiom-git/skills/commit-message/evals/evals.json)                  |         6 |                    24 | [Eval history](plugins/axiom-git/README.md#eval-history)        |
+
+Current coverage: **2 plugins**, **2 evaluated skills**,
+**11 scenarios**, **49 manifest expectations**.
+<!-- eval-index:end -->
 
 ## Add the marketplace
 
@@ -39,10 +52,13 @@ from a direct URL to `marketplace.json`.
 
 ## Plugins
 
+<!-- plugin-list:start -->
 ### [axiom-versioning](plugins/axiom-versioning/README.md)
 
-Audit and update external versioned dependencies across application,
-infrastructure, and CI/CD configurations.
+Audits and updates external versioned dependencies across application, infrastructure,
+and CI/CD configurations.
+
+Category: `dependency-management`
 
 ```shell
 /plugin install axiom-versioning@axiom
@@ -50,12 +66,15 @@ infrastructure, and CI/CD configurations.
 
 ### [axiom-git](plugins/axiom-git/README.md)
 
-Compose Conventional Commits messages with gitmoji from the staged diff, with
-safety gates for protected branches, staged secrets, and pre-commit hooks.
+Composes Conventional Commits messages with gitmoji from the staged diff, with safety
+gates for protected branches, staged secrets, and pre-commit hooks.
+
+Category: `version-control`
 
 ```shell
 /plugin install axiom-git@axiom
 ```
+<!-- plugin-list:end -->
 
 ## Repo layout
 
