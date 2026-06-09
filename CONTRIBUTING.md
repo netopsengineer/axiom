@@ -3,7 +3,7 @@
 Thanks for improving the **axiom** marketplace. This guide is how to make a
 change, verify it locally, and get it merged. Day to day the automation does the
 heavy lifting - open a Conventional-Commit PR and CI handles versioning,
-changelogs, releases, and dependency bumps.
+changelogs, releases, and dependency bumps per plugin.
 
 ## Local setup
 
@@ -44,22 +44,24 @@ stops so you can `git add` the result and commit again. Other useful commands:
 
 ```bash
 npm run lint           # Biome, read-only — exactly what CI runs
-npm run release:dry    # preview the next release; changes and publishes nothing
+BR="$(git rev-parse --abbrev-ref HEAD)"
+cd plugins/<plugin>
+npx --no-install semantic-release --dry-run --no-ci --branches "$BR"
 ```
 
 ## Commit & PR conventions
 
-[Conventional Commits](https://www.conventionalcommits.org), optionally prefixed
-with a [gitmoji](https://gitmoji.dev). A conventional `type:` is **required** - a
-bare emoji on its own does not trigger a release.
+[Conventional Commits](https://www.conventionalcommits.org) are required. The
+type must be the first text in the title. A [gitmoji](https://gitmoji.dev) can
+go after the colon as subject text; a bare emoji or an emoji before the type does
+not trigger a release and fails the PR title check.
 
 All of these header shapes parse correctly:
 
 ```text
-✨ feat: add live version verification
-🐛 fix(api): correct tag resolution
-feat: ✨ emoji after the type also works
-:sparkles: feat(scope): shortcode form works too
+feat: ✨ add live version verification
+fix(api): 🐛 correct tag resolution
+feat(scope): :sparkles: shortcode form works too
 feat!: drop the legacy format          # "!" marks a breaking change
 ```
 
@@ -75,16 +77,26 @@ The type decides the version bump:
 Never hand-edit the plugin `version` or `CHANGELOG.md` - semantic-release owns
 both.
 
+A release happens per plugin when both are true:
+
+1. The squash commit changes at least one file under `plugins/<plugin>/**`.
+2. The PR title has a releasable Conventional Commit type.
+
+Files outside plugin paths, such as `.github/**`, `AGENTS.md`,
+`CONTRIBUTING.md`, root `package.json`, and top-level `README.md`, do not release
+anything by themselves. A single releasable PR that touches multiple plugin paths
+can release multiple plugins.
+
 ## How releases & CI work
 
 All workflows live in `.github/`; every third-party action is SHA-pinned.
 
-| Workflow                                       | Trigger             | What it does                                                                          |
-|------------------------------------------------|---------------------|---------------------------------------------------------------------------------------|
-| `validate.yml`                                 | PR + push to `main` | `claude plugin validate` + markdownlint + Biome - the three required checks           |
-| `release.yml`                                  | push to `main`      | semantic-release: bump the manifest, update `CHANGELOG.md`, tag, cut a GitHub Release |
-| `bump-validate-action.yml`                     | daily + manual      | re-pins the tagless validate action to the latest upstream SHA via an auto-merged PR  |
-| `dependabot.yml` + `dependabot-auto-merge.yml` | daily               | bump GitHub Actions + npm tooling, auto-merged once CI is green                       |
+| Workflow                                       | Trigger             | What it does                                                                                                                                              |
+|------------------------------------------------|---------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `validate.yml`                                 | PR + push to `main` | `claude plugin validate` + markdownlint + Biome - the three required checks                                                                               |
+| `release.yml`                                  | push to `main`      | run semantic-release for each plugin; changed plugin paths with releasable titles bump the manifest, update `CHANGELOG.md`, tag, and cut a GitHub Release |
+| `bump-validate-action.yml`                     | daily + manual      | re-pins the tagless validate action to the latest upstream SHA via an auto-merged PR                                                                      |
+| `dependabot.yml` + `dependabot-auto-merge.yml` | daily               | bump GitHub Actions + npm tooling, auto-merged once CI is green                                                                                           |
 
 No Anthropic credentials are needed anywhere, and `claude plugin validate` runs
 offline. Releases run under a short-lived **GitHub App token** - the
@@ -98,10 +110,10 @@ this is not an npm project, and the shipped plugin carries no npm dependencies.
 
 See `CLAUDE.md` -> "Adding a plugin": create
 `plugins/<name>/.claude-plugin/plugin.json` (plus `README.md` and `CHANGELOG.md`)
-and register it in `.claude-plugin/marketplace.json` with a relative
-`source: "./plugins/<name>"`. This config versions the marketplace as a **single
-unit**; for independent per-plugin versions later, split `release.config.js` (see
-its header comment).
+and register it in `.claude-plugin/marketplace.json` with
+`source: "./plugins/<name>"`. Add the plugin release stub at
+`plugins/<name>/package.json` and the per-plugin release config at
+`plugins/<name>/release.config.js`.
 
 ### The eval gate
 
@@ -126,11 +138,12 @@ the evals exist and clear the bar before approving.
 
 ## Troubleshooting
 
-- **Merged to `main` but no release.** The PR title wasn't a releasing type -
-  only `feat`, `fix`, `perf`, and breaking changes release; `chore:` / `docs:` /
-  `ci:` / etc. are intentionally silent. Check the `Release` workflow run.
+- **Merged to `main` but no release.** The PR title was not a releasing type, or
+  the commit did not touch a plugin path. Only `feat`, `fix`, `perf`, and
+  breaking changes release; `chore:` / `docs:` / `ci:` / etc. are intentionally
+  silent. Check the `Release` workflow run.
 - **A gitmoji commit didn't release.** It needs a conventional `type:` after the
-  emoji (`✨ feat: ...`, not just `✨ ...`).
+  emoji (`feat: ✨ ...`, not just `✨ ...`).
 - **The commit was rejected by the hook.** A formatter rewrote a file - re-stage
   with `git add` and commit again. Run `prek run --all-files` to see what fired.
 - **`bump-validate-action` PR is stuck with no checks.** A `GITHUB_TOKEN`-created

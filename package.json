@@ -9,8 +9,6 @@
     "node": "^22.14.0 || >=24.10.0"
   },
   "scripts": {
-    "release": "semantic-release",
-    "release:dry": "semantic-release --dry-run --no-ci",
     "lint": "biome ci",
     "lint:fix": "biome check --write"
   },
@@ -20,6 +18,7 @@
     "@semantic-release/exec": "^7.1.0",
     "@semantic-release/git": "^10.0.1",
     "conventional-changelog-conventionalcommits": "^9.3.1",
-    "semantic-release": "^25.0.3"
+    "semantic-release": "^25.0.3",
+    "semantic-release-monorepo": "8.0.2"
   }
 }

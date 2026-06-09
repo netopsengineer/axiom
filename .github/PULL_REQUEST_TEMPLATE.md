@@ -6,11 +6,16 @@
 ## Release impact
 
 This repo squash-merges, and **the PR title becomes the release commit**.
-semantic-release derives the version bump from it (see `release.config.js`):
+semantic-release derives the version bump from it (see the per-plugin
+`plugins/<plugin>/release.config.js` files):
 
 - `feat:` → minor &middot; `fix:` / `perf:` → patch
 - `feat!:` or a `BREAKING CHANGE:` footer → major
 - `chore:` / `ci:` / `docs:` / `refactor:` / `test:` / `style:` / `build:` → no release
+
+A releasable PR title releases each plugin path touched under
+`plugins/<plugin>/**`. Files outside plugin paths do not release anything by
+themselves.
 
 The type must come first (Conventional Commits). A gitmoji, if used, goes after
 the colon (e.g. `feat: ✨ ...`), never before the type. The **PR Title** check
