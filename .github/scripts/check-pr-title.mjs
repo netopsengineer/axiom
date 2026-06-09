@@ -1,22 +1,17 @@
 #!/usr/bin/env node
 // Validates that a PR title is a valid Conventional Commit. This repo
 // squash-merges, so the PR title becomes the commit subject, and
-// semantic-release derives the version bump from it (see release.config.js).
+// semantic-release derives the version bump from it (release.config.js).
 //
-// The accepted header pattern mirrors release.config.js exactly: an OPTIONAL
-// leading gitmoji (a unicode glyph or a :shortcode:) before a REQUIRED
-// conventional type. Keeping the two in sync means a title that passes this
-// gate is parsed identically at release time. The one intentional difference:
-// here the type must be a KNOWN conventional type, so typos like "faet:" are
-// caught at PR time rather than silently producing no release.
+// Per the Conventional Commits spec the type is the PREFIX of the header —
+// nothing may precede it — and the description follows the colon and space. So
+// a gitmoji, if used at all, belongs AFTER the colon as the start of the
+// subject (`feat(scope): ✨ subject`), never before the type (`✨ feat: ...`).
+// This gate enforces type-first; release.config.js's default parser agrees.
 //
 //   PR_TITLE="feat: add thing" node .github/scripts/check-pr-title.mjs
 const title = process.env.PR_TITLE ?? "";
 
-// Optional leading gitmoji — unicode emoji (incl. ZWJ / variation-selector
-// sequences) or a :shortcode: — same as release.config.js GITMOJI.
-const GITMOJI =
-  "(?:(?::\\w+:|[\\p{Extended_Pictographic}\\u200d\\uFE0F]+)\\s*)?";
 const TYPES = [
   "feat",
   "fix",
@@ -30,21 +25,35 @@ const TYPES = [
   "chore",
   "revert",
 ];
-const header = new RegExp(
-  `^${GITMOJI}(?:${TYPES.join("|")})(?:\\([^)]+\\))?!?: .+`,
+const TYPE = `(?:${TYPES.join("|")})`;
+
+// Canonical header: type is the prefix, optional (scope), optional !, ": ".
+const header = new RegExp(`^${TYPE}(?:\\([^)]+\\))?!?: .+`, "u");
+// The specific mistake we reject with a tailored hint: a gitmoji (unicode glyph
+// or :shortcode:) placed BEFORE the type instead of after the colon.
+const leadingGitmoji = new RegExp(
+  `^(?::\\w+:|[\\p{Extended_Pictographic}\\u200d\\uFE0F]+)\\s*${TYPE}(?:\\([^)]+\\))?!?: .+`,
   "u",
 );
 
-if (!header.test(title)) {
-  const message = [
-    "PR title is not a valid Conventional Commit.",
-    `  title:    ${title || "(empty)"}`,
-    "  expected: <type>(optional-scope)!: <subject>  (an optional leading gitmoji is allowed)",
-    `  types:    ${TYPES.join(", ")}`,
-    "  why:      this title becomes the squash-merge commit that drives semantic-release.",
-  ].join("\n");
-  console.error(`::error::${message}`);
-  process.exit(1);
+if (header.test(title)) {
+  console.log(`PR title OK: ${title}`);
+  process.exit(0);
 }
 
-console.log(`PR title OK: ${title}`);
+const lines = leadingGitmoji.test(title)
+  ? [
+      "PR title puts a gitmoji before the type.",
+      `  title:    ${title}`,
+      "  fix:      move the emoji after the colon — `feat: ✨ subject`, not `✨ feat: subject`.",
+      "  why:      Conventional Commits requires the type to be the header prefix (nothing before it).",
+    ]
+  : [
+      "PR title is not a valid Conventional Commit.",
+      `  title:    ${title || "(empty)"}`,
+      "  expected: <type>(optional-scope)!: <subject>  (a gitmoji, if any, goes after the colon)",
+      `  types:    ${TYPES.join(", ")}`,
+      "  why:      this title becomes the squash-merge commit that drives semantic-release.",
+    ];
+console.error(`::error::${lines.join("\n")}`);
+process.exit(1);

@@ -12,8 +12,9 @@ semantic-release derives the version bump from it (see `release.config.js`):
 - `feat!:` or a `BREAKING CHANGE:` footer → major
 - `chore:` / `ci:` / `docs:` / `refactor:` / `test:` / `style:` / `build:` → no release
 
-A leading gitmoji is allowed only before a conventional type (e.g. `✨ feat: ...`).
-The **PR Title** check enforces this.
+The type must come first (Conventional Commits). A gitmoji, if used, goes after
+the colon (e.g. `feat: ✨ ...`), never before the type. The **PR Title** check
+enforces this.
 
 ## Checklist
 

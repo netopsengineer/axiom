@@ -11,6 +11,12 @@
  * Commit types: feat -> minor, fix/perf -> patch,
  * `feat!:` or a `BREAKING CHANGE:` footer -> major. chore/ci/docs/etc. -> none.
  *
+ * Commit convention: stock Conventional Commits, so the type is the header
+ * prefix — nothing precedes it. A gitmoji, if used, goes AFTER the colon as the
+ * start of the subject (`feat: ✨ ...`), where the default parser treats it as
+ * plain subject text. The `Conventional Commit title` PR check enforces this,
+ * so no custom parserOpts are needed here.
+ *
  * Multi-plugin note: this single-package config versions the whole marketplace
  * as one unit. If you later want independent per-plugin versions, split into
  * per-plugin configs (e.g. semantic-release-monorepo).
@@ -19,33 +25,13 @@ const PLUGIN_DIR = "plugins/axiom-versioning";
 const MANIFEST = `${PLUGIN_DIR}/.claude-plugin/plugin.json`;
 const CHANGELOG = `${PLUGIN_DIR}/CHANGELOG.md`;
 
-// Conventional Commits + gitmoji. The stock grammar requires the type at the
-// very start, so a commit like "✨ feat: …" would be ignored and trigger NO
-// release. These patterns allow an OPTIONAL leading gitmoji — a unicode emoji
-// (incl. ZWJ / variation-selector sequences) or a :shortcode: — before the
-// conventional header. The emoji is non-capturing, so the type/scope/subject
-// groups and the rest of the preset's parserOpts are unchanged. A conventional
-// `type:` is still required: a bare emoji with no type does not release.
-const GITMOJI =
-  "(?:(?::\\w+:|[\\p{Extended_Pictographic}\\u200d\\uFE0F]+)\\s*)?";
-const parserOpts = {
-  headerPattern: new RegExp(`^${GITMOJI}(\\w*)(?:\\((.*)\\))?!?: (.*)$`, "u"),
-  breakingHeaderPattern: new RegExp(
-    `^${GITMOJI}(\\w*)(?:\\((.*)\\))?!: (.*)$`,
-    "u",
-  ),
-};
-
 export default {
   branches: ["main"],
   plugins: [
-    [
-      "@semantic-release/commit-analyzer",
-      { preset: "conventionalcommits", parserOpts },
-    ],
+    ["@semantic-release/commit-analyzer", { preset: "conventionalcommits" }],
     [
       "@semantic-release/release-notes-generator",
-      { preset: "conventionalcommits", parserOpts },
+      { preset: "conventionalcommits" },
     ],
     [
       "@semantic-release/changelog",
