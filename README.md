@@ -1,10 +1,14 @@
 # Axiom
 
 [![Built for Claude Code](https://img.shields.io/badge/Built_for-Claude_Code-D97757?style=for-the-badge&logo=claude&logoColor=white&labelColor=1a1a1a)](https://docs.claude.com/en/docs/claude-code)
-[![semantic-release](https://img.shields.io/badge/release-semantic-e10079?style=for-the-badge&logo=semanticrelease&logoColor=white&labelColor=1a1a1a)](https://github.com/semantic-release/semantic-release)
-[![Latest release](https://img.shields.io/github/v/release/netopsengineer/axiom?style=for-the-badge&logo=github&logoColor=white&label=Release&color=8957e5&labelColor=1a1a1a)](https://github.com/netopsengineer/axiom/releases)
-[![Validate](https://img.shields.io/github/actions/workflow/status/netopsengineer/axiom/validate.yml?branch=main&style=for-the-badge&logo=githubactions&logoColor=white&label=CI&labelColor=1a1a1a)](https://github.com/netopsengineer/axiom/actions/workflows/validate.yml)
+[![Marketplace](https://img.shields.io/github/actions/workflow/status/netopsengineer/axiom/validate.yml?branch=main&style=for-the-badge&logo=anthropic&logoColor=white&label=Marketplace&labelColor=1a1a1a)](https://github.com/netopsengineer/axiom/actions/workflows/validate.yml)
+[![Release](https://img.shields.io/github/actions/workflow/status/netopsengineer/axiom/release.yml?branch=main&style=for-the-badge&logo=semanticrelease&logoColor=white&label=Release&labelColor=1a1a1a)](https://github.com/netopsengineer/axiom/actions/workflows/release.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-3fb950?style=for-the-badge&labelColor=1a1a1a)](https://opensource.org/licenses/MIT)
+
+<!-- plugin-badges:start -->
+[![axiom-versioning](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fraw.githubusercontent.com%2Fnetopsengineer%2Faxiom%2Fmain%2Fplugins%2Faxiom-versioning%2F.claude-plugin%2Fplugin.json&query=%24.version&prefix=v&label=axiom-versioning&style=for-the-badge&logo=claude&logoColor=white&color=8957e5&labelColor=1a1a1a)](plugins/axiom-versioning/CHANGELOG.md)
+[![axiom-git](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fraw.githubusercontent.com%2Fnetopsengineer%2Faxiom%2Fmain%2Fplugins%2Faxiom-git%2F.claude-plugin%2Fplugin.json&query=%24.version&prefix=v&label=axiom-git&style=for-the-badge&logo=claude&logoColor=white&color=8957e5&labelColor=1a1a1a)](plugins/axiom-git/CHANGELOG.md)
+<!-- plugin-badges:end -->
 
 > **Claude Code plugins, built from first principles.**
 

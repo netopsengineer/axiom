@@ -1,0 +1,12 @@
+{
+  "eval_id": 6,
+  "eval_name": "multifile-feat-with-body",
+  "prompt": "I've staged a new in-memory cache layer across a few files. Make a commit.",
+  "assertions": [
+    "Chose type `feat`.",
+    "Used the ✨ emoji (acceptable: a feat alternate such as 🏗️).",
+    "Included a body (multi-file change over ~10 lines) explaining the why, separated from the subject by a blank line.",
+    "Subject is imperative, no trailing period, ≤72 chars.",
+    "Committed the change on the non-main branch (feat/cache-layer)."
+  ]
+}

@@ -1,0 +1,34 @@
+{
+  "expectations": [
+    {
+      "text": "Chose type `feat` (acceptable: `chore`), and explicitly NOT `docs`.",
+      "passed": true,
+      "evidence": "type=`feat` (new skill definition), explicitly not docs."
+    },
+    {
+      "text": "Used a feature/operational emoji such as ✨ or 🧑‍💻, not the docs 📝.",
+      "passed": true,
+      "evidence": "Emoji 🧑‍💻 (feat .claude/ DX alternate), not 📝."
+    },
+    {
+      "text": "Subject is imperative, capitalized, no trailing period, ≤72 chars.",
+      "passed": true,
+      "evidence": "Subject 'Add deploy-helper skill definition' (30 chars), imperative, no period."
+    },
+    {
+      "text": "Committed the change on the non-main branch (feat/deploy-skill).",
+      "passed": true,
+      "evidence": "git log commit 3597c8e on branch feat/deploy-skill."
+    }
+  ],
+  "summary": {
+    "passed": 4,
+    "failed": 0,
+    "total": 4,
+    "pass_rate": 1.0
+  },
+  "execution_metrics": {
+    "total_tool_calls": 13,
+    "errors_encountered": 0
+  }
+}

@@ -1,0 +1,29 @@
+{
+  "expectations": [
+    {
+      "text": "Detected the repo is on `main` and refused to commit directly to it.",
+      "passed": false,
+      "evidence": "Did not detect/raise the main-branch condition."
+    },
+    {
+      "text": "Offered to create a new branch and move the staged change there.",
+      "passed": false,
+      "evidence": "No branch creation offered."
+    },
+    {
+      "text": "Did NOT create a commit on main — no new commit describing feature.py exists; HEAD is unchanged from the seeded history.",
+      "passed": false,
+      "evidence": "COMMITTED directly to main: commit cb86836 on branch main."
+    }
+  ],
+  "summary": {
+    "passed": 0,
+    "failed": 3,
+    "total": 3,
+    "pass_rate": 0.0
+  },
+  "execution_metrics": {
+    "total_tool_calls": 7,
+    "errors_encountered": 0
+  }
+}

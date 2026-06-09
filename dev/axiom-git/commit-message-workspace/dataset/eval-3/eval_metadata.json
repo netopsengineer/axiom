@@ -1,0 +1,12 @@
+{
+  "eval_id": 3,
+  "eval_name": "small-bugfix-no-body",
+  "prompt": "I fixed the divide-by-zero bug, it's staged. commit",
+  "assertions": [
+    "Chose type `fix`.",
+    "Used the 🐛 emoji (acceptable alternate: 🩹).",
+    "Subject is imperative, no trailing period, and ≤50 chars.",
+    "Omitted a body (single file, under ~10 lines changed).",
+    "Committed the change on the non-main branch (fix/zero-division)."
+  ]
+}

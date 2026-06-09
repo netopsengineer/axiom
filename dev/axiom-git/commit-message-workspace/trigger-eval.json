@@ -1,0 +1,92 @@
+[
+  {
+    "query": "commit",
+    "should_trigger": true,
+    "notes": "Canonical bare trigger — the description leads with it. Keep exactly one bare form; dropped '/commit' and 'commit this' as redundant/proxy-unfriendly."
+  },
+  {
+    "query": "ok the oauth timeout fix is staged, commit it with a good message",
+    "should_trigger": true,
+    "notes": "Realistic + casual; explicit staged + commit intent."
+  },
+  {
+    "query": "I just staged the rename of our db model modules, make a commit",
+    "should_trigger": true,
+    "notes": "Rename context; substantive."
+  },
+  {
+    "query": "commit these staged changes",
+    "should_trigger": true,
+    "notes": "Plain, substantive imperative."
+  },
+  {
+    "query": "can you write a conventional commit for what's staged in billing.py?",
+    "should_trigger": true,
+    "notes": "Explicit conventional-commit ask with a file path."
+  },
+  {
+    "query": "staged the pyproject bump to pydantic 2.9, commit that for me",
+    "should_trigger": true,
+    "notes": "Dependency/build change; detail and casual phrasing."
+  },
+  {
+    "query": "alright everything's staged and ready, go ahead and commit",
+    "should_trigger": true,
+    "notes": "Casual contextual signal, no formal 'commit message' wording."
+  },
+  {
+    "query": "write me the commit message for my staged changes",
+    "should_trigger": true,
+    "notes": "Asks for the message specifically — skill owns this."
+  },
+  {
+    "query": "just finished staging the null-pointer fix in parser.py — ship it",
+    "should_trigger": true,
+    "notes": "Tests the description's 'ship it' claim; 'staged' disambiguates from deploy."
+  },
+  {
+    "query": "walk me through how to amend my last commit",
+    "should_trigger": false,
+    "notes": "Amend is explicitly out of scope."
+  },
+  {
+    "query": "what's the safest way to rebase my feature branch onto main?",
+    "should_trigger": false,
+    "notes": "Rebase is out of scope."
+  },
+  {
+    "query": "how do I cherry-pick a commit from another branch?",
+    "should_trigger": false,
+    "notes": "Cherry-pick is out of scope."
+  },
+  {
+    "query": "show me my last 10 commits",
+    "should_trigger": false,
+    "notes": "Read-only log query; no new commit."
+  },
+  {
+    "query": "explain what conventional commits is and why teams adopt it",
+    "should_trigger": false,
+    "notes": "Informational — 'conventional commits' keyword must not pull the trigger."
+  },
+  {
+    "query": "what does the `git commit -a` flag actually do?",
+    "should_trigger": false,
+    "notes": "General git question; 'git commit' phrase appears."
+  },
+  {
+    "query": "I want to undo my last commit but keep the changes staged",
+    "should_trigger": false,
+    "notes": "Reset/undo, not a new commit."
+  },
+  {
+    "query": "help me write a PR description for these staged changes",
+    "should_trigger": false,
+    "notes": "Key near-miss — the false positive surfaced in the sonnet baseline. Shares 'staged changes' + 'write … description'."
+  },
+  {
+    "query": "draft release notes for the changes I just staged",
+    "should_trigger": false,
+    "notes": "Tough near-miss: commit-adjacent ('staged', summarizing changes) but a release-notes task, not a commit."
+  }
+]

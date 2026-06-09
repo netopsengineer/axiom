@@ -1,0 +1,39 @@
+{
+  "expectations": [
+    {
+      "text": "Chose type `fix`.",
+      "passed": true,
+      "evidence": "type=fix for the divide-by-zero guard."
+    },
+    {
+      "text": "Used the 🐛 emoji (acceptable alternate: 🩹).",
+      "passed": false,
+      "evidence": "No emoji; agent explicitly noted it did not mirror the repo's gitmoji."
+    },
+    {
+      "text": "Subject is imperative, no trailing period, and ≤50 chars.",
+      "passed": true,
+      "evidence": "Subject 'guard divide() against zero divisor' (35 chars ≤50), imperative, no trailing period."
+    },
+    {
+      "text": "Omitted a body (single file, under ~10 lines changed).",
+      "passed": false,
+      "evidence": "INCLUDED a body ('Return 0 when b is 0...'); the skill omits a body for a 2-line single-file fix."
+    },
+    {
+      "text": "Committed the change on the non-main branch (fix/zero-division).",
+      "passed": true,
+      "evidence": "Commit 360507a on branch fix/zero-division."
+    }
+  ],
+  "summary": {
+    "passed": 3,
+    "failed": 2,
+    "total": 5,
+    "pass_rate": 0.6
+  },
+  "execution_metrics": {
+    "total_tool_calls": 7,
+    "errors_encountered": 0
+  }
+}

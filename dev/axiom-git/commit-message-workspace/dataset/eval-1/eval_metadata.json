@@ -1,0 +1,12 @@
+{
+  "eval_id": 1,
+  "eval_name": "rename-heavy-refactor",
+  "prompt": "I just renamed a bunch of modules and staged them. Make a commit.",
+  "assertions": [
+    "Chose commit type `refactor`.",
+    "Used the 🚚 emoji (the renames/moves alternate called out in the signal table), not the default ♻️.",
+    "Subject is imperative mood, capitalized, with no trailing period, and ≤72 chars.",
+    "Did not repeat the type word at the start of the subject (subject does not begin with 'refactor').",
+    "Committed the change on the non-main branch (chore/rename-modules); git log shows the new commit."
+  ]
+}
