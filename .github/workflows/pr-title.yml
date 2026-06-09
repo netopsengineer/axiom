@@ -1,0 +1,27 @@
+name: PR Title
+
+# The repo squash-merges, so the PR title becomes the release commit subject and
+# semantic-release derives the version bump from it (release.config.js). Nothing
+# else checks that title until the analyzer runs on main — by which point a bad
+# title silently yields no release or the wrong bump. This gate enforces it at PR
+# time, using the same header pattern as release.config.js so the two agree.
+on:
+  pull_request:
+    types: [opened, edited, reopened, synchronize]
+
+permissions:
+  contents: read
+
+jobs:
+  conventional-title:
+    name: Conventional Commit title
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+      # The title is passed via env (never interpolated into the command) so an
+      # attacker-controlled PR title cannot inject shell. Node is preinstalled on
+      # the runner; the validator lives beside the other release scripts.
+      - name: Validate PR title
+        env:
+          PR_TITLE: ${{ github.event.pull_request.title }}
+        run: node .github/scripts/check-pr-title.mjs

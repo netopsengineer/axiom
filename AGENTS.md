@@ -56,7 +56,10 @@ release.config.js
     - `feat!:` or a `BREAKING CHANGE:` footer gives a major release.
     - `chore:`, `ci:`, `docs:`, `refactor:`, `test:`, `style:`, and `build:` do
     not release.
-- Gitmoji prefixes are allowed only when followed by a conventional type.
+- The type is the header prefix (stock Conventional Commits) — nothing precedes
+  it. A gitmoji, if used, goes immediately after the colon as the start of the
+  subject (`feat(scope): ✨ subject`), never before the type (`✨ feat:`). The
+  `Conventional Commit title` PR check enforces this.
 
 ## Validation
 

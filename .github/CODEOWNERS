@@ -1,0 +1,12 @@
+# Code ownership for review routing. The matching owner is auto-requested on
+# PRs that touch these paths. See:
+# https://docs.github.com/articles/about-code-owners
+
+# Default owner for everything in the repo.
+*                       @netopsengineer
+
+# Release, CI, and catalog wiring — a mistake here can break releases for every
+# plugin, so it always routes to the maintainer.
+/.github/               @netopsengineer
+/release.config.js      @netopsengineer
+/.claude-plugin/        @netopsengineer
