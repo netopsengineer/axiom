@@ -3,8 +3,8 @@ name: Bump validate-plugins action
 # The official validate-plugins action (anthropics/claude-plugins-community)
 # publishes no release tags, so Dependabot can't track it. This is our
 # stand-in: daily, it re-pins the SHA in the local validate-plugins wrapper to
-# the latest upstream commit, opens a PR, dispatches the Validate checks against
-# the branch (a GITHUB_TOKEN-created PR doesn't trigger them automatically),
+# the latest upstream commit, opens a PR with the repo GitHub App token so PR
+# checks trigger normally, dispatches an extra Validate pass against the branch,
 # and enables auto-merge so a green bump lands hands-off.
 
 on:
@@ -31,9 +31,18 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
+      - uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
+        id: app-token
+        with:
+          app-id: ${{ vars.APP_ID }}
+          private-key: ${{ secrets.APP_PRIVATE_KEY }}
+          permission-contents: write
+          permission-pull-requests: write
+
       - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
         with:
-          persist-credentials: true # later git push uses the workflow token
+          persist-credentials: true # later git push uses the App token
+          token: ${{ steps.app-token.outputs.token }}
 
       - name: Re-pin to latest upstream SHA
         id: bump
@@ -64,7 +73,8 @@ jobs:
       - name: Open / update PR and enable auto-merge
         if: steps.bump.outputs.changed == 'true'
         env:
-          GH_TOKEN: ${{ github.token }}
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+          WORKFLOW_TOKEN: ${{ github.token }}
           LATEST: ${{ steps.bump.outputs.latest }}
           SHORT: ${{ steps.bump.outputs.short }}
         run: |
@@ -83,10 +93,9 @@ jobs:
               --body "Automated re-pin of the local validate-plugins wrapper to latest upstream commit \`${LATEST}\` from \`${ACTION_REPO}/.github/actions/validate-plugins\` (no tags upstream, so Dependabot can't track it). Auto-merges once the dispatched Validate checks pass."
           fi
 
-          # A GITHUB_TOKEN-created PR doesn't trigger workflows, so dispatch the
-          # checks explicitly against the branch. The local wrapper on that
-          # branch now contains the new SHA, so this exercises the bumped action.
-          gh workflow run validate.yml --ref "$BRANCH"
+          # The App-created PR triggers normal PR checks. Dispatch Validate too,
+          # so this run immediately exercises the bumped local wrapper.
+          GH_TOKEN="$WORKFLOW_TOKEN" gh workflow run validate.yml --ref "$BRANCH"
 
           # Land it hands-off once required checks are green.
           gh pr merge --auto --squash "$BRANCH" \
