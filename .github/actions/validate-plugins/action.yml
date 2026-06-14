@@ -1,0 +1,96 @@
+name: Validate Plugins
+description: Local wrapper for the pinned upstream validate-plugins action.
+
+# cspell:ignore nonrevertable
+
+inputs:
+  marketplace-path:
+    description: Path to the assembled marketplace.json
+    default: .claude-plugin/marketplace.json
+  entries-dir:
+    description: Optional directory containing one marketplace entry per file
+    default: ""
+  base-ref:
+    description: Git ref to diff against for change detection
+    default: ${{ github.event.pull_request.base.sha || github.event.before || 'origin/main' }}
+  warn-invariants:
+    description: Space-separated invariant codes treated as warnings instead of errors
+    default: "I1 I3 I5 I8"
+  sha-exempt:
+    description: Space-separated plugin names allowed to omit source.sha
+    default: ""
+  scope-errors-to-changed:
+    description: Downgrade unchanged per-entry invariant violations to warnings
+    default: "false"
+  skip-external:
+    description: Skip cloning and validating external plugins
+    default: "false"
+  skip-local-folders:
+    description: Skip validating in-repo plugin folders
+    default: "false"
+  fail-on-warnings:
+    description: Treat validation warnings as failures
+    default: "false"
+  validate-all-external:
+    description: Validate every external entry, not just changed external entries
+    default: "false"
+  claude-cli-version:
+    description: Version of @anthropic-ai/claude-code to install
+    default: latest
+  external-timeout-secs:
+    description: Per-plugin timeout for external clone and validate
+    default: "120"
+  allowed-hosts:
+    description: Space-separated allowlist of git hosts for external source.url values
+    default: "github.com gitlab.com bitbucket.org"
+  npm-registry:
+    description: Optional npm registry URL
+    default: ""
+
+outputs:
+  changed-entries:
+    description: JSON array of marketplace entry names changed in this PR
+    value: ${{ steps.validate.outputs['changed-entries'] }}
+  changed-external:
+    description: JSON array of changed external entries
+    value: ${{ steps.validate.outputs['changed-external'] }}
+  changed-folders:
+    description: JSON array of changed in-repo plugin folder paths
+    value: ${{ steps.validate.outputs['changed-folders'] }}
+  result:
+    description: pass or fail
+    value: ${{ steps.validate.outputs.result }}
+  report-path:
+    description: Path to the markdown report
+    value: ${{ steps.validate.outputs['report-path'] }}
+  complete:
+    description: Whether validation produced at least one verdict row
+    value: ${{ steps.validate.outputs.complete }}
+  failed-subjects:
+    description: JSON array of marketplace entry names whose bump can be reverted
+    value: ${{ steps.validate.outputs['failed-subjects'] }}
+  nonrevertable:
+    description: JSON array of failure subjects that cannot be cleared by dropping source.sha
+    value: ${{ steps.validate.outputs.nonrevertable }}
+
+runs:
+  using: composite
+  steps:
+    - name: Run upstream validator
+      id: validate
+      uses: anthropics/claude-plugins-community/.github/actions/validate-plugins@8636d19de96fca11f8313ca24f83fd96c09695ae # main
+      with:
+        marketplace-path: ${{ inputs['marketplace-path'] }}
+        entries-dir: ${{ inputs['entries-dir'] }}
+        base-ref: ${{ inputs['base-ref'] }}
+        warn-invariants: ${{ inputs['warn-invariants'] }}
+        sha-exempt: ${{ inputs['sha-exempt'] }}
+        scope-errors-to-changed: ${{ inputs['scope-errors-to-changed'] }}
+        skip-external: ${{ inputs['skip-external'] }}
+        skip-local-folders: ${{ inputs['skip-local-folders'] }}
+        fail-on-warnings: ${{ inputs['fail-on-warnings'] }}
+        validate-all-external: ${{ inputs['validate-all-external'] }}
+        claude-cli-version: ${{ inputs['claude-cli-version'] }}
+        external-timeout-secs: ${{ inputs['external-timeout-secs'] }}
+        allowed-hosts: ${{ inputs['allowed-hosts'] }}
+        npm-registry: ${{ inputs['npm-registry'] }}

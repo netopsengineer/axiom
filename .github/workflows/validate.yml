@@ -38,9 +38,10 @@ jobs:
           fetch-depth: 0
           persist-credentials: false
       # Canonical validator: runs `claude plugin validate` (source-of-truth
-      # schema check) plus the marketplace invariant lints. Untagged action —
-      # SHA-pinned to upstream main; kept current by bump-validate-action.yml.
-      - uses: anthropics/claude-plugins-community/.github/actions/validate-plugins@8636d19de96fca11f8313ca24f83fd96c09695ae # main
+      # schema check) plus the marketplace invariant lints. The local wrapper
+      # keeps the untagged upstream action SHA-pinned and allows bumps without
+      # editing this workflow file.
+      - uses: ./.github/actions/validate-plugins
         with:
           marketplace-path: .claude-plugin/marketplace.json
           warn-invariants: "I1 I3 I8 I11"
