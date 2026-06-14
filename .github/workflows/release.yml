@@ -20,6 +20,8 @@ jobs:
     name: semantic-release
     runs-on: ubuntu-latest
     steps:
+      - name: Configure git defaults
+        run: git config --global init.defaultBranch main
       - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
         with:
           fetch-depth: 0 # semantic-release needs full history + tags
@@ -43,7 +45,7 @@ jobs:
         with:
           node-version: 24 # current LTS; semantic-release@25 needs ^22.14 || >=24.10
           cache: npm
-      - run: npm ci
+      - run: npm ci --loglevel=error
       - name: Release changed plugins
         run: |
           set -euo pipefail
