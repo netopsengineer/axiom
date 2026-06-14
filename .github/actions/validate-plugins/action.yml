@@ -1,6 +1,11 @@
 name: Validate Plugins
 description: Local wrapper for the pinned upstream validate-plugins action.
 
+# Upstream scripts are vendored from
+# anthropics/claude-plugins-community/.github/actions/validate-plugins@1293b8b641af59cc657db100f660717cbd9f1e22
+# The bump workflow updates this reference and the vendored upstream directory
+# together.
+#
 # cspell:ignore nonrevertable
 
 inputs:
@@ -15,7 +20,7 @@ inputs:
     default: ${{ github.event.pull_request.base.sha || github.event.before || 'origin/main' }}
   warn-invariants:
     description: Space-separated invariant codes treated as warnings instead of errors
-    default: "I1 I3 I5 I8"
+    default: ""
   sha-exempt:
     description: Space-separated plugin names allowed to omit source.sha
     default: ""
@@ -30,7 +35,7 @@ inputs:
     default: "false"
   fail-on-warnings:
     description: Treat validation warnings as failures
-    default: "false"
+    default: "true"
   validate-all-external:
     description: Validate every external entry, not just changed external entries
     default: "false"
@@ -50,47 +55,136 @@ inputs:
 outputs:
   changed-entries:
     description: JSON array of marketplace entry names changed in this PR
-    value: ${{ steps.validate.outputs['changed-entries'] }}
+    value: ${{ steps.detect.outputs['changed-entries'] }}
   changed-external:
     description: JSON array of changed external entries
-    value: ${{ steps.validate.outputs['changed-external'] }}
+    value: ${{ steps.detect.outputs['changed-external'] }}
   changed-folders:
     description: JSON array of changed in-repo plugin folder paths
-    value: ${{ steps.validate.outputs['changed-folders'] }}
+    value: ${{ steps.detect.outputs['changed-folders'] }}
   result:
     description: pass or fail
-    value: ${{ steps.validate.outputs.result }}
+    value: ${{ steps.report.outputs.result }}
   report-path:
     description: Path to the markdown report
-    value: ${{ steps.validate.outputs['report-path'] }}
+    value: ${{ steps.report.outputs['report-path'] }}
   complete:
     description: Whether validation produced at least one verdict row
-    value: ${{ steps.validate.outputs.complete }}
+    value: ${{ steps.report.outputs.completed }}
+  completed:
+    description: Whether validation produced at least one verdict row
+    value: ${{ steps.report.outputs.completed }}
   failed-subjects:
     description: JSON array of marketplace entry names whose bump can be reverted
-    value: ${{ steps.validate.outputs['failed-subjects'] }}
+    value: ${{ steps.report.outputs['failed-subjects'] }}
   nonrevertable:
     description: JSON array of failure subjects that cannot be cleared by dropping source.sha
-    value: ${{ steps.validate.outputs.nonrevertable }}
+    value: ${{ steps.report.outputs.nonrevertable }}
 
 runs:
   using: composite
   steps:
-    - name: Run upstream validator
-      id: validate
-      uses: anthropics/claude-plugins-community/.github/actions/validate-plugins@1293b8b641af59cc657db100f660717cbd9f1e22 # main
+    - name: Setup
+      shell: bash
+      env:
+        ACTION_PATH: ${{ github.action_path }}/upstream
+        VALIDATE_TMP: ${{ runner.temp }}/validate-plugins
+      run: |
+        set -euo pipefail
+        mkdir -p "$VALIDATE_TMP"
+        chmod +x "$ACTION_PATH/scripts/"*.sh "$ACTION_PATH/lib/"*.sh
+
+    - name: Install jq
+      shell: bash
+      run: command -v jq >/dev/null || sudo apt-get install -y jq
+
+    - name: Install Node
+      uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
       with:
-        marketplace-path: ${{ inputs['marketplace-path'] }}
-        entries-dir: ${{ inputs['entries-dir'] }}
-        base-ref: ${{ inputs['base-ref'] }}
-        warn-invariants: ${{ inputs['warn-invariants'] }}
-        sha-exempt: ${{ inputs['sha-exempt'] }}
-        scope-errors-to-changed: ${{ inputs['scope-errors-to-changed'] }}
-        skip-external: ${{ inputs['skip-external'] }}
-        skip-local-folders: ${{ inputs['skip-local-folders'] }}
-        fail-on-warnings: ${{ inputs['fail-on-warnings'] }}
-        validate-all-external: ${{ inputs['validate-all-external'] }}
-        claude-cli-version: ${{ inputs['claude-cli-version'] }}
-        external-timeout-secs: ${{ inputs['external-timeout-secs'] }}
-        allowed-hosts: ${{ inputs['allowed-hosts'] }}
-        npm-registry: ${{ inputs['npm-registry'] }}
+        node-version: "24"
+
+    - name: Configure npm registry
+      if: inputs.npm-registry != ''
+      shell: bash
+      env:
+        NPM_REGISTRY: ${{ inputs.npm-registry }}
+      run: npm config set registry "$NPM_REGISTRY"
+
+    - name: Install claude CLI
+      shell: bash
+      env:
+        CLAUDE_CLI_VERSION: ${{ inputs.claude-cli-version }}
+      run: |
+        set -euo pipefail
+        npm install -g --loglevel=error "@anthropic-ai/claude-code@${CLAUDE_CLI_VERSION}"
+        claude --version
+
+    - name: Detect changes
+      id: detect
+      shell: bash
+      env:
+        ACTION_PATH: ${{ github.action_path }}/upstream
+        BASE_REF: ${{ inputs.base-ref }}
+        ENTRIES_DIR: ${{ inputs.entries-dir }}
+        MARKETPLACE_PATH: ${{ inputs.marketplace-path }}
+        VALIDATE_TMP: ${{ runner.temp }}/validate-plugins
+      run: "$ACTION_PATH/scripts/00-detect-changes.sh"
+
+    - name: Custom invariants I1-I11
+      shell: bash
+      env:
+        ACTION_PATH: ${{ github.action_path }}/upstream
+        BASE_REF: ${{ inputs.base-ref }}
+        FAIL_ON_WARNINGS: ${{ inputs.fail-on-warnings }}
+        ENTRIES_DIR: ${{ inputs.entries-dir }}
+        MARKETPLACE_PATH: ${{ inputs.marketplace-path }}
+        SCOPE_ERRORS_TO_CHANGED: ${{ inputs.scope-errors-to-changed }}
+        SHA_EXEMPT: ${{ inputs.sha-exempt }}
+        VALIDATE_TMP: ${{ runner.temp }}/validate-plugins
+        WARN_INVARIANTS: ${{ inputs.warn-invariants }}
+      run: "$ACTION_PATH/scripts/11-validate-invariants.sh"
+
+    - name: CLI validate marketplace
+      shell: bash
+      env:
+        ACTION_PATH: ${{ github.action_path }}/upstream
+        FAIL_ON_WARNINGS: ${{ inputs.fail-on-warnings }}
+        VALIDATE_TMP: ${{ runner.temp }}/validate-plugins
+      run: "$ACTION_PATH/scripts/20-validate-cli-marketplace.sh"
+
+    - name: CLI validate external plugins
+      if: inputs.skip-external != 'true'
+      shell: bash
+      env:
+        ACTION_PATH: ${{ github.action_path }}/upstream
+        ALLOWED_HOSTS: ${{ inputs.allowed-hosts }}
+        EXTERNAL_TIMEOUT_SECS: ${{ inputs.external-timeout-secs }}
+        VALIDATE_TMP: ${{ runner.temp }}/validate-plugins
+        VALIDATE_ALL_EXTERNAL: ${{ inputs.validate-all-external }}
+      run: "$ACTION_PATH/scripts/30-validate-cli-external.sh"
+
+    - name: CLI validate changed in-repo folders
+      if: inputs.skip-local-folders != 'true'
+      shell: bash
+      env:
+        ACTION_PATH: ${{ github.action_path }}/upstream
+        FAIL_ON_WARNINGS: ${{ inputs.fail-on-warnings }}
+        VALIDATE_TMP: ${{ runner.temp }}/validate-plugins
+      run: "$ACTION_PATH/scripts/40-validate-cli-local.sh"
+
+    - name: Aux-file JSON parse (changed in-repo folders)
+      if: inputs.skip-local-folders != 'true'
+      shell: bash
+      env:
+        ACTION_PATH: ${{ github.action_path }}/upstream
+        VALIDATE_TMP: ${{ runner.temp }}/validate-plugins
+      run: "$ACTION_PATH/scripts/41-validate-aux-files.sh"
+
+    - name: Report
+      id: report
+      if: always()
+      shell: bash
+      env:
+        ACTION_PATH: ${{ github.action_path }}/upstream
+        VALIDATE_TMP: ${{ runner.temp }}/validate-plugins
+      run: "$ACTION_PATH/scripts/90-report.sh"

@@ -24,6 +24,7 @@ concurrency:
 env:
   ACTION_REPO: anthropics/claude-plugins-community
   PIN_FILE: .github/actions/validate-plugins/action.yml
+  UPSTREAM_DIR: .github/actions/validate-plugins/upstream
   BRANCH: chore/bump-validate-plugins-action
 
 jobs:
@@ -31,18 +32,19 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      - uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
-        id: app-token
-        with:
-          app-id: ${{ vars.APP_ID }}
-          private-key: ${{ secrets.APP_PRIVATE_KEY }}
-          permission-contents: write
-          permission-pull-requests: write
-
+      - name: Configure git defaults
+        run: git config --global init.defaultBranch main
       - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
         with:
-          persist-credentials: true # later git push uses the App token
-          token: ${{ steps.app-token.outputs.token }}
+          persist-credentials: false
+
+      - name: Mint GitHub App token
+        id: app-token
+        env:
+          APP_ID: ${{ vars.APP_ID }}
+          APP_PRIVATE_KEY: ${{ secrets.APP_PRIVATE_KEY }}
+          TOKEN_PERMISSIONS: '{"contents":"write","pull_requests":"write"}'
+        run: node .github/scripts/create-app-token.mjs
 
       - name: Re-pin to latest upstream SHA
         id: bump
@@ -63,6 +65,15 @@ jobs:
             echo "changed=false" >> "$GITHUB_OUTPUT"
             exit 0
           fi
+
+          tmp="$(mktemp -d)"
+          git -C "$tmp" init
+          git -C "$tmp" remote add origin "https://github.com/${ACTION_REPO}.git"
+          git -C "$tmp" fetch --depth=1 origin "$latest"
+          git -C "$tmp" checkout --detach FETCH_HEAD
+          rm -rf "${UPSTREAM_DIR:?}/lib" "${UPSTREAM_DIR:?}/scripts"
+          mkdir -p "$UPSTREAM_DIR"
+          cp -R "$tmp/.github/actions/validate-plugins/lib" "$tmp/.github/actions/validate-plugins/scripts" "$UPSTREAM_DIR/"
           sed -i "s/validate-plugins@${current}/validate-plugins@${latest}/" "$PIN_FILE"
           {
             echo "changed=true"
@@ -82,9 +93,9 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git checkout -B "$BRANCH"
-          git add "$PIN_FILE"
+          git add "$PIN_FILE" "$UPSTREAM_DIR"
           git commit -m "ci: bump validate-plugins action to ${SHORT}"
-          git push -f origin "$BRANCH"
+          git push -f "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" "$BRANCH"
 
           # Create the PR if one isn't already open for this branch.
           if [ "$(gh pr list --head "$BRANCH" --state open --json number --jq 'length')" = "0" ]; then

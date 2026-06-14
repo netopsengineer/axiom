@@ -1,4 +1,6 @@
 .DS_Store
+.agents/
+.codex/
 node_modules/
 __pycache__/
 *.pyc

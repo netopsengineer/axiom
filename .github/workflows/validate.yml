@@ -17,6 +17,8 @@ jobs:
     name: Secret scan
     runs-on: ubuntu-latest
     steps:
+      - name: Configure git defaults
+        run: git config --global init.defaultBranch main
       - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
         with:
           fetch-depth: 0
@@ -28,11 +30,14 @@ jobs:
           GITLEAKS_ENABLE_COMMENTS: "false"
           GITLEAKS_ENABLE_UPLOAD_ARTIFACT: "false"
           GITLEAKS_VERSION: 8.30.1
+          NODE_OPTIONS: --no-deprecation
 
   plugins:
     name: Plugin manifests
     runs-on: ubuntu-latest
     steps:
+      - name: Configure git defaults
+        run: git config --global init.defaultBranch main
       - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
         with:
           fetch-depth: 0
@@ -44,7 +49,8 @@ jobs:
       - uses: ./.github/actions/validate-plugins
         with:
           marketplace-path: .claude-plugin/marketplace.json
-          warn-invariants: "I1 I3 I8 I11"
+          warn-invariants: ""
+          fail-on-warnings: "true"
           skip-external: "true" # every entry is a local folder source
           claude-cli-version: latest
 
@@ -52,6 +58,8 @@ jobs:
     name: Markdown lint
     runs-on: ubuntu-latest
     steps:
+      - name: Configure git defaults
+        run: git config --global init.defaultBranch main
       - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
         with:
           persist-credentials: false
@@ -65,6 +73,8 @@ jobs:
     name: Repository checks
     runs-on: ubuntu-latest
     steps:
+      - name: Configure git defaults
+        run: git config --global init.defaultBranch main
       - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
         with:
           persist-credentials: false
@@ -72,7 +82,7 @@ jobs:
         with:
           node-version: 24
           cache: npm
-      - run: npm ci
+      - run: npm ci --loglevel=error
       - run: npm run check:repo
       - run: npm run lint:yaml
       - run: npm run lint:spelling
@@ -83,6 +93,8 @@ jobs:
     name: Workflow security lint
     runs-on: ubuntu-latest
     steps:
+      - name: Configure git defaults
+        run: git config --global init.defaultBranch main
       - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
         with:
           persist-credentials: false
@@ -90,13 +102,15 @@ jobs:
         with:
           node-version: 24
           cache: npm
-      - run: npm ci
+      - run: npm ci --loglevel=error
       - run: npm run check:precommit:security
 
   javascript:
     name: JavaScript lint
     runs-on: ubuntu-latest
     steps:
+      - name: Configure git defaults
+        run: git config --global init.defaultBranch main
       - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
         with:
           persist-credentials: false
@@ -107,6 +121,6 @@ jobs:
       # Biome lint + format check (read-only `biome ci`). Config in biome.jsonc,
       # scoped to the repo's hand-written JS. Installed via npm, so there is no
       # extra action to SHA-pin — reuses the pinned checkout + setup-node above.
-      - run: npm ci
+      - run: npm ci --loglevel=error
       - run: npm run docs:readme:check
       - run: npm run lint
