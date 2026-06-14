@@ -97,6 +97,7 @@ repos:
     rev: 745eface02aef23e168a8afb6b5737818efbea95 # v0.11.0.1
     hooks:
       - id: shellcheck
+        exclude: ^\.github/actions/validate-plugins/upstream/
 
   # Hardening checks for GitHub Actions workflows.
   - repo: https://github.com/zizmorcore/zizmor-pre-commit
