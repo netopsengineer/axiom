@@ -79,6 +79,8 @@ runs:
     - name: Run upstream validator
       id: validate
       uses: anthropics/claude-plugins-community/.github/actions/validate-plugins@1293b8b641af59cc657db100f660717cbd9f1e22 # main
+      env:
+        FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
       with:
         marketplace-path: ${{ inputs['marketplace-path'] }}
         entries-dir: ${{ inputs['entries-dir'] }}

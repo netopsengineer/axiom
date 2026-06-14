@@ -20,5 +20,5 @@
   "formatter": { "enabled": true, "indentStyle": "space" },
 
   // Biome's recommended rule set (the default, stated explicitly for readers).
-  "linter": { "enabled": true, "rules": { "recommended": true } }
+  "linter": { "enabled": true, "rules": { "preset": "recommended" } }
 }

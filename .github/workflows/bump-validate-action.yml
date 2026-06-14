@@ -31,18 +31,17 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      - uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
-        id: app-token
-        with:
-          app-id: ${{ vars.APP_ID }}
-          private-key: ${{ secrets.APP_PRIVATE_KEY }}
-          permission-contents: write
-          permission-pull-requests: write
-
       - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
         with:
-          persist-credentials: true # later git push uses the App token
-          token: ${{ steps.app-token.outputs.token }}
+          persist-credentials: false
+
+      - name: Mint GitHub App token
+        id: app-token
+        env:
+          APP_ID: ${{ vars.APP_ID }}
+          APP_PRIVATE_KEY: ${{ secrets.APP_PRIVATE_KEY }}
+          TOKEN_PERMISSIONS: '{"contents":"write","pull_requests":"write"}'
+        run: node .github/scripts/create-app-token.mjs
 
       - name: Re-pin to latest upstream SHA
         id: bump
@@ -84,7 +83,7 @@ jobs:
           git checkout -B "$BRANCH"
           git add "$PIN_FILE"
           git commit -m "ci: bump validate-plugins action to ${SHORT}"
-          git push -f origin "$BRANCH"
+          git push -f "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" "$BRANCH"
 
           # Create the PR if one isn't already open for this branch.
           if [ "$(gh pr list --head "$BRANCH" --state open --json number --jq 'length')" = "0" ]; then
