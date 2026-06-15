@@ -79,14 +79,10 @@ flag() {
   fi
   if (( as_warn )); then
     printf '::warning %s::invariant %s: %s\n' "$loc" "$code" "$msg"
-    record_result "invariants" "warn" "$code" "$msg" "$name"; warnings=$((warnings+1))
+    record_result "invariants" "warn" "$code" "$msg"; warnings=$((warnings+1))
   else
     printf '::error %s::invariant %s: %s\n' "$loc" "$code" "$msg"
-    # Pass $name as the `entry` (5th arg): a per-entry invariant failure (I3/I5/
-    # I8/I10/I11) records the invariant CODE as `subject`, so the entry name must
-    # ride along for the bump-revert loop to drop the right pin. Whole-marketplace
-    # invariants (I1/I2/I7) flag() with no name → entry="" → non-revertable bucket.
-    record_result "invariants" "fail" "$code" "$msg" "$name"; failures=$((failures+1))
+    record_result "invariants" "fail" "$code" "$msg"; failures=$((failures+1))
   fi
 }
 

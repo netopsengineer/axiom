@@ -2,7 +2,7 @@ name: Validate Plugins
 description: Local wrapper for the pinned upstream validate-plugins action.
 
 # Upstream scripts are vendored from
-# anthropics/claude-plugins-community/.github/actions/validate-plugins@1293b8b641af59cc657db100f660717cbd9f1e22
+# anthropics/claude-plugins-community/.github/actions/validate-plugins@74db36daf2f1602c34802de3bc45d746a9b55c64
 # The bump workflow updates this reference and the vendored upstream directory
 # together.
 #

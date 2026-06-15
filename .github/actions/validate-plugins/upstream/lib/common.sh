@@ -21,23 +21,14 @@ group_end()   { printf '::endgroup::\n'; }
 RESULTS_FILE="${VALIDATE_TMP:-./.validate-tmp}/results.jsonl"
 
 record_result() {
-  local step="$1" status="$2" subject="$3" detail="${4:-}" entry="${5:-}"
+  local step="$1" status="$2" subject="$3" detail="${4:-}"
   mkdir -p "$(dirname "$RESULTS_FILE")"
-  # `entry` (optional 5th arg) is the marketplace entry NAME a failure is
-  # attributable to, when that differs from `subject`. For per-entry invariant
-  # failures `subject` is the invariant CODE (I3/I5/I11…), not the entry name, so
-  # the bump-revert loop (which reverts by entry name) needs `entry` to know what
-  # to drop. Whole-marketplace failures (I1 sort, I2 dups, marketplace schema)
-  # have no single entry → `entry` stays "" and 90-report.sh routes them to the
-  # non-revertable bucket (revert aborts + alerts rather than spinning). Additive:
-  # existing 4-arg callers get entry="".
   jq -cn \
     --arg step "$step" \
     --arg status "$status" \
     --arg subject "$subject" \
     --arg detail "$detail" \
-    --arg entry "$entry" \
-    '{step:$step, status:$status, subject:$subject, detail:$detail, entry:$entry}' \
+    '{step:$step, status:$status, subject:$subject, detail:$detail}' \
     >> "$RESULTS_FILE"
 }
 
