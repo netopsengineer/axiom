@@ -4,16 +4,15 @@ description: >
   MUST consult this skill before answering whenever the user's task involves external
   versioned dependencies — even if you think you can handle it directly. This applies to:
   checking if packages/tools are up to date, upgrading npm/pip/cargo/go dependencies,
-  planning or writing CI/CD workflows (GitHub Actions, CircleCI, GitLab CI), pinning
-  action versions, reviewing Dockerfiles or base images, checking Terraform providers
-  or modules for drift, reviewing Helm chart versions, verifying Kubernetes/EKS/cloud
-  resource versions, updating pre-commit hooks, writing Dependabot configs, or any task
-  where the user mentions specific version numbers, package names, or config files like
-  package.json, pyproject.toml, Dockerfile, .pre-commit-config.yaml, main.tf, or
-  values.yaml. Even casual requests like "is this still current" or "has anything
-  drifted" require this skill because your training data is unreliable for volatile
-  version facts. Do NOT use for: refactoring code, writing tests, debugging errors,
-  designing APIs, or tasks with no external versioned dependencies.
+  writing or reviewing CI/CD (GitHub Actions, CircleCI, GitLab CI), pinning action versions,
+  reviewing Dockerfiles/base images, checking Terraform providers/modules for drift,
+  reviewing Helm chart versions, verifying Kubernetes/EKS/cloud versions, updating
+  pre-commit hooks, writing Dependabot configs, or any task mentioning specific version
+  numbers, package names, or config files like package.json, pyproject.toml, Dockerfile,
+  .pre-commit-config.yaml, main.tf, or values.yaml. Even casual asks like "is this still
+  current" or "has anything drifted" require it — training data is unreliable for volatile
+  version facts. Do NOT use for refactoring code, writing tests, debugging errors, designing
+  APIs, or tasks with no external versioned dependencies.
 allowed-tools: WebSearch, WebFetch, Read, Grep, Glob, Bash
 effort: high
 ---

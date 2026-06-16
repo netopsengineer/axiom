@@ -137,6 +137,26 @@ is the priority. The description was rewritten from a generic one-liner to a
 comprehensive trigger description listing specific patterns, config files, and
 explicit exclusions.
 
+### Description triggering (2026-06-16, length optimization)
+
+The shipped description was 1067 characters, over the 1024-character
+limit at which descriptions are truncated on load (some agents refuse
+to load them at all), severing the trailing "Do NOT use for"
+exclusion boundary. It was re-tuned to fit while preserving triggering
+and coverage.
+
+- **Method**: 20 trigger queries (10 should-trigger, 10 near-miss
+  should-not-trigger), evaluated on Claude Sonnet 4.6 and Opus 4.8, 5
+  runs per query, with candidate generation and held-out selection via
+  a no-API-key `claude -p` loop.
+- **Result**: shipped a 1006-character description (18 under the
+  limit) with full coverage retained (Terraform drift, EKS,
+  CircleCI/GitLab CI, Helm, Dependabot, config-file list). Opus
+  triggered 10/10 should-trigger scenarios, zero false positives on
+  either model, and Sonnet held within measurement noise of the
+  original. The win is that it now loads in full with the exclusion
+  boundary intact, not trigger rate (already at a ceiling).
+
 ### Changes made during eval cycle
 
 - **Iteration 1 -> 2**: Fixed security search gap for low-profile repos
