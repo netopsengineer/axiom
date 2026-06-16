@@ -1,5 +1,11 @@
 # Changelog
 
+## [axiom-versioning-v1.0.2](https://github.com/netopsengineer/axiom/compare/axiom-versioning-v1.0.1...axiom-versioning-v1.0.2) (2026-06-16)
+
+### Bug Fixes
+
+* **dependency-versions:** trim description under 1024-char load limit ([#22](https://github.com/netopsengineer/axiom/issues/22)) ([3e3b469](https://github.com/netopsengineer/axiom/commit/3e3b4691b9b5454e4c7ff5654d8c9da129397863))
+
 ## [1.0.1](https://github.com/netopsengineer/axiom/compare/v1.0.0...v1.0.1) (2026-06-05)
 
 ### Bug Fixes
