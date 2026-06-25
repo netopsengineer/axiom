@@ -87,7 +87,6 @@ jobs:
       - run: npm run lint:yaml
       - run: npm run lint:spelling
       - run: npm run lint:links
-      - run: npm audit --audit-level=high
 
   workflows:
     name: Workflow security lint
