@@ -1,0 +1,9 @@
+{
+  "_comment": "Advisories that `npm audit fix` cannot resolve and that are accepted for now. Keyed by GHSA id (or advisory URL). Each entry needs an `expires` (YYYY-MM-DD) and a `reason`; .github/scripts/check-npm-audit.mjs fails the audit gate on any at/above-threshold advisory that is missing, expired, or undated, so entries are forced back through review. Keep this list as small as possible.",
+  "advisories": {
+    "GHSA-vxpw-j846-p89q": {
+      "expires": "2026-12-31",
+      "reason": "undici WebSocket DoS, present only in the copy bundled inside npm@11 (npm > node-gyp > undici). Bundled deps are shipped inside the npm tarball, so neither `npm audit fix` nor package `overrides` can reach it, and npm@latest still bundles the vulnerable version. Dev/release tooling only — never shipped to marketplace consumers (plugins carry zero dependencies). Clears automatically when npm publishes a re-bundled release."
+    }
+  }
+}
