@@ -1,0 +1,32 @@
+name: Dependency audit
+
+# npm audit queries a live advisory feed, so a newly-disclosed advisory unrelated
+# to any PR could otherwise turn a required check red and block all merges. This
+# workflow keeps audit as an advisory signal, not a merge gate: it runs on a daily
+# schedule (offset from the bump-validate-action cron) plus manual dispatch, and is
+# intentionally NOT wired into pull_request, so it produces no PR status check.
+
+on:
+  schedule:
+    - cron: "37 6 * * *" # daily 06:37 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    name: Dependency audit
+    runs-on: ubuntu-latest
+    steps:
+      - name: Configure git defaults
+        run: git config --global init.defaultBranch main
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci --loglevel=error
+      - run: npm audit --audit-level=high

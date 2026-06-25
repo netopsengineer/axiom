@@ -1,5 +1,6 @@
 import { access, readdir, readFile, stat } from "node:fs/promises";
 import path from "node:path";
+import YAML from "yaml";
 
 const ROOT = process.cwd();
 const KEBAB_CASE = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
@@ -32,6 +33,8 @@ async function main() {
       await checkPlugin(plugin.name);
     }
   }
+
+  await checkWorkflowPermissions();
 
   if (errors.length > 0) {
     console.error("Repository invariant check failed:");
@@ -166,6 +169,86 @@ function checkReadmeEvalHistory(pluginName, readme) {
 
   if (meaningfulLines.length === 0) {
     fail(`plugins/${pluginName}/README.md ## Eval history must be non-empty.`);
+  }
+}
+
+// Safety invariant for the read-only Actions default token permission: every
+// workflow must declare its own permissions (top-level OR on every job) so no
+// workflow silently inherits the repository default. Presence is checked, never
+// the value — write-needing workflows keep their explicit write scopes. Scope is
+// .github/workflows/ only; composite actions are not workflows.
+async function checkWorkflowPermissions() {
+  const workflowsDir = ".github/workflows";
+  let entries;
+  try {
+    entries = await readdir(path.join(ROOT, workflowsDir), {
+      withFileTypes: true,
+    });
+  } catch (error) {
+    fail(`${workflowsDir} must exist and be readable: ${error.message}`);
+    return;
+  }
+
+  const workflowFiles = entries
+    .filter((entry) => entry.isFile() && /\.ya?ml$/.test(entry.name))
+    .map((entry) => entry.name)
+    .sort();
+
+  for (const fileName of workflowFiles) {
+    const relativePath = path.join(workflowsDir, fileName);
+    const text = await readText(relativePath);
+
+    let root;
+    try {
+      const doc = YAML.parseDocument(text);
+      if (doc.errors.length > 0) {
+        fail(`${relativePath} is not valid YAML: ${doc.errors[0].message}`);
+        continue;
+      }
+      root = doc.toJS();
+    } catch (error) {
+      fail(`${relativePath} is not valid YAML: ${error.message}`);
+      continue;
+    }
+
+    if (!root || typeof root !== "object" || Array.isArray(root)) {
+      fail(`${relativePath} must be a YAML mapping declaring permissions.`);
+      continue;
+    }
+
+    if (Object.hasOwn(root, "permissions")) {
+      continue; // top-level permissions present — safe
+    }
+
+    const jobs = root.jobs;
+    const jobsIsPlainObject =
+      jobs !== null && typeof jobs === "object" && !Array.isArray(jobs);
+    const jobNames = jobsIsPlainObject ? Object.keys(jobs) : [];
+
+    // Guard the [].every() === true trap: an empty/non-object jobs map with no
+    // top-level permissions must fail, not vacuously pass.
+    if (!jobsIsPlainObject || jobNames.length === 0) {
+      fail(
+        `${relativePath} must declare a top-level permissions block (no jobs found to carry job-level permissions).`,
+      );
+      continue;
+    }
+
+    const jobsMissingPermissions = jobNames.filter((jobName) => {
+      const job = jobs[jobName];
+      return (
+        !job ||
+        typeof job !== "object" ||
+        Array.isArray(job) ||
+        !Object.hasOwn(job, "permissions")
+      );
+    });
+
+    if (jobsMissingPermissions.length > 0) {
+      fail(
+        `${relativePath} must declare top-level permissions or set permissions on every job; missing on: ${jobsMissingPermissions.join(", ")}.`,
+      );
+    }
   }
 }
 

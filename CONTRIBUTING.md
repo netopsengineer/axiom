@@ -110,7 +110,8 @@ All workflows live in `.github/`; every third-party action is SHA-pinned.
 |------------------------------------------------|---------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------|
 | `branch-name.yml`                              | PR                  | enforce predictable PR source branch names for human and agent branches                                                                                   |
 | `pr-title.yml`                                 | PR                  | enforce Conventional Commit PR titles, which become squash commit subjects                                                                                |
-| `validate.yml`                                 | PR + push to `main` | plugin validation, markdownlint, Biome, secret scanning, repository invariants, YAML syntax, spelling, Markdown links, workflow security lint, npm audit  |
+| `validate.yml`                                 | PR + push to `main` | plugin validation, markdownlint, Biome, secret scanning, repository invariants, YAML syntax, spelling, Markdown links, workflow security lint             |
+| `dependency-audit.yml`                         | daily + manual      | non-required `npm audit --audit-level=high`; advisory signal, not a merge gate                                                                            |
 | `release.yml`                                  | push to `main`      | run semantic-release for each plugin; changed plugin paths with releasable titles bump the manifest, update `CHANGELOG.md`, tag, and cut a GitHub Release |
 | `bump-validate-action.yml`                     | daily + manual      | re-pins the tagless validate action to the latest upstream SHA via an auto-merged PR                                                                      |
 | `dependabot.yml` + `dependabot-auto-merge.yml` | daily               | bump GitHub Actions + npm tooling, auto-merged once CI is green                                                                                           |
@@ -122,6 +123,9 @@ built-in `GITHUB_TOKEN` can't push to a branch with required status checks. The
 app's ID and key live in the `APP_ID` variable and `APP_PRIVATE_KEY` secret.
 `package.json` / `package-lock.json` are **release- and lint-tooling only** -
 this is not an npm project, and the shipped plugin carries no npm dependencies.
+The repository's Actions **default token permission is read-only**; every
+workflow declares an explicit top-level `permissions:` block (enforced by
+`npm run check:repo`), so none silently rely on the default.
 
 ## Adding a plugin
 
