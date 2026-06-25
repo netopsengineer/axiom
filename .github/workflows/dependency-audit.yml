@@ -5,6 +5,12 @@ name: Dependency audit
 # workflow keeps audit as an advisory signal, not a merge gate: it runs on a daily
 # schedule (offset from the bump-validate-action cron) plus manual dispatch, and is
 # intentionally NOT wired into pull_request, so it produces no PR status check.
+#
+# The audit runs through .github/scripts/check-npm-audit.mjs (npm run audit:ci),
+# which fails only on at/above-high advisories that are not covered by a current
+# .github/npm-audit-allowlist.json entry. Fixable advisories are auto-patched by
+# dependency-audit-fix.yml; only genuinely unfixable ones (e.g. bundled inside npm)
+# are allowlisted, each with an expiry so it is re-reviewed.
 
 on:
   schedule:
@@ -29,4 +35,4 @@ jobs:
           node-version: 24
           cache: npm
       - run: npm ci --loglevel=error
-      - run: npm audit --audit-level=high
+      - run: npm run audit:ci

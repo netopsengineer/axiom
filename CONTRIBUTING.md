@@ -111,7 +111,8 @@ All workflows live in `.github/`; every third-party action is SHA-pinned.
 | `branch-name.yml`                              | PR                  | enforce predictable PR source branch names for human and agent branches                                                                                   |
 | `pr-title.yml`                                 | PR                  | enforce Conventional Commit PR titles, which become squash commit subjects                                                                                |
 | `validate.yml`                                 | PR + push to `main` | plugin validation, markdownlint, Biome, secret scanning, repository invariants, YAML syntax, spelling, Markdown links, workflow security lint             |
-| `dependency-audit.yml`                         | daily + manual      | non-required `npm audit --audit-level=high`; advisory signal, not a merge gate                                                                            |
+| `dependency-audit.yml`                         | daily + manual      | non-required audit gate (`npm run audit:ci`); fails only on high+ advisories not in `.github/npm-audit-allowlist.json`; advisory signal, not a merge gate |
+| `dependency-audit-fix.yml`                     | daily + manual      | runs `npm audit fix`; opens an auto-merged PR when the lockfile changes, self-healing advisories that have an upstream fix                                |
 | `release.yml`                                  | push to `main`      | run semantic-release for each plugin; changed plugin paths with releasable titles bump the manifest, update `CHANGELOG.md`, tag, and cut a GitHub Release |
 | `bump-validate-action.yml`                     | daily + manual      | re-pins the tagless validate action to the latest upstream SHA via an auto-merged PR                                                                      |
 | `dependabot.yml` + `dependabot-auto-merge.yml` | daily               | bump GitHub Actions + npm tooling, auto-merged once CI is green                                                                                           |
@@ -125,7 +126,14 @@ app's ID and key live in the `APP_ID` variable and `APP_PRIVATE_KEY` secret.
 this is not an npm project, and the shipped plugin carries no npm dependencies.
 The repository's Actions **default token permission is read-only**; every
 workflow declares an explicit top-level `permissions:` block (enforced by
-`npm run check:repo`), so none silently rely on the default.
+`npm run check:repo`), so none silently rely on the default. Dependency auditing
+is **self-managing**: `dependency-audit-fix.yml` auto-fixes and auto-merges any
+advisory with an upstream fix, while the audit gate flags only high+ advisories
+left over. The few that have no available fix (e.g. a dependency bundled inside
+`npm` itself) go in `.github/npm-audit-allowlist.json`, each with an **expiry**
+date so it is forced back through review - that one-time acknowledgement is the
+only manual step, since `npm audit` cannot itself tell a fixable advisory from an
+unfixable one.
 
 ## Adding a plugin
 

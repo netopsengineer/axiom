@@ -26,6 +26,8 @@
   ],
   "words": [
     "actionlint",
+    "allowlist",
+    "allowlisted",
     "Anson",
     "anthropics",
     "APIRouter",
@@ -87,6 +89,7 @@
     "tagless",
     "toolchain",
     "toolchains",
+    "undici",
     "wfqv",
     "worktree",
     "zizmor"

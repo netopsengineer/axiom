@@ -1,0 +1,96 @@
+name: Dependency audit fix
+
+# Self-heal for fixable advisories. `npm audit fix` resolves anything with a
+# semver-compatible upstream fix, but Dependabot version updates only touch DIRECT
+# deps and its security updates routinely error on transitive ones, so those fixes
+# never land on their own. This workflow runs `npm audit fix` daily; if the
+# lockfile changes it opens a PR with the repo GitHub App token (so PR checks
+# trigger), dispatches a Validate pass, and enables auto-merge so a green fix lands
+# hands-off. Advisories with no available fix are handled by the dependency-audit
+# gate's allowlist instead, not here.
+
+on:
+  schedule:
+    - cron: "47 6 * * *" # daily 06:47 UTC (offset from audit 06:37 and bump 06:17)
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: dependency-audit-fix
+  cancel-in-progress: false
+
+env:
+  BRANCH: chore/npm-audit-fix
+
+jobs:
+  fix:
+    name: Dependency audit fix
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
+      pull-requests: write
+      actions: write # gh workflow run validate.yml --ref <branch>
+    steps:
+      - name: Configure git defaults
+        run: git config --global init.defaultBranch main
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci --loglevel=error
+
+      - name: Mint GitHub App token
+        id: app-token
+        env:
+          APP_ID: ${{ vars.APP_ID }}
+          APP_PRIVATE_KEY: ${{ secrets.APP_PRIVATE_KEY }}
+          TOKEN_PERMISSIONS: '{"contents":"write","pull_requests":"write"}'
+        run: node .github/scripts/create-app-token.mjs
+
+      - name: Run npm audit fix
+        id: fix
+        run: |
+          set -euo pipefail
+          # Lockfile-only: resolve advisories without rebuilding node_modules.
+          npm audit fix --package-lock-only --loglevel=error || true
+          if git diff --quiet -- package-lock.json package.json; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            echo "No lockfile changes from npm audit fix; nothing to do."
+          else
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Open / update PR and enable auto-merge
+        if: steps.fix.outputs.changed == 'true'
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+          WORKFLOW_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git checkout -B "$BRANCH"
+          git add package-lock.json package.json
+          git commit -m "chore: npm audit fix"
+          git push -f "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" "$BRANCH"
+
+          # Create the PR if one isn't already open for this branch.
+          if [ "$(gh pr list --head "$BRANCH" --state open --json number --jq 'length')" = "0" ]; then
+            gh pr create --head "$BRANCH" --base main \
+              --title "chore: npm audit fix" \
+              --body "Automated \`npm audit fix\` (lockfile-only). Resolves advisories that have a semver-compatible upstream fix. Advisories with no available fix are handled by \`.github/npm-audit-allowlist.json\` instead. Auto-merges once the required checks pass."
+          fi
+
+          # The App-created PR triggers normal PR checks. Dispatch Validate too,
+          # so this run immediately exercises the updated lockfile.
+          GH_TOKEN="$WORKFLOW_TOKEN" gh workflow run validate.yml --ref "$BRANCH"
+
+          # Land it hands-off once required checks are green.
+          gh pr merge --auto --squash "$BRANCH" \
+            || echo "::warning::Could not enable auto-merge — enable 'Allow auto-merge' in repo settings and protect main with the Validate checks."
