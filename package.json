@@ -29,8 +29,8 @@
     "lint:fix": "biome check --write"
   },
   "devDependencies": {
-    "@biomejs/biome": "^2.5.1",
-    "@j178/prek": "^0.4.5",
+    "@biomejs/biome": "^2.5.2",
+    "@j178/prek": "^0.4.6",
     "@semantic-release/changelog": "^6.0.3",
     "@semantic-release/exec": "^7.1.0",
     "@semantic-release/git": "^10.0.1",
