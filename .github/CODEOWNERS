@@ -8,5 +8,10 @@
 # Release, CI, and catalog wiring — a mistake here can break releases for every
 # plugin, so it always routes to the maintainer.
 /.github/               @netopsengineer
+
+# The local validator and its bump workflow are security-sensitive because they
+# define the plugin validation path used by required CI.
+/.github/actions/validate-plugins/** @netopsengineer
+/.github/workflows/bump-validate-action.yml @netopsengineer
 /release.config.js      @netopsengineer
 /.claude-plugin/        @netopsengineer

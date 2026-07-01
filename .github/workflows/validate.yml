@@ -53,6 +53,10 @@ jobs:
           fail-on-warnings: "true"
           skip-external: "true" # every entry is a local folder source
           claude-cli-version: latest
+      # Node/npm are already on PATH from the validate-plugins composite
+      # action's own setup-node step above.
+      - name: Validator smoke tests
+        run: npm run test:validate-plugins
 
   markdown:
     name: Markdown lint
@@ -123,3 +127,7 @@ jobs:
       - run: npm ci --loglevel=error
       - run: npm run docs:readme:check
       - run: npm run lint
+      # Unit tests for the CI/automation helper scripts (audit gate,
+      # audit-fix classifier) — required here so a regression fails the PR
+      # instead of only surfacing later in scheduled security automation.
+      - run: npm run test:automation

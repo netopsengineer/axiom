@@ -17,7 +17,7 @@ You need:
 
 ```bash
 npm install        # Biome + release tooling (dev-only; the shipped plugin has no deps)
-prek install       # install the pre-commit hook that mirrors CI
+prek install       # install the local pre-commit checks
 ```
 
 ## Make a change
@@ -32,14 +32,18 @@ prek install       # install the pre-commit hook that mirrors CI
 
 ## Checks
 
-`prek run --all-files` runs everything CI runs, locally. Individually:
+`prek run --all-files` mirrors the local/static checks from `validate.yml` and
+also runs the automation script tests wired into pre-commit. It does not run
+every CI job, especially checks that depend on PR metadata, scheduled workflow
+context, or live service credentials. Individually:
 
-| Check      | Tool                                           | Auto-fix                                   |
-|------------|------------------------------------------------|--------------------------------------------|
-| Branch     | `.github/scripts/check-branch-name.mjs`        | rename the PR source branch                |
-| JavaScript | Biome (`biome.jsonc`)                          | `npm run lint:fix`                         |
-| Markdown   | markdownlint-cli2 (`.markdownlint-cli2.jsonc`) | `npx -y markdownlint-cli2 --fix "**/*.md"` |
-| Manifests  | `claude plugin validate ./plugins/<name>`      | fix the flagged manifest                   |
+| Check              | Tool                                           | Auto-fix                                   |
+|--------------------|------------------------------------------------|--------------------------------------------|
+| Branch             | `.github/scripts/check-branch-name.mjs`        | rename the PR source branch                |
+| JavaScript         | Biome (`biome.jsonc`)                          | `npm run lint:fix`                         |
+| Markdown           | markdownlint-cli2 (`.markdownlint-cli2.jsonc`) | `npx -y markdownlint-cli2 --fix "**/*.md"` |
+| Manifests          | `claude plugin validate ./plugins/<name>`      | fix the flagged manifest                   |
+| Automation scripts | Node's built-in test runner                    | fix the flagged helper behavior            |
 
 The hook auto-fixes formatting on commit; if it rewrites a file, the commit
 stops so you can `git add` the result and commit again. Other useful commands:
@@ -80,13 +84,16 @@ feat(scope): :sparkles: shortcode form works too
 feat!: drop the legacy format          # "!" marks a breaking change
 ```
 
-The type decides the version bump:
+The type decides the version bump. For a breaking change, prefer `<type>!:` in
+the PR title because the title becomes the squash commit subject. Rely on a
+`BREAKING CHANGE:` footer only if repository squash settings preserve the PR body
+into the commit body.
 
 | Commit type                                                  | Release                |
 |--------------------------------------------------------------|------------------------|
 | `feat:`                                                      | minor (1.0.0 -> 1.1.0) |
 | `fix:` / `perf:`                                             | patch (1.0.0 -> 1.0.1) |
-| `feat!:` / any `BREAKING CHANGE:` footer                     | major (1.0.0 -> 2.0.0) |
+| `<type>!:`                                                   | major (1.0.0 -> 2.0.0) |
 | `chore:` `ci:` `docs:` `refactor:` `test:` `style:` `build:` | no release             |
 
 Never hand-edit the plugin `version` or `CHANGELOG.md` - semantic-release owns
@@ -112,28 +119,36 @@ All workflows live in `.github/`; every third-party action is SHA-pinned.
 | `pr-title.yml`                                 | PR                  | enforce Conventional Commit PR titles, which become squash commit subjects                                                                                |
 | `validate.yml`                                 | PR + push to `main` | plugin validation, markdownlint, Biome, secret scanning, repository invariants, YAML syntax, spelling, Markdown links, workflow security lint             |
 | `dependency-audit.yml`                         | daily + manual      | non-required audit gate (`npm run audit:ci`); fails only on high+ advisories not in `.github/npm-audit-allowlist.json`; advisory signal, not a merge gate |
-| `dependency-audit-fix.yml`                     | daily + manual      | runs `npm audit fix`; opens an auto-merged PR when the lockfile changes, self-healing advisories that have an upstream fix                                |
+| `dependency-audit-fix.yml`                     | daily + manual      | classifies `npm audit fix` exits; opens an auto-merged PR for valid lockfile-only fixes when package files change                                         |
 | `release.yml`                                  | push to `main`      | run semantic-release for each plugin; changed plugin paths with releasable titles bump the manifest, update `CHANGELOG.md`, tag, and cut a GitHub Release |
-| `bump-validate-action.yml`                     | daily + manual      | re-pins the tagless validate action to the latest upstream SHA via an auto-merged PR                                                                      |
+| `bump-validate-action.yml`                     | daily + manual      | re-pins the tagless validate action to the latest upstream SHA via an auto-merged PR, gated by Validate plus validator smoke tests                        |
 | `dependabot.yml` + `dependabot-auto-merge.yml` | daily               | bump GitHub Actions + npm tooling, auto-merged once CI is green                                                                                           |
 
 No Anthropic credentials are needed anywhere, and `claude plugin validate` runs
 offline. Releases run under a short-lived **GitHub App token** - the
 `axiom-release-bot` app is the bypass actor on the `main` ruleset, because the
 built-in `GITHUB_TOKEN` can't push to a branch with required status checks. The
-app's ID and key live in the `APP_ID` variable and `APP_PRIVATE_KEY` secret.
+app's ID and key live in the `APP_ID` variable and `APP_PRIVATE_KEY` secret. The
+automation PRs are App-created intentionally because App/PAT-created events can
+trigger PR workflows normally; the built-in `GITHUB_TOKEN` is used only for
+`workflow_dispatch` calls from jobs that explicitly grant `actions: write`.
 `package.json` / `package-lock.json` are **release- and lint-tooling only** -
 this is not an npm project, and the shipped plugin carries no npm dependencies.
 The repository's Actions **default token permission is read-only**; every
-workflow declares an explicit top-level `permissions:` block (enforced by
-`npm run check:repo`), so none silently rely on the default. Dependency auditing
-is **self-managing**: `dependency-audit-fix.yml` auto-fixes and auto-merges any
-advisory with an upstream fix, while the audit gate flags only high+ advisories
-left over. The few that have no available fix (e.g. a dependency bundled inside
-`npm` itself) go in `.github/npm-audit-allowlist.json`, each with an **expiry**
-date so it is forced back through review - that one-time acknowledgement is the
-only manual step, since `npm audit` cannot itself tell a fixable advisory from an
-unfixable one.
+workflow declares explicit top-level permissions or explicit job-level
+permissions on every job (enforced by `npm run check:repo`), so none silently
+rely on the default. Write scopes are granted only to jobs that need them.
+Dependency auditing is **self-managing**: `dependency-audit-fix.yml` classifies
+`npm audit fix` exits, auto-fixes and auto-merges valid lockfile-only updates,
+while the audit gate enforces allowlisted high+ leftovers. The few advisories
+that have no available fix (e.g. a dependency bundled inside `npm` itself) go in
+`.github/npm-audit-allowlist.json`, each with an **expiry** date and a reason so
+it is forced back through review.
+Validator bumps are also automated: `bump-validate-action.yml` updates the
+vendored Anthropic validator scripts, dispatches `validate.yml` on the bump
+branch, and enables auto-merge. That required Validate run includes
+repo-owned smoke tests proving the bumped validator accepts a known-good plugin,
+rejects a known-bad plugin, and treats warnings as fatal when configured.
 
 ## Adding a plugin
 
@@ -178,10 +193,15 @@ the evals exist and clear the bar before approving.
 - **The Branch name check failed.** Rename the PR source branch to
   `feat/<short-kebab-slug>`, `fix/<short-kebab-slug>`, or
   `chore/<short-kebab-slug>`, then push the renamed branch.
-- **`bump-validate-action` PR is stuck with no checks.** A `GITHUB_TOKEN`-created
-  PR can't trigger workflows, so the job dispatches the checks against the branch.
-  If your ruleset doesn't honor dispatched checks, add a fine-grained PAT (repo
-  `contents` + `pull-requests` write) and use it for that workflow's PR step.
+- **`bump-validate-action` PR is stuck with no checks.** The PR is App-created so
+  normal PR workflows should run, and the job also dispatches `validate.yml`
+  against the branch with `GITHUB_TOKEN` under explicit `actions: write`. If no
+  checks appear, verify the App token permissions, workflow dispatch settings,
+  and required-check ruleset.
+- **`bump-validate-action` PR did not auto-merge.** Check the `Plugin manifests`
+  job first. A failed validator smoke test means the new upstream validator no
+  longer preserves this repo's expected pass/fail behavior and should not land
+  hands-off.
 - **A Dependabot PR won't auto-merge.** Confirm "Allow auto-merge" is on and the
   required checks pass. All update types auto-merge by default; to hold majors
   back, uncomment the `update-type` guard in `dependabot-auto-merge.yml`.

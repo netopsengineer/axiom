@@ -1,5 +1,5 @@
 {
-  "_comment": "Advisories that `npm audit fix` cannot resolve and that are accepted for now. Keyed by GHSA id (or advisory URL). Each entry needs an `expires` (YYYY-MM-DD) and a `reason`; .github/scripts/check-npm-audit.mjs fails the audit gate on any at/above-threshold advisory that is missing, expired, or undated, so entries are forced back through review. Keep this list as small as possible.",
+  "_comment": "Advisories that `npm audit fix` cannot resolve and that are accepted for now. Keyed by GHSA id or advisory URL (case-insensitive). Each entry must be an object with a real `expires` date in YYYY-MM-DD format and a non-blank `reason`; .github/scripts/check-npm-audit.mjs fails the audit gate on malformed entries and on any at/above-threshold advisory that is missing or expired, so entries are forced back through review. Keep this list as small as possible.",
   "advisories": {
     "GHSA-vxpw-j846-p89q": {
       "expires": "2026-12-31",

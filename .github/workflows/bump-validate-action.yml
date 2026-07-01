@@ -5,7 +5,8 @@ name: Bump validate-plugins action
 # stand-in: daily, it re-pins the SHA in the local validate-plugins wrapper to
 # the latest upstream commit, opens a PR with the repo GitHub App token so PR
 # checks trigger normally, dispatches an extra Validate pass against the branch,
-# and enables auto-merge so a green bump lands hands-off.
+# and enables auto-merge only after required checks, including validator smoke
+# tests, pass on the bumped branch.
 
 on:
   schedule:
@@ -13,9 +14,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: write
-  pull-requests: write
-  actions: write # gh workflow run validate.yml --ref <branch>
+  contents: read
 
 concurrency:
   group: bump-validate-action
@@ -31,12 +30,19 @@ jobs:
   bump:
     runs-on: ubuntu-latest
     timeout-minutes: 10
+    permissions:
+      contents: write
+      pull-requests: write
+      actions: write # gh workflow run validate.yml --ref <branch>
     steps:
       - name: Configure git defaults
         run: git config --global init.defaultBranch main
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
           persist-credentials: false
+      - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
+        with:
+          node-version: 24
 
       - name: Mint GitHub App token
         id: app-token
@@ -97,11 +103,30 @@ jobs:
           git commit -m "ci: bump validate-plugins action to ${SHORT}"
           git push -f "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" "$BRANCH"
 
-          # Create the PR if one isn't already open for this branch.
-          if [ "$(gh pr list --head "$BRANCH" --state open --json number --jq 'length')" = "0" ]; then
+          body="$(mktemp)"
+          cat > "$body" <<EOF
+          Automated re-pin of the local validate-plugins wrapper to latest upstream commit \`${LATEST}\`.
+
+          - Upstream commit: https://github.com/${ACTION_REPO}/commit/${LATEST}
+          - Upstream source path: \`${ACTION_REPO}/.github/actions/validate-plugins\`
+          - Local copied path: \`${UPSTREAM_DIR}\`
+          - Local pin file: \`${PIN_FILE}\`
+
+          Auto-merges once required checks pass, including the repo-owned validator smoke tests in \`validate.yml\`.
+          EOF
+
+          # Create or update the PR. Required checks guard the validator bump:
+          # Validate includes repo-owned smoke tests for known-good, known-bad,
+          # and fail-on-warnings behavior before auto-merge can land it.
+          pr_number="$(gh pr list --head "$BRANCH" --state open --json number --jq '.[0].number // empty')"
+          if [ -z "$pr_number" ]; then
             gh pr create --head "$BRANCH" --base main \
               --title "ci: bump validate-plugins action to ${SHORT}" \
-              --body "Automated re-pin of the local validate-plugins wrapper to latest upstream commit \`${LATEST}\` from \`${ACTION_REPO}/.github/actions/validate-plugins\` (no tags upstream, so Dependabot can't track it). Auto-merges once the dispatched Validate checks pass."
+              --body-file "$body"
+          else
+            gh pr edit "$pr_number" \
+              --title "ci: bump validate-plugins action to ${SHORT}" \
+              --body-file "$body"
           fi
 
           # The App-created PR triggers normal PR checks. Dispatch Validate too,
