@@ -1,4 +1,5 @@
-# Local checks for the axiom marketplace — mirrors .github/workflows/validate.yml.
+# Local checks for the axiom marketplace — mirrors validate.yml's local/static
+# jobs and adds automation script tests for workflow helpers.
 # Runs with prek (https://prek.j178.dev), a drop-in for pre-commit:
 #
 #   prek install           # install the git pre-commit hook (one time)
@@ -37,7 +38,21 @@ repos:
         name: repository invariants
         entry: npm run check:repo
         language: system
-        files: ^(\.claude-plugin/marketplace\.json|plugins/|\.github/scripts/check-repo-invariants\.mjs)$
+        files: ^(\.claude-plugin/marketplace\.json|plugins/|\.github/scripts/check-repo-invariants\.mjs|\.github/workflows/.*\.ya?ml)$
+        pass_filenames: false
+
+      - id: automation-script-tests
+        name: automation script tests
+        entry: npm run test:automation
+        language: system
+        files: ^(\.github/scripts/.*\.mjs|\.github/npm-audit-allowlist\.json|\.github/workflows/dependency-audit.*\.yml|package\.json|package-lock\.json)$
+        pass_filenames: false
+
+      - id: validate-plugins-smoke-tests
+        name: validate-plugins smoke tests
+        entry: npm run test:validate-plugins
+        language: system
+        files: ^(\.github/actions/validate-plugins/|\.github/scripts/check-validate-plugins-smoke\.mjs|\.github/workflows/validate\.yml|package\.json)$
         pass_filenames: false
 
       # Keeps all generated README regions derived from canonical structured

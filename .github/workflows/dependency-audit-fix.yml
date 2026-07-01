@@ -55,16 +55,7 @@ jobs:
 
       - name: Run npm audit fix
         id: fix
-        run: |
-          set -euo pipefail
-          # Lockfile-only: resolve advisories without rebuilding node_modules.
-          npm audit fix --package-lock-only --loglevel=error || true
-          if git diff --quiet -- package-lock.json package.json; then
-            echo "changed=false" >> "$GITHUB_OUTPUT"
-            echo "No lockfile changes from npm audit fix; nothing to do."
-          else
-            echo "changed=true" >> "$GITHUB_OUTPUT"
-          fi
+        run: node .github/scripts/run-npm-audit-fix.mjs
 
       - name: Open / update PR and enable auto-merge
         if: steps.fix.outputs.changed == 'true'

@@ -10,7 +10,8 @@ semantic-release derives the version bump from it (see the per-plugin
 `plugins/<plugin>/release.config.js` files):
 
 - `feat:` → minor &middot; `fix:` / `perf:` → patch
-- `feat!:` or a `BREAKING CHANGE:` footer → major
+- `<type>!:` in the PR title → major
+- `BREAKING CHANGE:` footer → major only if repository squash settings preserve it in the commit body
 - `chore:` / `ci:` / `docs:` / `refactor:` / `test:` / `style:` / `build:` → no release
 
 A releasable PR title releases each plugin path touched under

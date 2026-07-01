@@ -1,113 +1,104 @@
 import { spawnSync } from "node:child_process";
 import { readFileSync } from "node:fs";
 import path from "node:path";
+import { fileURLToPath } from "node:url";
 
 // Advisory gate over `npm audit --json`. npm audit itself has no way to ignore
-// an advisory or filter "no upstream fix" / transitive findings — its only knobs
-// are --audit-level (severity) and --omit (dependency type). This wrapper adds an
-// allowlist with per-entry expiry so the scheduled audit fails only on advisories
-// that are (a) at or above the threshold AND (b) not covered by a current
-// allowlist entry. Advisories with a real fix should be resolved by `npm audit
-// fix` (see dependency-audit-fix.yml); only genuinely unfixable ones (e.g. bundled
-// inside npm) belong in the allowlist, and every entry expires so it is re-reviewed.
+// an advisory or filter "no upstream fix" / transitive findings; this wrapper
+// adds a strict allowlist with per-entry expiry so every accepted advisory is
+// documented, time-bound, and re-reviewed.
 
 const ROOT = process.cwd();
 const ALLOWLIST_PATH = ".github/npm-audit-allowlist.json";
 const LEVELS = ["info", "low", "moderate", "high", "critical"];
-const THRESHOLD = (process.env.AUDIT_LEVEL || "high").toLowerCase();
+const GHSA_PATTERN = /GHSA-[0-9a-z]{4}-[0-9a-z]{4}-[0-9a-z]{4}/i;
+const DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
 
-function rank(level) {
-  const index = LEVELS.indexOf(level);
-  return index === -1 ? 0 : index;
+export function advisoryKey(url) {
+  const value = String(url ?? "");
+  const match = GHSA_PATTERN.exec(value);
+  return match ? match[0].toUpperCase() : value;
 }
 
-function fail(message) {
-  console.error(`npm audit gate error: ${message}`);
-  process.exit(1);
+// Case-insensitive lookup key: canonicalizes an embedded GHSA id if present,
+// otherwise case-folds the whole value (e.g. a bare advisory URL) so allowlist
+// entries can be written in any case.
+export function normalizeAllowlistKey(key) {
+  const value = String(key ?? "").trim();
+  const match = GHSA_PATTERN.exec(value);
+  return match ? match[0].toUpperCase() : value.toUpperCase();
 }
 
-function loadAllowlist() {
-  let text;
+export function loadAllowlistFromText(text, allowlistPath = ALLOWLIST_PATH) {
+  let data;
   try {
-    text = readFileSync(path.join(ROOT, ALLOWLIST_PATH), "utf8");
+    data = JSON.parse(text);
   } catch (error) {
-    if (error.code === "ENOENT") {
-      return {};
+    throw new Error(`${allowlistPath} is not valid JSON: ${error.message}`);
+  }
+
+  if (!isPlainObject(data)) {
+    throw new Error(`${allowlistPath} must contain a JSON object.`);
+  }
+
+  if (!Object.hasOwn(data, "advisories")) {
+    return {};
+  }
+
+  if (!isPlainObject(data.advisories)) {
+    throw new Error(`${allowlistPath} advisories must be an object.`);
+  }
+
+  const allowlist = {};
+  for (const [key, record] of Object.entries(data.advisories)) {
+    if (!isPlainObject(record)) {
+      throw new Error(`Allowlist entry ${key} must be an object.`);
     }
-    return fail(`Could not read ${ALLOWLIST_PATH}: ${error.message}`);
+    validateAllowlistRecord(key, record);
+    allowlist[key] = {
+      expires: record.expires,
+      reason: record.reason,
+    };
   }
-  try {
-    const data = JSON.parse(text);
-    const advisories = data?.advisories;
-    return advisories &&
-      typeof advisories === "object" &&
-      !Array.isArray(advisories)
-      ? advisories
-      : {};
-  } catch (error) {
-    return fail(`${ALLOWLIST_PATH} is not valid JSON: ${error.message}`);
-  }
+  return allowlist;
 }
 
-function runAudit() {
-  // npm audit exits non-zero when it finds vulnerabilities but still prints JSON,
-  // so the exit code is ignored and stdout is parsed directly.
-  const result = spawnSync("npm", ["audit", "--json"], {
-    cwd: ROOT,
-    encoding: "utf8",
-    maxBuffer: 64 * 1024 * 1024,
-  });
-  if (result.error) {
-    return fail(`Could not run npm audit: ${result.error.message}`);
-  }
-  if (!result.stdout || result.stdout.trim() === "") {
-    const detail = result.stderr ? ` ${result.stderr.trim()}` : "";
-    return fail(`npm audit produced no JSON output.${detail}`);
-  }
-  try {
-    return JSON.parse(result.stdout);
-  } catch (error) {
-    return fail(`Could not parse npm audit --json output: ${error.message}`);
-  }
-}
-
-function advisoryKey(url) {
-  // Preserve GitHub's canonical lowercase GHSA casing; matching is done
-  // case-insensitively so allowlist entries can be written in either case.
-  const match = /GHSA-[0-9a-z]{4}-[0-9a-z]{4}-[0-9a-z]{4}/i.exec(url || "");
-  return match ? match[0] : url;
-}
-
-function main() {
-  const threshold = rank(THRESHOLD);
-  const allowlist = loadAllowlist();
-  // Case-insensitive lookup: allowlist keys mapped to upper case.
+export function evaluateAudit({
+  audit,
+  allowlist,
+  threshold = "high",
+  now = new Date(),
+}) {
+  const thresholdLevel = normalizeThreshold(threshold);
+  const thresholdRank = rank(thresholdLevel);
+  const nowTime = toTime(now, "now");
+  const vulnerabilities = validateAuditReport(audit);
   const allowByKey = new Map(
-    Object.entries(allowlist).map(([key, record]) => [
-      key.toUpperCase(),
+    Object.entries(allowlist ?? {}).map(([key, record]) => [
+      normalizeAllowlistKey(key),
       { key, record },
     ]),
   );
-  const audit = runAudit();
-  const vulnerabilities = audit.vulnerabilities ?? {};
 
-  // Collect every advisory key seen at any severity (for stale-entry detection)
-  // and the unique advisories at or above the threshold (the ones the gate cares
-  // about). An advisory can surface under several packages/paths, so dedupe by key.
-  const allKeys = new Set();
+  const activeKeys = new Set();
   const relevant = new Map();
 
-  for (const [pkg, vuln] of Object.entries(vulnerabilities)) {
-    const via = Array.isArray(vuln?.via) ? vuln.via : [];
+  for (const [pkg, vulnerability] of Object.entries(vulnerabilities)) {
+    const via = Array.isArray(vulnerability?.via) ? vulnerability.via : [];
     for (const entry of via) {
       if (!entry || typeof entry !== "object" || !entry.url) {
         continue;
       }
+
       const key = advisoryKey(entry.url);
-      allKeys.add(key);
-      if (rank(entry.severity) < threshold) {
+      const urlKey = normalizeAllowlistKey(entry.url);
+      activeKeys.add(key);
+      activeKeys.add(urlKey);
+
+      if (rank(entry.severity) < thresholdRank) {
         continue;
       }
+
       if (!relevant.has(key)) {
         relevant.set(key, {
           key,
@@ -124,88 +115,246 @@ function main() {
   const blocking = [];
   const allowed = [];
 
-  for (const adv of relevant.values()) {
+  for (const advisory of relevant.values()) {
     const hit =
-      allowByKey.get(String(adv.key).toUpperCase()) ||
-      allowByKey.get(String(adv.url).toUpperCase());
-    const record = hit ? hit.record : null;
+      allowByKey.get(normalizeAllowlistKey(advisory.key)) ??
+      allowByKey.get(normalizeAllowlistKey(advisory.url));
 
-    if (record == null) {
-      blocking.push({ ...adv, reason: "not allowlisted" });
+    if (!hit) {
+      blocking.push({ ...advisory, reason: "not allowlisted" });
       continue;
     }
 
-    const expires = typeof record === "object" ? record.expires : null;
-    const expiresAt = expires ? Date.parse(`${expires}T23:59:59Z`) : Number.NaN;
-    if (Number.isNaN(expiresAt)) {
+    const expiresAt = parseDateEndOfDayUtc(hit.record.expires).getTime();
+    if (nowTime > expiresAt) {
       blocking.push({
-        ...adv,
-        reason: `allowlist entry is missing a valid "expires" date (YYYY-MM-DD)`,
+        ...advisory,
+        reason: `allowlist entry expired on ${hit.record.expires} - re-review and renew or remove it`,
       });
       continue;
     }
-    if (Date.now() > expiresAt) {
-      blocking.push({
-        ...adv,
-        reason: `allowlist entry expired on ${expires} — re-review and renew or remove it`,
-      });
-      continue;
-    }
+
     allowed.push({
-      ...adv,
-      expires,
-      note: typeof record === "object" ? record.reason : String(record),
+      ...advisory,
+      expires: hit.record.expires,
+      note: hit.record.reason,
     });
   }
 
-  if (allowed.length > 0) {
-    console.log(
-      `Allowlisted advisories (${allowed.length}), not blocking until expiry:`,
+  const stale = Object.keys(allowlist ?? {}).filter((key) => {
+    return !activeKeys.has(normalizeAllowlistKey(key));
+  });
+
+  return {
+    threshold: thresholdLevel,
+    allowed,
+    blocking,
+    stale,
+  };
+}
+
+export function normalizeThreshold(value) {
+  const threshold = String(value || "high").toLowerCase();
+  if (!LEVELS.includes(threshold)) {
+    throw new Error(
+      `AUDIT_LEVEL must be one of ${LEVELS.join(", ")}; got ${JSON.stringify(value)}.`,
     );
-    for (const adv of allowed) {
+  }
+  return threshold;
+}
+
+function validateAllowlistRecord(key, record) {
+  if (
+    typeof record.expires !== "string" ||
+    !DATE_PATTERN.test(record.expires)
+  ) {
+    throw new Error(
+      `Allowlist entry ${key} must include an expires date in YYYY-MM-DD format.`,
+    );
+  }
+
+  parseDateEndOfDayUtc(record.expires, key);
+
+  if (typeof record.reason !== "string" || record.reason.trim() === "") {
+    throw new Error(`Allowlist entry ${key} must include a non-blank reason.`);
+  }
+}
+
+function parseDateEndOfDayUtc(value, key = value) {
+  const [year, month, day] = value.split("-").map((part) => Number(part));
+  const date = new Date(Date.UTC(year, month - 1, day, 23, 59, 59, 999));
+  if (
+    date.getUTCFullYear() !== year ||
+    date.getUTCMonth() !== month - 1 ||
+    date.getUTCDate() !== day
+  ) {
+    throw new Error(
+      `Allowlist entry ${key} must include a real calendar date in YYYY-MM-DD format.`,
+    );
+  }
+  return date;
+}
+
+function toTime(value, label) {
+  const time =
+    value instanceof Date ? value.getTime() : new Date(value).getTime();
+  if (Number.isNaN(time)) {
+    throw new Error(`${label} must be a valid date.`);
+  }
+  return time;
+}
+
+function rank(level) {
+  const index = LEVELS.indexOf(String(level || "").toLowerCase());
+  // Fail closed: an unrecognized severity (schema drift, a new npm audit
+  // level, a malformed advisory) must not rank below every threshold and
+  // silently vanish from the gate — treat it as at least as severe as the
+  // highest known level so it always surfaces and must be allowlisted.
+  return index === -1 ? LEVELS.length : index;
+}
+
+// Fail closed on anything that isn't a genuine audit report: `npm audit` exits
+// non-zero both when it finds vulnerabilities (a real report, safe to ignore
+// the exit code for) AND on operational failures (registry outage, corrupt
+// lockfile, etc.), which parse as `{ "error": {...} }` with no
+// `vulnerabilities` key. Treating that shape as "zero vulnerabilities" would
+// turn an audit failure into a silent, false-green pass.
+function validateAuditReport(audit) {
+  if (!isPlainObject(audit)) {
+    throw new Error("npm audit output must be a JSON object.");
+  }
+  if (audit.error) {
+    throw new Error(
+      `npm audit reported an operational error instead of a report: ${summarizeAuditError(audit.error)}`,
+    );
+  }
+  if (!isPlainObject(audit.vulnerabilities)) {
+    throw new Error(
+      'npm audit output is missing a "vulnerabilities" object — not a valid audit report.',
+    );
+  }
+  return audit.vulnerabilities;
+}
+
+function summarizeAuditError(error) {
+  if (typeof error === "string") {
+    return error;
+  }
+  if (error && typeof error === "object") {
+    const code = error.code ? `${error.code}: ` : "";
+    return `${code}${error.summary || error.message || JSON.stringify(error)}`;
+  }
+  return String(error);
+}
+
+function isPlainObject(value) {
+  return value !== null && typeof value === "object" && !Array.isArray(value);
+}
+
+function loadAllowlist() {
+  try {
+    return loadAllowlistFromText(
+      readFileSync(path.join(ROOT, ALLOWLIST_PATH), "utf8"),
+      ALLOWLIST_PATH,
+    );
+  } catch (error) {
+    if (error.code === "ENOENT") {
+      return {};
+    }
+    throw error;
+  }
+}
+
+function runAudit() {
+  // npm audit exits non-zero when it finds vulnerabilities but still prints JSON,
+  // so the exit code is ignored and stdout is parsed directly.
+  const result = spawnSync("npm", ["audit", "--json"], {
+    cwd: ROOT,
+    encoding: "utf8",
+    maxBuffer: 64 * 1024 * 1024,
+  });
+  if (result.error) {
+    throw new Error(`Could not run npm audit: ${result.error.message}`);
+  }
+  if (!result.stdout || result.stdout.trim() === "") {
+    const detail = result.stderr ? ` ${result.stderr.trim()}` : "";
+    throw new Error(`npm audit produced no JSON output.${detail}`);
+  }
+  try {
+    return JSON.parse(result.stdout);
+  } catch (error) {
+    throw new Error(
+      `Could not parse npm audit --json output: ${error.message}`,
+    );
+  }
+}
+
+function printResult(result) {
+  if (result.allowed.length > 0) {
+    console.log(
+      `Allowlisted advisories (${result.allowed.length}), not blocking until expiry:`,
+    );
+    for (const advisory of result.allowed) {
       console.log(
-        `- ${adv.key} [${adv.severity}] expires ${adv.expires} — ${adv.note || "no reason given"}`,
+        `- ${advisory.key} [${advisory.severity}] expires ${advisory.expires} - ${advisory.note}`,
       );
     }
   }
 
-  const allKeysUpper = new Set(
-    [...allKeys].map((key) => String(key).toUpperCase()),
-  );
-  const staleKeys = Object.keys(allowlist).filter(
-    (key) => !allKeysUpper.has(key.toUpperCase()),
-  );
-  if (staleKeys.length > 0) {
+  if (result.stale.length > 0) {
     const phrase =
-      staleKeys.length === 1
+      result.stale.length === 1
         ? "entry no longer matches"
         : "entries no longer match";
     console.log(
-      `Note: ${staleKeys.length} allowlist ${phrase} a current advisory (safe to remove): ${staleKeys.join(", ")}`,
+      `Note: ${result.stale.length} allowlist ${phrase} a current advisory (safe to remove): ${result.stale.join(", ")}`,
     );
   }
 
-  if (blocking.length > 0) {
+  if (result.blocking.length > 0) {
     console.error(
-      `\nnpm audit gate FAILED: ${blocking.length} advisor${
-        blocking.length === 1 ? "y" : "ies"
-      } at or above "${THRESHOLD}" not covered by a valid allowlist entry:`,
+      `\nnpm audit gate FAILED: ${result.blocking.length} advisor${
+        result.blocking.length === 1 ? "y" : "ies"
+      } at or above "${result.threshold}" not covered by a valid allowlist entry:`,
     );
-    for (const adv of blocking) {
-      console.error(`- ${adv.key} [${adv.severity}] ${adv.title}`);
-      console.error(`    ${adv.url}`);
-      console.error(`    paths: ${[...adv.packages].join(", ")}`);
-      console.error(`    ${adv.reason}`);
+    for (const advisory of result.blocking) {
+      console.error(
+        `- ${advisory.key} [${advisory.severity}] ${advisory.title}`,
+      );
+      console.error(`    ${advisory.url}`);
+      console.error(`    paths: ${[...advisory.packages].join(", ")}`);
+      console.error(`    ${advisory.reason}`);
     }
     console.error(
       `\nFix with "npm audit fix". If there is no upstream fix, add the advisory to ${ALLOWLIST_PATH} with an "expires" date and a reason.`,
     );
-    process.exit(1);
+    return 1;
   }
 
   console.log(
-    `\nnpm audit gate passed (threshold: ${THRESHOLD}; ${allowed.length} allowlisted, 0 blocking).`,
+    `\nnpm audit gate passed (threshold: ${result.threshold}; ${result.allowed.length} allowlisted, 0 blocking).`,
   );
+  return 0;
 }
 
-main();
+function main() {
+  try {
+    const result = evaluateAudit({
+      audit: runAudit(),
+      allowlist: loadAllowlist(),
+      threshold: process.env.AUDIT_LEVEL || "high",
+      now: new Date(),
+    });
+    process.exitCode = printResult(result);
+  } catch (error) {
+    console.error(`npm audit gate error: ${error.message}`);
+    process.exitCode = 1;
+  }
+}
+
+if (
+  process.argv[1] &&
+  path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)
+) {
+  main();
+}
