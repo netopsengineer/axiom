@@ -33,11 +33,11 @@
   },
   "devDependencies": {
     "@biomejs/biome": "^2.5.2",
-    "@j178/prek": "^0.4.6",
+    "@j178/prek": "^0.4.8",
     "@semantic-release/changelog": "^6.0.3",
     "@semantic-release/exec": "^7.1.0",
     "@semantic-release/git": "^10.0.1",
-    "conventional-changelog-conventionalcommits": "^10.2.0",
+    "conventional-changelog-conventionalcommits": "^10.2.1",
     "cspell": "^10.0.1",
     "markdown-link-check": "^3.14.2",
     "semantic-release": "^25.0.5",
