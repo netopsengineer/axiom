@@ -3,7 +3,7 @@
   "name": "axiom-versioning",
   "displayName": "Axiom Versioning",
   "description": "Audits and updates external versioned dependencies across application, infrastructure, and CI/CD configurations.",
-  "version": "1.0.2",
+  "version": "1.1.0",
   "author": {
     "name": "axiom-plugins",
     "email": "enterprise.code.developer@gmail.com"
