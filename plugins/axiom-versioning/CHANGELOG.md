@@ -1,5 +1,7 @@
 # Changelog
 
+## [axiom-versioning-v1.1.1](https://github.com/netopsengineer/axiom/compare/axiom-versioning-v1.1.0...axiom-versioning-v1.1.1) (2026-07-07)
+
 ## [axiom-versioning-v1.1.0](https://github.com/netopsengineer/axiom/compare/axiom-versioning-v1.0.2...axiom-versioning-v1.1.0) (2026-07-07)
 
 ## [axiom-versioning-v1.0.2](https://github.com/netopsengineer/axiom/compare/axiom-versioning-v1.0.1...axiom-versioning-v1.0.2) (2026-06-16)
