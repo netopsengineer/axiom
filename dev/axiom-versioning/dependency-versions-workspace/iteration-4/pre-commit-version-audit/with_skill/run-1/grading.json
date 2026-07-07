@@ -1,0 +1,30 @@
+{
+  "expectations": [
+    {
+      "text": "Used live sources (WebFetch or WebSearch) to check versions for every hook, not training data",
+      "passed": true,
+      "evidence": "Verification log shows every one of the 5 hooks checked via 'WebFetch (via gh api)' against api.github.com/repos/.../tags and /releases/latest, each returning specific commit SHAs and 2026 dates (e.g. markdownlint-cli2 'v0.23.0, commit 534166213006ec869b773b7ed8c6ebeaad1165d0'), matching a genuine live-lookup pattern rather than recalled facts."
+    },
+    {
+      "text": "Checked BOTH GitHub releases AND tags for at least one dependency where they might diverge",
+      "passed": true,
+      "evidence": "'Verified via: WebFetch api.github.com/repos/DavidAnson/markdownlint-cli2/tags (latest tag v0.23.0...) -- /releases/latest returns HTTP 404 (this project ships no GitHub Releases, confirming the existing comment's premise)' -- both endpoints checked and the release/tag divergence explicitly documented; also done for shellcheck-py (tags-only) and zizmor-pre-commit (both agree)."
+    },
+    {
+      "text": "Checked each externally-pinned pre-commit hook repo (5 in this config; the local repo has no pinnable external version) for known advisories via a live source (OSV.dev scan or CVE search)",
+      "passed": true,
+      "evidence": "'### SECURITY -- None found. OSV.dev batch scan (scripts/osv_scan.py) returned [CLEAN] for all 5 hooks...WebSearch fallback cross-checks...found no CVEs or GHSA advisories for any of the 5 tools either.' The verification log lists individual OSV.dev + WebSearch rows for markdownlint-cli2, gitleaks, actionlint, shellcheck-py, and zizmor-pre-commit."
+    },
+    {
+      "text": "Used the decision format (Risk level, Verified via, What changed, etc.) for each version delta",
+      "passed": true,
+      "evidence": "'### DavidAnson/markdownlint-cli2: v0.22.1 -> v0.23.0' and '### zizmorcore/zizmor-pre-commit: v1.25.2 -> v1.26.1' both use Risk level, Verified via, What changed, Breaking changes, Migration steps, Security advisories, Recommendation, Your call. The gitleaks maintenance-health finding also uses the same format even though it's not a version delta."
+    },
+    {
+      "text": "Included a verification log table at the end listing every external claim with tool and source",
+      "passed": true,
+      "evidence": "'## Step 6: Verification Log' (lines 178-202) is a table with columns Claim | Tool | Source | Finding containing 21 rows, covering every hook's tag/release check, SHA-integrity re-derivation, changelog fetch, and OSV/WebSearch security checks."
+    }
+  ],
+  "summary": {"passed": 5, "failed": 0, "total": 5, "pass_rate": 1.0}
+}

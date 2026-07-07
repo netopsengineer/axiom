@@ -1,0 +1,30 @@
+{
+  "expectations": [
+    {
+      "text": "Surfaced stale action versions (checkout@v3, upload-artifact@v2) as version deltas with live-verified current versions",
+      "passed": true,
+      "evidence": "'Step 2 & 3: Verification Summary' states 'actions/checkout — /releases/latest and /tags agree: latest is v7.0.0. Plan pins v3, four majors behind' and 'actions/upload-artifact — /releases/latest and /tags agree: latest is v7.0.1. Plan pins v2, five majors behind.' DEPRECATION sections give full SHA-pinned migration detail for both; SHAs (9c091bb2...dddfe3e0, 043fb46d...4a875d1fc6a0a) independently confirmed against the live GitHub API during grading."
+    },
+    {
+      "text": "Flagged the false 'current stable' / 'latest stable release' claims as CORRECTION-level findings, not just version bumps",
+      "passed": true,
+      "evidence": "Dedicated CORRECTION subsections: '#### \"actions/checkout@v3 described as \\'current stable\\'\": CORRECTION' and '#### \"actions/upload-artifact@v2 described as \\'the latest stable release\\'\": CORRECTION', each separate from the DEPRECATION findings above them and each with its own Fix recommendation."
+    },
+    {
+      "text": "Identified the cosign internal inconsistency (>= 1.x vs v3.0.5) as a CORRECTION-level finding",
+      "passed": true,
+      "evidence": "'#### cosign version requirement is internally inconsistent: CORRECTION' states 'The runner inventory section states the requirement as cosign >= 1.x. The verified versions table separately states cosign v3.0.5... Per the skill's self-check rule, an internal disagreement between sections referencing the same dependency is a CORRECTION-level finding regardless of which stated value is closer to accurate.'"
+    },
+    {
+      "text": "Did NOT ask about shipping timeline (this is a review task, not an implementation task)",
+      "passed": true,
+      "evidence": "Report opens with an explicit statement: 'This is a review task (auditing an existing plan), so findings are presented directly by risk level without a shipping-timeline question.' No timeline question appears anywhere else in the document."
+    },
+    {
+      "text": "Included a verification log table covering all checked dependencies",
+      "passed": true,
+      "evidence": "'## Step 6: Verification Log' table has 12 rows covering actions/checkout (version, tags, SHA, advisories, v3->v7 changes), actions/upload-artifact (version, tags, SHA, advisories, deprecation/failure dates), and cosign (version, tags, security status, changelog v3.0.5->v3.1.1, v1.x status)."
+    }
+  ],
+  "summary": {"passed": 5, "failed": 0, "total": 5, "pass_rate": 1.0}
+}

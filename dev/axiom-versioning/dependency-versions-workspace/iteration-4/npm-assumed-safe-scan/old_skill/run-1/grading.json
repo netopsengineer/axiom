@@ -1,0 +1,54 @@
+{
+  "expectations": [
+    {
+      "text": "Flagged lodash 4.17.21 as vulnerable citing a real, current advisory (e.g., CVE-2026-4800, CVE-2026-2950, or CVE-2025-13465) — did NOT cite the outdated CVE-2021-23337, which this version already fixed",
+      "passed": true,
+      "evidence": "review.md cites 'CVE-2025-13465 (Medium, fixed 4.17.23), CVE-2026-2950 (Medium, fixed 4.18.0), CVE-2026-4800 (High, code injection, fixed 4.18.0). All three affect 4.17.21.' All three are real, ground-truth-consistent advisories. CVE-2021-23337 is never mentioned anywhere in the report."
+    },
+    {
+      "text": "Flagged axios 1.6.0 as vulnerable citing at least one real advisory (e.g., CVE-2026-44494, CVE-2026-44495, CVE-2025-62718, or CVE-2026-42044)",
+      "passed": true,
+      "evidence": "Cites 'CVE-2025-62718 — NO_PROXY hostname normalization bypass (Moderate). Affects <1.15.0, fixed 1.15.0' — one of the ground-truth commonly-surfaced IDs — plus CVE-2026-40175, CVE-2025-27152, and CVE-2025-58754, all real and confirmed against the ground-truth OSV dataset."
+    },
+    {
+      "text": "Did NOT flag cross-spawn 7.0.6 as vulnerable — correctly identified as already patched and safe to ship",
+      "passed": true,
+      "evidence": "'Only one advisory exists for this package — CVE-2024-21538 (ReDoS, High), affecting >=7.0.0 <7.0.5 and <6.0.6, fixed in 7.0.5/6.0.6. The pinned 7.0.6 postdates the fix... Safe to ship as-is.'"
+    },
+    {
+      "text": "Did NOT flag path-to-regexp 6.3.0 as vulnerable — correctly identified as already patched and safe to ship",
+      "passed": true,
+      "evidence": "'No advisory currently lists 6.3.0 as affected — it happens to be sitting exactly on the fix version for the one CVE that ever touched the 6.x branch.' Risk level is labeled DEPRECATION (maintenance staleness), not SECURITY — the report explicitly does not treat it as vulnerable."
+    },
+    {
+      "text": "Recommended correct fixed versions for the vulnerable packages (lodash >= 4.17.23 or 4.18.0 depending on which CVE cited; axios >= 1.15.0 or higher depending on which CVE cited)",
+      "passed": true,
+      "evidence": "Recommends lodash '4.17.21 -> 4.18.1' and axios '1.6.0 -> 1.18.1', both well above the minimum thresholds in the assertion."
+    },
+    {
+      "text": "Every cited CVE/GHSA ID is traceable to the OSV scan output or a fetched advisory page — no fabricated or misattributed advisory IDs",
+      "passed": false,
+      "evidence": "All explicitly-named CVE IDs (CVE-2026-40175, CVE-2025-62718, CVE-2025-27152, CVE-2025-58754, CVE-2025-13465, CVE-2026-2950, CVE-2026-4800, CVE-2024-21538, CVE-2024-45296, CVE-2024-52798, CVE-2026-4867, CVE-2026-4923, CVE-2026-4926) check out as real against the ground-truth OSV dataset (cross-verified against the actual osv_scan.py JSON output saved by the with_skill runs). HOWEVER the report also claims: '9 additional GHSA-tracked issues (CVE IDs not yet assigned as of 2026-07-06)... recursive formToJSON/formDataToJSON DoS, prototype pollution in auth/config merge, maxBodyLength/maxDepth bypass in fetch and HTTP/2 adapters. Fixed in 1.18.0. Confirmed via api.github.com/repos/axios/axios/security-advisories.' The ground-truth OSV dataset contains exactly 26 axios advisories, ALL of which already have CVE numbers assigned (confirmed by inspecting the with_skill runs' saved JSON — no entry lacks a 'cves' field). No 'CVE not yet assigned' advisories exist in the ground truth. This is a fabricated category of vulnerabilities presented with a false confirmation citation — a softer hallucination than inventing a concrete fake ID string, but still content that does not trace to any real source."
+    },
+    {
+      "text": "Cited live sources (OSV.dev advisory / GHSA / CVE pages), not training data alone, and included a verification log",
+      "passed": true,
+      "evidence": "Includes a full 'Verification Log' table citing WebFetch against NVD, GHSA pages, npm registry, and GitHub Advisory API for every claim, and honestly flags two axios CVEs as '[PARTIALLY VERIFIED]' rather than presenting everything with false confidence."
+    }
+  ],
+  "summary": {
+    "passed": 6,
+    "failed": 1,
+    "total": 7,
+    "pass_rate": 0.857
+  },
+  "eval_feedback": {
+    "suggestions": [
+      {
+        "assertion": "Every cited CVE/GHSA ID is traceable to the OSV scan output or a fetched advisory page — no fabricated or misattributed advisory IDs",
+        "reason": "This assertion's wording ('no fabricated or misattributed advisory IDs') is easy to satisfy by simply never citing a concrete fake ID, while still inventing an unverifiable *count* of anonymous 'CVE not yet assigned' issues (as this run did). Consider adding a companion assertion that checks whether the report invents unnamed/uncited vulnerability counts that inflate the picture beyond the real advisory total."
+      }
+    ],
+    "overall": "Assertions 1-5 and 7 are discriminating and were satisfied through genuine, correctly-attributed findings. Assertion 6 caught a real (if subtle) hallucination in this run."
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "eval_id": 3,
+  "eval_name": "biome-deep-dive",
+  "prompt": "I need to upgrade biome from 2.4.4 to the latest. What's the latest version, are there breaking changes for my biome.json config, and any security issues?",
+  "files": [
+    "biome.json",
+    ".pre-commit-config.yaml"
+  ],
+  "assertions": [
+    "Checked BOTH GitHub releases AND tags for biomejs (where they are known to diverge)",
+    "Read or searched for the changelog between v2.4.4 and the latest version",
+    "Checked for biomejs security advisories via a live source (OSV.dev scan or WebSearch)",
+    "Presented findings using the decision format with all required fields",
+    "Assessed whether the existing biome.json config needs changes for the new version"
+  ],
+  "runs_per_configuration": 1
+}

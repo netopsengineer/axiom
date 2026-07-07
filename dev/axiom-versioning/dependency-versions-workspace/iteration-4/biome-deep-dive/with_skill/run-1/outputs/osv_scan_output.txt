@@ -1,0 +1,4 @@
+[CLEAN]      npm:@biomejs/biome@2.4.4
+[CLEAN]      npm:@biomejs/biome@2.5.2
+
+RESULT: 0 of 2 package(s) have advisories in OSV.dev.

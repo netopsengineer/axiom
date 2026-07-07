@@ -1,0 +1,30 @@
+{
+  "expectations": [
+    {
+      "text": "Verified currency of all 5 actions using live sources (GitHub API)",
+      "passed": true,
+      "evidence": "Each of the five findings cites 'gh api repos/<action>/releases/latest and /tags' with specific published timestamps (e.g. checkout v7.0.0 published 2026-06-18T13:53:05Z, setup-node v6.4.0 published 2026-04-20T02:57:28Z). Grading independently re-queried the live GitHub API for all five commit SHAs and all matched exactly."
+    },
+    {
+      "text": "Fetched commit SHAs for all 5 actions and presented them in pinned format (owner/action@sha # vX.Y.Z)",
+      "passed": true,
+      "evidence": "'## SHA pin block (recommended versions)' yaml block lists all five in the required format: 'actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0', 'actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1', 'actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1', 'actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0', 'actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0' — all SHAs confirmed correct against the live GitHub API during grading."
+    },
+    {
+      "text": "Covered security advisories for all 5 actions — bundling actions/* into shared searches is acceptable if explicitly documented in the log",
+      "passed": true,
+      "evidence": "No bundling was used; each action has its own dedicated advisory check documented individually: 'gh api repos/actions/checkout/security-advisories -> empty', 'repos/actions/upload-artifact/security-advisories (empty) + WebSearch', 'repos/actions/download-artifact/security-advisories -> GHSA-cxww-7g56-2vh6', 'repos/actions/cache/security-advisories (empty) + WebSearch', 'repos/actions/setup-node/security-advisories -> empty' (plus a dedicated WebSearch that surfaced the transitive CVE-2025-7783). All 5 actions individually covered, exceeding the bundling-acceptable bar."
+    },
+    {
+      "text": "Verification log documents which security search covers which dependencies when bundled",
+      "passed": true,
+      "evidence": "This run did not bundle searches, so the 'when bundled' condition does not apply, but the verification log still documents per-dependency security coverage explicitly and individually, e.g. 'checkout has no repo-level security advisory | gh api | repos/actions/checkout/security-advisories | Empty result', with a distinct row for each of the five actions plus one for the transitive form-data CVE."
+    },
+    {
+      "text": "Included a verification log table at the end",
+      "passed": true,
+      "evidence": "'## Verification Log' table with 19 rows appears near the end of the document, followed only by a brief self-check list."
+    }
+  ],
+  "summary": {"passed": 5, "failed": 0, "total": 5, "pass_rate": 1.0}
+}

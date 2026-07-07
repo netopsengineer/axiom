@@ -1,0 +1,30 @@
+{
+  "expectations": [
+    {
+      "text": "Checked BOTH GitHub releases AND tags for biomejs (where they are known to diverge)",
+      "passed": true,
+      "evidence": "'GitHub API (api.github.com/repos/biomejs/biome/releases/latest ...) tag_name: @biomejs/biome@2.5.2' and 'GitHub tags, cross-checked via git/matching-refs/tags/@biomejs/biome@ (60 matching refs returned; newest is @biomejs/biome@2.5.2, no tag beyond it exists) -- releases and tags agree, no divergence here.' Both endpoints explicitly queried and compared, plus a third npm-registry cross-check."
+    },
+    {
+      "text": "Read or searched for the changelog between v2.4.4 and the latest version",
+      "passed": true,
+      "evidence": "'Full CLI changelog fetched from raw.githubusercontent.com/biomejs/biome/main/packages/@biomejs/biome/CHANGELOG.md ... Read every entry between the ## 2.4.4 and ## 2.5.2 headers (all of 2.4.5 through 2.4.16, 2.5.0, 2.5.1, 2.5.2)', with itemized findings on the recommended->preset deprecation, 73 rule promotions, and 4 rule renames."
+    },
+    {
+      "text": "Checked for biomejs security advisories via a live source (OSV.dev scan or WebSearch)",
+      "passed": true,
+      "evidence": "'OSV scan (scripts/osv_scan.py, single call, both project and target version checked): [CLEAN] npm:@biomejs/biome@2.4.4 / [CLEAN] npm:@biomejs/biome@2.5.2' with raw output also saved to osv_scan_output.txt (confirmed present in the outputs directory), plus a 'Fallback WebSearch' and a GitHub Security Advisories API check, all returning clean."
+    },
+    {
+      "text": "Presented findings using the decision format with all required fields",
+      "passed": true,
+      "evidence": "'## Step 4: Decision -- ### @biomejs/biome: 2.4.4 -> 2.5.2' includes Risk level, Verified via, What changed, Breaking changes, Migration steps, Security advisories, Recommendation, and Your call."
+    },
+    {
+      "text": "Assessed whether the existing biome.json config needs changes for the new version",
+      "passed": true,
+      "evidence": "Identifies that 'linter.rules.recommended' (used in the project's biome.json) is deprecated in favor of 'linter.rules.preset', that 73 newly-promoted recommended rules will activate automatically, and prescribes concrete migration steps including a $schema bump. Caveat: this report recommends running 'biome migrate --write' to perform the recommended->preset conversion with no warning attached, whereas the old_skill run on the same task empirically executed that exact command and found it produces the incorrect 'preset: \"none\"' (silently disabling all lint rules) rather than 'preset: \"recommended\"', citing an open upstream bug (biomejs/biome#10716). with_skill's assessment is still substantive and correctly identifies that a config change is needed, but its specific recommended remediation (an untested migrate command) is less rigorous than the comparison run and would be actively unsafe if followed as written."
+    }
+  ],
+  "summary": {"passed": 5, "failed": 0, "total": 5, "pass_rate": 1.0}
+}

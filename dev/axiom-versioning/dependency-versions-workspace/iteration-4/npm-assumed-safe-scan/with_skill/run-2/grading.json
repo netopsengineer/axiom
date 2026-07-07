@@ -1,0 +1,53 @@
+{
+  "expectations": [
+    {
+      "text": "Flagged lodash 4.17.21 as vulnerable citing a real, current advisory (e.g., CVE-2026-4800, CVE-2026-2950, or CVE-2025-13465) — did NOT cite the outdated CVE-2021-23337, which this version already fixed",
+      "passed": true,
+      "evidence": "Cites exactly 'GHSA-xxjr-mmjv-4gpg / CVE-2025-13465 (MODERATE), GHSA-f23m-r3pf-42rh / CVE-2026-2950 (MODERATE), GHSA-r5fr-rjxr-66jc / CVE-2026-4800 (HIGH)' — verified as an exact match against the findings array for lodash in this run's own osv-scan-pinned-versions.json. CVE-2021-23337 is mentioned once only as fixed historical lineage, not as an active reason."
+    },
+    {
+      "text": "Flagged axios 1.6.0 as vulnerable citing at least one real advisory (e.g., CVE-2026-44494, CVE-2026-44495, CVE-2025-62718, or CVE-2026-42044)",
+      "passed": true,
+      "evidence": "The axios CVE table includes all four ground-truth example IDs: CVE-2026-44494, CVE-2026-44495, CVE-2025-62718, and CVE-2026-42044, among a full 26-row table."
+    },
+    {
+      "text": "Did NOT flag cross-spawn 7.0.6 as vulnerable — correctly identified as already patched and safe to ship",
+      "passed": true,
+      "evidence": "osv-scan-pinned-versions.json shows cross-spawn entry with 'status: clean', 'total_advisories: 0'; report states 'Already latest (...) and clean in the OSV batch scan... Safe to ship as-is.'"
+    },
+    {
+      "text": "Did NOT flag path-to-regexp 6.3.0 as vulnerable — correctly identified as already patched and safe to ship",
+      "passed": true,
+      "evidence": "osv-scan-pinned-versions.json shows path-to-regexp entry with 'status: clean', 'total_advisories: 0'; report states '6.3.0 pin is not currently vulnerable... Safe to ship 6.3.0 as-is from a pure vulnerability standpoint.'"
+    },
+    {
+      "text": "Recommended correct fixed versions for the vulnerable packages (lodash >= 4.17.23 or 4.18.0 depending on which CVE cited; axios >= 1.15.0 or higher depending on which CVE cited)",
+      "passed": true,
+      "evidence": "Recommends lodash '4.17.21 -> 4.18.1' and axios '1.6.0 -> 1.18.1', both above the required minimums."
+    },
+    {
+      "text": "Every cited CVE/GHSA ID is traceable to the OSV scan output or a fetched advisory page — no fabricated or misattributed advisory IDs",
+      "passed": true,
+      "evidence": "Cross-checked every CVE ID in the axios table and lodash section against the findings arrays in this run's own osv-scan-pinned-versions.json — exact 1:1 match for all 26 axios and all 3 lodash IDs, no extras or omissions. Auxiliary claims (path-to-regexp GHSA-9wv6-86v2-598j/CVE-2024-45296, cross-spawn GHSA-3xgq-45jj-v275/CVE-2024-21538, and 8.x-line CVE-2026-4923/CVE-2026-4926) are not present in this run's own saved JSON (which only stored the pinned-version 'clean' results with empty findings for those two packages) but are independently corroborated by with_skill/run-1's separate full-history JSON output from the same eval — confirming these are real IDs, just not evidenced by a file saved in this specific run's directory. No fabricated ID found."
+    },
+    {
+      "text": "Cited live sources (OSV.dev advisory / GHSA / CVE pages), not training data alone, and included a verification log",
+      "passed": true,
+      "evidence": "Primary tool is 'OSV.dev batch scan (osv_scan.py npm:axios@1.6.0, 2026-07-06)' cross-checked against GitHub API release notes; includes a full 'Verification log' table and a 'Self-check' section stating 'Advisory integrity: every CVE/GHSA ID and range above is traced to a specific osv_scan.py invocation shown in this log; no ID was reconstructed from memory.'"
+    }
+  ],
+  "summary": {
+    "passed": 7,
+    "failed": 0,
+    "total": 7,
+    "pass_rate": 1.0
+  },
+  "eval_feedback": {
+    "suggestions": [
+      {
+        "reason": "This run's saved osv-scan-pinned-versions.json only captures the pinned-version scan, not the unpinned/full-history scans the report also references for path-to-regexp and cross-spawn's historical CVEs. Those claims could only be verified by cross-referencing with_skill/run-1's separate saved JSON from the same eval. If runs are graded in isolation in the future, consider requiring the executor to save every OSV invocation's output (pinned and unpinned) as a file, not just the pinned one, so each run is independently self-verifying."
+      }
+    ],
+    "overall": "Assertions are discriminating and were all satisfied through genuine, tool-grounded findings with no hallucinated IDs."
+  }
+}

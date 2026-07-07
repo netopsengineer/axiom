@@ -32,40 +32,6 @@ WebFetch: https://registry.npmjs.org/{package-name}/latest
 
 ### Security checking
 
-Prefer the bundled scanner — it batches every dependency into one deterministic
-OSV.dev call (GHSA/PYSEC/CVE), so you get a hard per-package verdict instead of
-judging search snippets:
-
-```bash
-# One call covers all deps. Spec: ecosystem:name[@version]
-python3 scripts/osv_scan.py npm:lodash@4.17.15 pypi:requests@2.19.1 \
-  "gha:tj-actions/changed-files@v44"
-
-# Or feed a JSON manifest (list of {ecosystem, name, version}):
-python3 scripts/osv_scan.py --json deps.json
-python3 scripts/osv_scan.py --format json npm:minimist@1.2.5   # machine-readable
-```
-
-Output legend:
-
-- `[VULNERABLE]` — a registry package (npm, PyPI, Go, crates.io, …) whose exact
-  version matches an advisory. Real hit for your pin.
-- `[REVIEW]` — a GitHub Action with advisories. OSV can't range-match action
-  tags, so it lists every advisory with its affected range; compare your pinned
-  tag against that range to decide if you're affected.
-- `[CLEAN]` — no advisories for the queried version.
-
-For each flagged advisory, open it to confirm real-world impact:
-
-```plaintext
-WebFetch: https://osv.dev/vulnerability/{advisory-id}
-```
-
-Exit codes: `0` ran (read stdout), `2` usage error, `3` OSV unreachable —
-fall back to the WebSearch method below. Use the fallback whenever the script
-can't help (offline/air-gapped, unsupported ecosystem, or you need deeper
-context than an advisory ID):
-
 ```plaintext
 WebSearch: "{package-name} CVE 2025 2026"
 WebSearch: "{package-name} security advisory"
@@ -130,17 +96,6 @@ one without the others would break the workflow. Look for these patterns.
 After tj-actions/changed-files (CVE-2025-30066), SHA pinning is mandatory for
 GitHub Actions in production workflows. Fetch SHAs via:
 `api.github.com/repos/{owner}/{repo}/git/refs/tags/{tag}`
-
-### OSV can't range-match GitHub Actions tags
-
-Empirically: `osv_scan.py "gha:tj-actions/changed-files@v44"` with an explicit
-version returns CLEAN even though CVE-2025-30066 affects everything through
-45.0.7. OSV keys the GitHub Actions ecosystem on release semver and does not
-resolve moving tags, so a versioned query silently under-reports (a dangerous
-false CLEAN). That is why the scanner queries actions at package level and labels
-them `[REVIEW]`, printing each advisory's affected range (`introduced` / `fixed`)
-so you can judge your pin yourself. Registry ecosystems (npm, PyPI, Go, …) do not
-have this problem — their versioned queries match precisely.
 
 ## Dual-Finding Pattern
 

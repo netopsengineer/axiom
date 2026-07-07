@@ -1,0 +1,56 @@
+[
+  {
+    "package": {
+      "ecosystem": "GitHub Actions",
+      "name": "actions/checkout",
+      "version": "v3"
+    },
+    "requested_version": "v3",
+    "auto_version_match": false,
+    "status": "clean",
+    "total_advisories": 0,
+    "shown": 0,
+    "findings": []
+  },
+  {
+    "package": {
+      "ecosystem": "GitHub Actions",
+      "name": "actions/upload-artifact",
+      "version": "v2"
+    },
+    "requested_version": "v2",
+    "auto_version_match": false,
+    "status": "clean",
+    "total_advisories": 0,
+    "shown": 0,
+    "findings": []
+  },
+  {
+    "package": {
+      "ecosystem": "Go",
+      "name": "github.com/sigstore/cosign/v3",
+      "version": "v3.0.5"
+    },
+    "requested_version": "v3.0.5",
+    "auto_version_match": true,
+    "status": "vulnerable",
+    "total_advisories": 1,
+    "shown": 1,
+    "findings": [
+      {
+        "id": "GO-2026-5694",
+        "cves": [
+          "CVE-2026-39395"
+        ],
+        "severity": "unknown",
+        "summary": "Cosign's verify-blob-attestation reports false positive when payload parsing fails in github.com/sigstore/cosign",
+        "ranges": [
+          [
+            "3.0.0",
+            "3.0.6"
+          ]
+        ]
+      }
+    ]
+  }
+]

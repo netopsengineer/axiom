@@ -1,0 +1,30 @@
+{
+  "expectations": [
+    {
+      "text": "Used live sources (WebFetch or WebSearch) to check versions for every hook, not training data",
+      "passed": true,
+      "evidence": "Verification log rows show every one of the 5 hooks checked via live 'Bash curl (GitHub API)' calls to api.github.com/repos/.../tags and /releases/latest, plus package-registry lookups for Biome and prek npm packages. Exact commit SHAs and 2026 publish dates are cited for each (e.g. 'markdownlint-cli2 latest tag/release ... Latest tag v0.23.0 (2026-07-01)'), consistent with genuine live queries rather than recalled training data."
+    },
+    {
+      "text": "Checked BOTH GitHub releases AND tags for at least one dependency where they might diverge",
+      "passed": true,
+      "evidence": "For markdownlint-cli2: 'GitHub API api.github.com/repos/DavidAnson/markdownlint-cli2/tags (v0.23.0...) and /releases/latest (404 -- this repo publishes no formal GitHub Releases...)' -- both endpoints were queried and the divergence (tags exist, releases don't) is explicitly reported. Also done for shellcheck-py (tags only, releases 404) and zizmor-pre-commit (both agree)."
+    },
+    {
+      "text": "Checked each externally-pinned pre-commit hook repo (5 in this config; the local repo has no pinnable external version) for known advisories via a live source (OSV.dev scan or CVE search)",
+      "passed": true,
+      "evidence": "Verification log has a dedicated CVE WebSearch row for all 5 hooks: markdownlint-cli2 ('CVE security advisory 2025 2026' -> none), gitleaks ('CVE security advisory 2026' -> none), actionlint ('CVE security advisory 2025 2026' -> none), shellcheck-py/shellcheck ('CVE security advisory 2025 2026' -> none), zizmor-pre-commit ('CVE security advisory 2025 2026' -> none, with the Chainguard container advisory explicitly ruled out as irrelevant). No OSV.dev scan script was used, but the assertion's 'OSV.dev scan OR CVE search' condition is satisfied via WebSearch."
+    },
+    {
+      "text": "Used the decision format (Risk level, Verified via, What changed, etc.) for each version delta",
+      "passed": true,
+      "evidence": "Both version deltas use the full format: '#### markdownlint-cli2: v0.22.1 -> v0.23.0' has Risk level, Verified via, What changed, Breaking changes, Migration steps, Security advisories, Recommendation, Your call; '#### zizmor-pre-commit: v1.25.2 -> v1.26.1' has the identical field set."
+    },
+    {
+      "text": "Included a verification log table at the end listing every external claim with tool and source",
+      "passed": true,
+      "evidence": "The '## Verification log' section (lines 70-97) is a table with columns Claim | Tool | Source | Finding, containing 20 rows covering every hook's version check, SHA-integrity check, and CVE search, plus supporting checks (Biome, prek, Dependabot config, CI Node version)."
+    }
+  ],
+  "summary": {"passed": 5, "failed": 0, "total": 5, "pass_rate": 1.0}
+}

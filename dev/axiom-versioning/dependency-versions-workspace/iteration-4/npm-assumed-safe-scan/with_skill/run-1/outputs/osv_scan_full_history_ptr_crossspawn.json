@@ -1,0 +1,132 @@
+[
+  {
+    "package": {
+      "ecosystem": "npm",
+      "name": "path-to-regexp"
+    },
+    "requested_version": null,
+    "auto_version_match": true,
+    "status": "vulnerable",
+    "total_advisories": 5,
+    "shown": 5,
+    "findings": [
+      {
+        "id": "GHSA-27v5-c462-wpq7",
+        "cves": [
+          "CVE-2026-4923"
+        ],
+        "severity": "MODERATE",
+        "summary": "path-to-regexp vulnerable to Regular Expression Denial of Service via multiple wildcards",
+        "ranges": [
+          [
+            "8.0.0",
+            "8.4.0"
+          ]
+        ]
+      },
+      {
+        "id": "GHSA-37ch-88jc-xwx2",
+        "cves": [
+          "CVE-2026-4867"
+        ],
+        "severity": "HIGH",
+        "summary": "path-to-regexp vulnerable to Regular Expression Denial of Service via multiple route parameters",
+        "ranges": [
+          [
+            "0",
+            "0.1.13"
+          ]
+        ]
+      },
+      {
+        "id": "GHSA-9wv6-86v2-598j",
+        "cves": [
+          "CVE-2024-45296"
+        ],
+        "severity": "HIGH",
+        "summary": "path-to-regexp outputs backtracking regular expressions",
+        "ranges": [
+          [
+            "0.2.0",
+            "1.9.0"
+          ],
+          [
+            "0",
+            "0.1.10"
+          ],
+          [
+            "7.0.0",
+            "8.0.0"
+          ],
+          [
+            "2.0.0",
+            "3.3.0"
+          ],
+          [
+            "4.0.0",
+            "6.3.0"
+          ]
+        ]
+      },
+      {
+        "id": "GHSA-j3q9-mxjg-w52f",
+        "cves": [
+          "CVE-2026-4926"
+        ],
+        "severity": "HIGH",
+        "summary": "path-to-regexp vulnerable to Denial of Service via sequential optional groups",
+        "ranges": [
+          [
+            "8.0.0",
+            "8.4.0"
+          ]
+        ]
+      },
+      {
+        "id": "GHSA-rhx6-c78j-4q9w",
+        "cves": [
+          "CVE-2024-52798"
+        ],
+        "severity": "HIGH",
+        "summary": "path-to-regexp contains a ReDoS",
+        "ranges": [
+          [
+            "0",
+            "0.1.12"
+          ]
+        ]
+      }
+    ]
+  },
+  {
+    "package": {
+      "ecosystem": "npm",
+      "name": "cross-spawn"
+    },
+    "requested_version": null,
+    "auto_version_match": true,
+    "status": "vulnerable",
+    "total_advisories": 1,
+    "shown": 1,
+    "findings": [
+      {
+        "id": "GHSA-3xgq-45jj-v275",
+        "cves": [
+          "CVE-2024-21538"
+        ],
+        "severity": "HIGH",
+        "summary": "Regular Expression Denial of Service (ReDoS) in cross-spawn",
+        "ranges": [
+          [
+            "7.0.0",
+            "7.0.5"
+          ],
+          [
+            "0",
+            "6.0.6"
+          ]
+        ]
+      }
+    ]
+  }
+]
