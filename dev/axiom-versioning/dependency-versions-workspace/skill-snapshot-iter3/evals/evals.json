@@ -11,7 +11,7 @@
       "expectations": [
         "Used live sources (WebFetch or WebSearch) to check versions for every hook, not training data",
         "Checked BOTH GitHub releases AND tags for at least one dependency where they might diverge",
-        "Checked each externally-pinned pre-commit hook repo (5 in this config; the local repo has no pinnable external version) for known advisories via a live source (OSV.dev scan or CVE search)",
+        "Ran a security/CVE search for each of the 6 pre-commit hook repos",
         "Used the decision format (Risk level, Verified via, What changed, etc.) for each version delta",
         "Included a verification log table at the end listing every external claim with tool and source"
       ]
@@ -43,7 +43,7 @@
       "expectations": [
         "Checked BOTH GitHub releases AND tags for biomejs (where they are known to diverge)",
         "Read or searched for the changelog between v2.4.4 and the latest version",
-        "Checked for biomejs security advisories via a live source (OSV.dev scan or WebSearch)",
+        "Checked for biomejs security advisories via WebSearch",
         "Presented findings using the decision format with all required fields",
         "Assessed whether the existing biome.json config needs changes for the new version"
       ]
@@ -72,37 +72,6 @@
         "Covered security advisories for all 5 actions \u2014 bundling actions/* into shared searches is acceptable if explicitly documented in the log",
         "Verification log documents which security search covers which dependencies when bundled",
         "Included a verification log table at the end"
-      ]
-    },
-    {
-      "id": 6,
-      "prompt": "We're about to lock dependencies for a new service before shipping. Here's what's currently pinned — for each one, tell me whether it's actually safe to ship as-is or needs to move, and to which exact version. npm: lodash 4.17.21, axios 1.6.0, cross-spawn 7.0.6, path-to-regexp 6.3.0.",
-      "expected_output": "A security report that correctly separates two already-patched, safe-to-ship packages (cross-spawn 7.0.6, path-to-regexp 6.3.0) from two packages that look safe by reputation but are actually vulnerable in current advisories (lodash 4.17.21 — vulnerable to CVEs from 2025/2026, not the old 2021 prototype-pollution CVE that this version already fixed; axios 1.6.0 — vulnerable to multiple 2025/2026 advisories). Every cited advisory ID must be real and traceable, not reconstructed from memory.",
-      "files": [],
-      "expectations": [
-        "Flagged lodash 4.17.21 as vulnerable citing a real, current advisory (e.g., CVE-2026-4800, CVE-2026-2950, or CVE-2025-13465) — did NOT cite the outdated CVE-2021-23337, which this version already fixed",
-        "Flagged axios 1.6.0 as vulnerable citing at least one real advisory (e.g., CVE-2026-44494, CVE-2026-44495, CVE-2025-62718, or CVE-2026-42044)",
-        "Did NOT flag cross-spawn 7.0.6 as vulnerable — correctly identified as already patched and safe to ship",
-        "Did NOT flag path-to-regexp 6.3.0 as vulnerable — correctly identified as already patched and safe to ship",
-        "Recommended correct fixed versions for the vulnerable packages (lodash >= 4.17.23 or 4.18.0 depending on which CVE cited; axios >= 1.15.0 or higher depending on which CVE cited)",
-        "Every cited CVE/GHSA ID is traceable to the OSV scan output or a fetched advisory page — no fabricated or misattributed advisory IDs",
-        "Cited live sources (OSV.dev advisory / GHSA / CVE pages), not training data alone, and included a verification log"
-      ]
-    },
-    {
-      "id": 7,
-      "prompt": "We're auditing a legacy internal tool's dependencies before a security review. Here's the full lockfile — flag anything with a known vulnerability or supply-chain risk, and tell me which ones are already safe. Python: python-multipart 0.0.6, jinja2 3.1.2, pyyaml 6.0.2. Node: tar-fs 2.1.1, ws 8.11.0, ua-parser-js 0.7.29, send 0.19.0.",
-      "expected_output": "A security report covering less-famous, recent (2024-2026) CVEs across Python and Node — python-multipart, jinja2, tar-fs, and ws are each vulnerable in current advisories; ua-parser-js 0.7.29 is a known embedded-malware supply-chain compromise, not a routine bug, and should be flagged accordingly; pyyaml 6.0.2 and send 0.19.0 are already patched and safe. Every cited advisory ID must be real and traceable, with no fabricated attribution detail.",
-      "files": [],
-      "expectations": [
-        "Flagged python-multipart 0.0.6 as vulnerable citing a real advisory (e.g., CVE-2024-24762) and recommended a fixed version (>= 0.0.7)",
-        "Flagged jinja2 3.1.2 as vulnerable citing a real advisory (e.g., CVE-2025-27516, CVE-2024-56201, CVE-2024-22195, or CVE-2024-34064) and recommended a fixed version (>= 3.1.6)",
-        "Flagged tar-fs 2.1.1 as vulnerable citing a real advisory (e.g., CVE-2025-48387, CVE-2024-12905, or CVE-2025-59343) and recommended a fixed version (>= 2.1.4)",
-        "Flagged ws 8.11.0 as vulnerable citing a real advisory (e.g., CVE-2024-37890) and recommended a fixed version (>= 8.17.1)",
-        "Flagged ua-parser-js 0.7.29 as a supply-chain / embedded-malware compromise (not merely a routine bug), citing CVE-2021-4229 or equivalent, and recommended moving off the compromised line entirely (>= 0.7.30, 0.8.1, or 1.0.1)",
-        "Did NOT flag pyyaml 6.0.2 or send 0.19.0 as vulnerable — both correctly identified as already patched and safe",
-        "Every cited CVE/GHSA/PYSEC ID and any attribution detail (discoverer, audit context) is traceable to the OSV scan output or a fetched advisory page — no fabricated IDs or invented narrative detail",
-        "Cited live sources (OSV.dev / GHSA / CVE pages), not training data alone, and included a verification log table"
       ]
     }
   ]

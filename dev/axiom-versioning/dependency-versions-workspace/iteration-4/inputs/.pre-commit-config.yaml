@@ -1,0 +1,121 @@
+# Local checks for the axiom marketplace — mirrors validate.yml's local/static
+# jobs and adds automation script tests for workflow helpers.
+# Runs with prek (https://prek.j178.dev), a drop-in for pre-commit:
+#
+#   prek install           # install the git pre-commit hook (one time)
+#   prek run --all-files   # run every hook against the whole repo
+#
+# Maintenance: npm-backed local hooks are single-sourced in package.json, while
+# third-party pre-commit hooks are SHA-frozen with a `# frozen: vX.Y.Z`
+# comment, so Dependabot tracks matching release tags instead of default-branch
+# HEAD. Bump them with `prek auto-update --freeze`.
+repos:
+  - repo: local
+    hooks:
+      # Mirrors the "JavaScript lint" job. Reuses the Biome version pinned in
+      # package.json (one source of truth, Dependabot-tracked); auto-fixes via
+      # `biome check --write`. If it rewrites a file, the commit stops so you
+      # can re-stage.
+      - id: biome
+        name: biome (check + write)
+        entry: npm run lint:fix
+        language: system
+        files: \.(js|mjs)$
+        pass_filenames: false
+
+      # Mirrors the "Plugin manifests" job's core local validation. Requires
+      # the Claude Code CLI on PATH.
+      - id: claude-plugin-validate
+        name: claude plugin validate
+        entry: npm run check:plugins:local
+        language: system
+        files: ^(plugins/|\.claude-plugin/)
+        pass_filenames: false
+
+      # Keeps local edits honest against repository-specific marketplace and
+      # shipped-plugin invariants that are too contextual for generic linters.
+      - id: repo-invariants
+        name: repository invariants
+        entry: npm run check:repo
+        language: system
+        files: ^(\.claude-plugin/marketplace\.json|plugins/|\.github/scripts/check-repo-invariants\.mjs|\.github/workflows/.*\.ya?ml)$
+        pass_filenames: false
+
+      - id: automation-script-tests
+        name: automation script tests
+        entry: npm run test:automation
+        language: system
+        files: ^(\.github/scripts/.*\.mjs|\.github/npm-audit-allowlist\.json|\.github/workflows/dependency-audit.*\.yml|package\.json|package-lock\.json)$
+        pass_filenames: false
+
+      - id: validate-plugins-smoke-tests
+        name: validate-plugins smoke tests
+        entry: npm run test:validate-plugins
+        language: system
+        files: ^(\.github/actions/validate-plugins/|\.github/scripts/check-validate-plugins-smoke\.mjs|\.github/workflows/validate\.yml|package\.json)$
+        pass_filenames: false
+
+      # Keeps all generated README regions derived from canonical structured
+      # sources. If a plugin is added or renamed, the hook updates README.md and
+      # stops the commit so the generated blocks can be staged with the content
+      # change.
+      - id: readme-generated-blocks
+        name: README generated blocks
+        entry: npm run docs:readme
+        language: system
+        files: ^(\.claude-plugin/marketplace\.json|plugins/.*/README\.md|plugins/.*/\.claude-plugin/plugin\.json|plugins/.*/skills/.*/evals/evals\.json|README\.md|\.github/scripts/sync-readme-.*\.mjs)$
+        pass_filenames: false
+
+      - id: yaml-syntax
+        name: YAML syntax
+        entry: npm run lint:yaml --
+        language: system
+        files: \.ya?ml$
+
+      - id: spelling
+        name: spelling
+        entry: npm run lint:spelling
+        language: system
+        files: \.(md|mjs|js|json|ya?ml)$
+        pass_filenames: false
+
+      - id: markdown-links
+        name: Markdown links
+        entry: npm run lint:links --
+        language: system
+        files: \.md$
+
+  # Mirrors the "Markdown lint" job, using the repo's .markdownlint-cli2.jsonc.
+  # markdownlint-cli2 is not an npm dependency here (CI uses the action), so the
+  # hook is pinned — SHA-frozen to v0.22.1, the latest tag (this project ships
+  # NO GitHub releases; tags are the only source).
+  - repo: https://github.com/DavidAnson/markdownlint-cli2
+    rev: 996abf60411a8d954288ac9856aae7602b80cbda # frozen: v0.22.1
+    hooks:
+      - id: markdownlint-cli2
+        args: [--fix]
+
+  # Secret scanning, both for local commits and full-repo CI coverage.
+  - repo: https://github.com/gitleaks/gitleaks
+    rev: 83d9cd684c87d95d656c1458ef04895a7f1cbd8e # frozen: v8.30.1
+    hooks:
+      - id: gitleaks
+
+  # GitHub Actions static analysis.
+  - repo: https://github.com/rhysd/actionlint
+    rev: 914e7df21a07ef503a81201c76d2b11c789d3fca # frozen: v1.7.12
+    hooks:
+      - id: actionlint
+
+  # Shell script linting for workflow scripts and future automation.
+  - repo: https://github.com/shellcheck-py/shellcheck-py
+    rev: 745eface02aef23e168a8afb6b5737818efbea95 # frozen: v0.11.0.1
+    hooks:
+      - id: shellcheck
+        exclude: ^\.github/actions/validate-plugins/upstream/
+
+  # Hardening checks for GitHub Actions workflows.
+  - repo: https://github.com/zizmorcore/zizmor-pre-commit
+    rev: 9257c6050c0261b8c57e712f632dc4a8010109a9 # frozen: v1.25.2
+    hooks:
+      - id: zizmor

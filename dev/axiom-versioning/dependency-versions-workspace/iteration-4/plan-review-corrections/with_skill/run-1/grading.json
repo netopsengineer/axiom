@@ -1,0 +1,30 @@
+{
+  "expectations": [
+    {
+      "text": "Surfaced stale action versions (checkout@v3, upload-artifact@v2) as version deltas with live-verified current versions",
+      "passed": true,
+      "evidence": "DEPRECATION section '#### actions/checkout: v3 -> v7.0.0' verified via 'gh api repos/actions/checkout/releases/latest -> v7.0.0, published 2026-06-18' and '#### actions/upload-artifact: v2 -> v7.0.1' verified via 'gh api repos/actions/upload-artifact/releases/latest -> v7.0.1, published 2026-04-10, commit 043fb46d1a93c77aae656e7c1c64a875d1fc6a0a'. Both SHAs independently confirmed against the live GitHub API during grading."
+    },
+    {
+      "text": "Flagged the false 'current stable' / 'latest stable release' claims as CORRECTION-level findings, not just version bumps",
+      "passed": true,
+      "evidence": "Dedicated CORRECTION subsections exist separate from the DEPRECATION entries: '#### \"actions/checkout@v3 ... current stable\": CORRECTION' and '#### \"actions/upload-artifact@v2 ... the latest stable release\": CORRECTION', each with 'What is stated' / 'What is correct' / 'Why it matters' / 'Fix' fields."
+    },
+    {
+      "text": "Identified the cosign internal inconsistency (>= 1.x vs v3.0.5) as a CORRECTION-level finding",
+      "passed": true,
+      "evidence": "'#### cosign version requirement: internal inconsistency — CORRECTION' states 'The runner inventory section states the requirement as cosign >= 1.x. The verified-versions table in the same plan states cosign v3.0.5... This is the exact cross-section inconsistency pattern the skill flags as CORRECTION-level regardless of which number is right.'"
+    },
+    {
+      "text": "Did NOT ask about shipping timeline (this is a review task, not an implementation task)",
+      "passed": true,
+      "evidence": "No shipping-timeline question appears anywhere in the report. The report opens by scoping directly to the three dependency claims and proceeds straight to findings; no 'Your call' or open question references a ship date."
+    },
+    {
+      "text": "Included a verification log table covering all checked dependencies",
+      "passed": true,
+      "evidence": "'## Verification Log' table has 16 rows covering actions/checkout (releases, tags, SHA, advisories, Node16 deprecation, v7 pwn-request change), actions/upload-artifact (releases, tags, SHA, advisories, deprecation dates, v4 breaking changes), and cosign (releases, advisories including false-positive triage, GHSA detail, CVE status, v1.x last release)."
+    }
+  ],
+  "summary": {"passed": 5, "failed": 0, "total": 5, "pass_rate": 1.0}
+}

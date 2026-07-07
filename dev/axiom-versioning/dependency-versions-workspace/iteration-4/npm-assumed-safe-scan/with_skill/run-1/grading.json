@@ -1,0 +1,49 @@
+{
+  "expectations": [
+    {
+      "text": "Flagged lodash 4.17.21 as vulnerable citing a real, current advisory (e.g., CVE-2026-4800, CVE-2026-2950, or CVE-2025-13465) — did NOT cite the outdated CVE-2021-23337, which this version already fixed",
+      "passed": true,
+      "evidence": "Cites exactly the three ground-truth lodash advisories: 'GHSA-xxjr-mmjv-4gpg (CVE-2025-13465), GHSA-f23m-r3pf-42rh (CVE-2026-2950), GHSA-r5fr-rjxr-66jc (CVE-2026-4800)' — verified identical to the findings array in the run's own osv_scan_pinned.json. CVE-2021-23337 is mentioned once only as fixed historical lineage ('an incomplete-patch follow-up to CVE-2021-23337'), not as an active/unfixed reason, which is compliant."
+    },
+    {
+      "text": "Flagged axios 1.6.0 as vulnerable citing at least one real advisory (e.g., CVE-2026-44494, CVE-2026-44495, CVE-2025-62718, or CVE-2026-42044)",
+      "passed": true,
+      "evidence": "All four ground-truth example IDs are present: GHSA-35jp-ww65-95wh (CVE-2026-44494), GHSA-3g43-6gmg-66jw (CVE-2026-44495), GHSA-3p68-rc4w-qgx5 (CVE-2025-62718), GHSA-3w6x-2g7m-8v23 (CVE-2026-42044), as part of a full 26-advisory list."
+    },
+    {
+      "text": "Did NOT flag cross-spawn 7.0.6 as vulnerable — correctly identified as already patched and safe to ship",
+      "passed": true,
+      "evidence": "osv_scan_pinned.json / report shows cross-spawn as CLEAN via OSV; report states 'Already latest... and clean in the OSV batch scan... Safe to ship as-is.'"
+    },
+    {
+      "text": "Did NOT flag path-to-regexp 6.3.0 as vulnerable — correctly identified as already patched and safe to ship",
+      "passed": true,
+      "evidence": "'OSV batch scan both with pin (npm:path-to-regexp@6.3.0 -> CLEAN)... The 6.3.0 pin is not currently vulnerable.' Labeled BREAKING-UPGRADE, not SECURITY."
+    },
+    {
+      "text": "Recommended correct fixed versions for the vulnerable packages (lodash >= 4.17.23 or 4.18.0 depending on which CVE cited; axios >= 1.15.0 or higher depending on which CVE cited)",
+      "passed": true,
+      "evidence": "Recommends lodash '4.17.21 -> 4.18.1' and axios '1.6.0 -> 1.18.1', with an explicit fallback minimum of '>= 1.16.0' if a more conservative jump is wanted — both comfortably clear the assertion's thresholds."
+    },
+    {
+      "text": "Every cited CVE/GHSA ID is traceable to the OSV scan output or a fetched advisory page — no fabricated or misattributed advisory IDs",
+      "passed": true,
+      "evidence": "Cross-checked every CVE/GHSA ID quoted in report.md against the actual saved tool output osv_scan_pinned.json and osv_scan_full_history_ptr_crossspawn.json in this run's outputs directory. All 26 axios IDs and all 3 lodash IDs cited in the report are an exact 1:1 match with the findings arrays in osv_scan_pinned.json (no extras, no omissions). The path-to-regexp (GHSA-9wv6-86v2-598j/CVE-2024-45296) and cross-spawn (GHSA-3xgq-45jj-v275/CVE-2024-21538) full-history IDs, plus the 8.x-line CVEs (CVE-2026-4923, CVE-2026-4926), all trace directly to osv_scan_full_history_ptr_crossspawn.json. No fabricated or misattributed ID found."
+    },
+    {
+      "text": "Cited live sources (OSV.dev advisory / GHSA / CVE pages), not training data alone, and included a verification log",
+      "passed": true,
+      "evidence": "Primary tool is 'OSV.dev batch scan (osv_scan.py npm:axios@1.6.0, 2026-07-06)' cross-checked against GitHub release notes and npm registry; includes a full 'Verification Log' table plus a 'Self-check' section explicitly stating 'No ID was reconstructed from memory.'"
+    }
+  ],
+  "summary": {
+    "passed": 7,
+    "failed": 0,
+    "total": 7,
+    "pass_rate": 1.0
+  },
+  "eval_feedback": {
+    "suggestions": [],
+    "overall": "No suggestions, evals look solid for this run. Note: run-1's outputs directory contains report.md and review.md as byte-identical duplicates (same 16280-byte content); grading was based on that single unique content."
+  }
+}

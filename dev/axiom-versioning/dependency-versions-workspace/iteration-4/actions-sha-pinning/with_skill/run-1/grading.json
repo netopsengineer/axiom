@@ -1,0 +1,30 @@
+{
+  "expectations": [
+    {
+      "text": "Verified currency of all 5 actions using live sources (GitHub API)",
+      "passed": true,
+      "evidence": "'Step 2: Verify current state — summary' table checks '/releases/latest' and '/tags' for all five repos (checkout v7.0.0, upload-artifact v7.0.1, download-artifact v8.0.1, cache v6.1.0, setup-node v6.4.0). Grading independently re-queried the live GitHub API for all five commit SHAs (checkout, upload-artifact, download-artifact, cache, setup-node) and all matched exactly."
+    },
+    {
+      "text": "Fetched commit SHAs for all 5 actions and presented them in pinned format (owner/action@sha # vX.Y.Z)",
+      "passed": true,
+      "evidence": "'## Step 5: All five, ready to pin' yaml block: 'actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0', 'actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1', 'actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1', 'actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0', 'actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0' — all five present and all SHAs confirmed correct against the live GitHub API during grading."
+    },
+    {
+      "text": "Covered security advisories for all 5 actions — bundling actions/* into shared searches is acceptable if explicitly documented in the log",
+      "passed": true,
+      "evidence": "Text explicitly documents the bundling choice: 'Security scan (bundled osv_scan.py, one batched OSV.dev call, all 5 actions queried at package level as required for GitHub Actions)', followed by scan output covering all five (checkout CLEAN, upload-artifact CLEAN, download-artifact REVIEW with GHSA-cxww-7g56-2vh6, cache CLEAN, setup-node CLEAN). The osv-scan.json output file confirms this data is real, not fabricated — all five packages appear with matching statuses."
+    },
+    {
+      "text": "Verification log documents which security search covers which dependencies when bundled",
+      "passed": true,
+      "evidence": "Verification log has one row per action tying the same bundled tool/source to each: 'checkout OSV advisories | osv_scan.py | OSV.dev querybatch | CLEAN, all versions', 'upload-artifact OSV advisories | osv_scan.py | OSV.dev querybatch | CLEAN, all versions', 'download-artifact OSV advisory GHSA-cxww-7g56-2vh6 scope | osv_scan.py + WebFetch | ...', 'cache OSV advisories | osv_scan.py | OSV.dev querybatch | CLEAN, all versions', 'setup-node OSV advisories | osv_scan.py | OSV.dev querybatch | CLEAN, all versions'. Self-check reiterates: 'Every dependency covered by the OSV scan: yes, all five in one batched call.'"
+    },
+    {
+      "text": "Included a verification log table at the end",
+      "passed": true,
+      "evidence": "'## Step 6: Verification log' table with 19 rows appears near the end of the document, followed only by a brief self-check list."
+    }
+  ],
+  "summary": {"passed": 5, "failed": 0, "total": 5, "pass_rate": 1.0}
+}

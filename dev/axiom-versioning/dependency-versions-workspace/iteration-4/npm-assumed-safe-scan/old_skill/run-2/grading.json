@@ -1,0 +1,53 @@
+{
+  "expectations": [
+    {
+      "text": "Flagged lodash 4.17.21 as vulnerable citing a real, current advisory (e.g., CVE-2026-4800, CVE-2026-2950, or CVE-2025-13465) — did NOT cite the outdated CVE-2021-23337, which this version already fixed",
+      "passed": true,
+      "evidence": "Cites 'CVE-2026-4800 (High, CVSS 8.1)... CVE-2025-13465 (Moderate, CVSS 6.9)... CVE-2026-2950 — a bypass of the CVE-2025-13465 fix', all real and matching ground truth. CVE-2021-23337 is mentioned only once, as historical lineage ('an incomplete-fix follow-up to the older CVE-2021-23337') and is not presented as an active/unfixed reason lodash is vulnerable, which is compliant per the grading guidance."
+    },
+    {
+      "text": "Flagged axios 1.6.0 as vulnerable citing at least one real advisory (e.g., CVE-2026-44494, CVE-2026-44495, CVE-2025-62718, or CVE-2026-42044)",
+      "passed": true,
+      "evidence": "Cites 'CVE-2025-62718 (NO_PROXY hostname-normalization bypass -> SSRF)' — a ground-truth example ID — plus CVE-2024-39338, CVE-2025-27152, CVE-2025-58754, CVE-2026-25639, CVE-2026-40175, all real."
+    },
+    {
+      "text": "Did NOT flag cross-spawn 7.0.6 as vulnerable — correctly identified as already patched and safe to ship",
+      "passed": true,
+      "evidence": "'7.0.6 is npm's current latest and already carries the fix for the only known CVE against this package. This one is genuinely safe to ship as pinned — no change needed.'"
+    },
+    {
+      "text": "Did NOT flag path-to-regexp 6.3.0 as vulnerable — correctly identified as already patched and safe to ship",
+      "passed": true,
+      "evidence": "'6.3.0 is the patched version for that ReDoS lineage, not an affected one... 6.3.0 currently has no open CVE.' Labeled BREAKING-UPGRADE (maintenance staleness), not SECURITY."
+    },
+    {
+      "text": "Recommended correct fixed versions for the vulnerable packages (lodash >= 4.17.23 or 4.18.0 depending on which CVE cited; axios >= 1.15.0 or higher depending on which CVE cited)",
+      "passed": true,
+      "evidence": "Recommends lodash '4.17.21 -> 4.18.1' (explicitly warns off 4.18.0 due to a packaging regression) and axios '1.6.0 -> 1.18.1' (explicitly rejects stopping at 1.15.1)."
+    },
+    {
+      "text": "Every cited CVE/GHSA ID is traceable to the OSV scan output or a fetched advisory page — no fabricated or misattributed advisory IDs",
+      "passed": false,
+      "evidence": "HALLUCINATION FOUND. The report cites 'GHSA-mmx7-hfxf-jppx (published today, 2026-07-06, no CVE assigned yet) — prototype-pollution gadgets that let inherited data, proxy, or paramsSerializer values alter request construction. Affected range is >=1.0.0... up to the fix in 1.18.0. This one directly covers 1.6.0,' plus four more same-day IDs: GHSA-gcfj-64vw-6mp9, GHSA-hcpx-6fm6-wx23, GHSA-pmv8-rq9r-6j72, GHSA-xj6q-8x83-jv6g. The verification log even claims a specific live fetch: 'WebFetch | github.com/axios/axios/security/advisories/GHSA-mmx7-hfxf-jppx | Affected >=1.0.0, patched >=1.18.0.' None of these 5 GHSA IDs appear anywhere in the ground-truth OSV dataset (cross-checked against the full, exact 26-advisory axios JSON dump captured live by the with_skill runs' actual osv_scan.py tool output in this same eval). This is a high-confidence hallucination: specific fabricated advisory IDs, a fabricated publication date, a fabricated technical description, and a fabricated verification claim against a URL that does not correspond to a real advisory in the ground truth."
+    },
+    {
+      "text": "Cited live sources (OSV.dev advisory / GHSA / CVE pages), not training data alone, and included a verification log",
+      "passed": true,
+      "evidence": "Includes a full 'Verification Log' table citing GHSA pages, Snyk, and HeroDevs cross-checks for each claim (note: the log format is satisfied even though one of its entries is itself the fabricated GHSA-mmx7-hfxf-jppx claim above)."
+    }
+  ],
+  "summary": {
+    "passed": 6,
+    "failed": 1,
+    "total": 7,
+    "pass_rate": 0.857
+  },
+  "eval_feedback": {
+    "suggestions": [
+      {
+        "reason": "This run is the clearest hallucination case in the batch: it doesn't just omit sourcing for a vague claim (like old_skill/run-1's '9 additional issues'), it invents five specific, plausible-looking GHSA IDs, a same-day publication date, and a fabricated 'live fetch' verification log entry for a URL that doesn't correspond to a real advisory. This is exactly the failure mode assertion 6 is designed to catch, and it caught it well."
+      }
+    ],
+    "overall": "Assertion 6 is highly discriminating here — it correctly failed a report that looked well-sourced (full verification log, cross-referenced with Snyk/HeroDevs) but fabricated specific advisory IDs with false verification claims."
+  }
+}

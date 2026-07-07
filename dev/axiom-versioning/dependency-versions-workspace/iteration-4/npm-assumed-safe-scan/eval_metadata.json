@@ -1,0 +1,16 @@
+{
+  "eval_id": 6,
+  "eval_name": "npm-assumed-safe-scan",
+  "prompt": "We're about to lock dependencies for a new service before shipping. Here's what's currently pinned \u2014 for each one, tell me whether it's actually safe to ship as-is or needs to move, and to which exact version. npm: lodash 4.17.21, axios 1.6.0, cross-spawn 7.0.6, path-to-regexp 6.3.0.",
+  "files": [],
+  "assertions": [
+    "Flagged lodash 4.17.21 as vulnerable citing a real, current advisory (e.g., CVE-2026-4800, CVE-2026-2950, or CVE-2025-13465) \u2014 did NOT cite the outdated CVE-2021-23337, which this version already fixed",
+    "Flagged axios 1.6.0 as vulnerable citing at least one real advisory (e.g., CVE-2026-44494, CVE-2026-44495, CVE-2025-62718, or CVE-2026-42044)",
+    "Did NOT flag cross-spawn 7.0.6 as vulnerable \u2014 correctly identified as already patched and safe to ship",
+    "Did NOT flag path-to-regexp 6.3.0 as vulnerable \u2014 correctly identified as already patched and safe to ship",
+    "Recommended correct fixed versions for the vulnerable packages (lodash >= 4.17.23 or 4.18.0 depending on which CVE cited; axios >= 1.15.0 or higher depending on which CVE cited)",
+    "Every cited CVE/GHSA ID is traceable to the OSV scan output or a fetched advisory page \u2014 no fabricated or misattributed advisory IDs",
+    "Cited live sources (OSV.dev advisory / GHSA / CVE pages), not training data alone, and included a verification log"
+  ],
+  "runs_per_configuration": 2
+}

@@ -45,10 +45,12 @@ See [`CHANGELOG.md`](CHANGELOG.md) for release history.
 
 ## Eval history
 
-Evaluated across three iterations (2026-03-21 through 2026-03-23) using Claude
-Sonnet 4.6 as executor and Claude Opus 4.6 as grader. Five test scenarios
-covering pre-commit audits, GHA workflow planning, single-dependency deep dives,
-plan review with false claims, and bulk SHA pinning.
+Iterations 1-3 were evaluated 2026-03-21 through 2026-03-23 using Claude
+Sonnet 4.6 as executor and Claude Opus 4.6 as grader, across five test
+scenarios covering pre-commit audits, GHA workflow planning, single-dependency
+deep dives, plan review with false claims, and bulk SHA pinning. Iteration 4
+was evaluated 2026-07-06 using Claude Sonnet 5 as executor and Claude Opus 4.8
+as grader, adding two security-focused scenarios (2 runs each).
 
 ### Iteration 1: Skill vs no skill (3 evals)
 
@@ -87,6 +89,54 @@ iteration 2 snapshot.
 | Plan Review (Corrections) | 80% (4/5)       | 100% (5/5)       | +20 pp    |
 | Actions SHA Pinning       | 100% (5/5)      | 100% (5/5)       | +0 pp     |
 | **Overall**               | **96% (24/25)** | **100% (25/25)** | **+4 pp** |
+
+### Iteration 4: OSV.dev integration + anti-hallucination guardrail vs iteration 3 skill (7 evals)
+
+Rewired the security-check step to run a bundled `scripts/osv_scan.py` first —
+one batched call against the OSV.dev vulnerability database (GHSA/PYSEC/CVE
+across npm, PyPI, Go, crates.io, and GitHub Actions) — falling back to
+`WebSearch` only when the script can't help. Added a guardrail requiring every
+advisory ID, affected range, fixed-in version, and attribution detail to trace
+to a specific tool call, never memory. Added two new evals with fixtures
+independently verified live against OSV.dev before the eval was written: an
+"assumed-safe" trap (well-known packages pinned at versions that look patched
+but carry current, less-famous CVEs) and a multi-ecosystem lockfile audit
+including a real embedded-malware supply-chain package. Compared against the
+iteration 3 snapshot with neutral, identical prompts across both configs (no
+coverage hints).
+
+A first eval attempt (evals built on famous, training-data-known CVEs) showed
+no measurable delta and was discarded rather than published — those fixtures
+didn't discriminate between a skill using live data and a capable model
+recalling well-known advisories from training. The eval set below replaced it.
+
+| Eval                                | Old Skill       | New Skill        | Delta     |
+|-------------------------------------|-----------------|------------------|-----------|
+| Pre-commit Version Audit            | 100% (5/5)      | 100% (5/5)       | +0 pp     |
+| GHA CI Planning                     | 100% (5/5)      | 100% (5/5)       | +0 pp     |
+| Biome Deep Dive                     | 100% (5/5)      | 100% (5/5)       | +0 pp     |
+| Plan Review (Corrections)           | 100% (5/5)      | 100% (5/5)       | +0 pp     |
+| Actions SHA Pinning                 | 100% (5/5)      | 100% (5/5)       | +0 pp     |
+| npm Assumed-Safe Scan (2 runs)      | 86% (12/14)     | 100% (14/14)     | +14 pp    |
+| Obscure-CVE Lockfile Audit (2 runs) | 94% (15/16)     | 100% (16/16)     | +6 pp     |
+| **Overall**                         | **95% (52/55)** | **100% (55/55)** | **+5 pp** |
+
+The pass-rate delta understates the actual gap. Grading the two security evals
+line-by-line surfaced a hard hallucination in the old (WebSearch-based) skill:
+one run fabricated a complete advisory — a fake GHSA ID, a fake publish date, a
+fake technical description, and a fake "verified via live fetch" citation —
+for a real package, none of which exist in the actual OSV data. A second run
+falsely claimed nine additional untracked advisories that don't exist. The
+OSV-grounded skill had zero fabricated citations across all 9 of its eval runs,
+including on the two evals designed specifically to surface this failure mode.
+Separately, the old skill twice denied a real, assigned CVE existed for a
+known malicious package — factually wrong, not merely incomplete.
+
+Not every finding favored the new skill: on the Biome eval, the old skill
+executed the CLI's own suggested migration command and caught a live upstream
+bug (it silently disables all lint rules) that the new skill's report
+recommended running without any such warning — logged as a follow-up fix
+independent of the OSV work.
 
 ### What failed without the skill (iteration 1)
 
@@ -172,3 +222,10 @@ and coverage.
   resolution.
 - **`SKILL.md` description**: Rewritten to comprehensive trigger description
   listing specific patterns, use cases, config files, and explicit exclusions.
+- **Iteration 3 -> 4**: Added `scripts/osv_scan.py` (batched OSV.dev lookups)
+  as the primary security-check method, with `WebSearch` as an explicit
+  fallback. Added a guardrail requiring every advisory ID, range, fixed
+  version, and attribution detail to trace to a specific tool call — never
+  reconstructed from memory. Replaced the two security-focused evals with
+  fixtures verified live against OSV.dev, chosen specifically to discriminate
+  between live-data grounding and recall of famous, training-data-known CVEs.

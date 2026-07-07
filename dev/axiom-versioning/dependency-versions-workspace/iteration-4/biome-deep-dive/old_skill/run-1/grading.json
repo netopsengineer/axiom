@@ -1,0 +1,30 @@
+{
+  "expectations": [
+    {
+      "text": "Checked BOTH GitHub releases AND tags for biomejs (where they are known to diverge)",
+      "passed": true,
+      "evidence": "'WebFetch/curl api.github.com/repos/biomejs/biome/releases/latest -> tag @biomejs/biome@2.5.2, published 2026-07-01' and 'curl api.github.com/repos/biomejs/biome/tags (paged, filtered to @biomejs/biome@ prefix ... newest matching tag is also 2.5.2; releases and tags agree, no divergence this time' -- both endpoints explicitly queried and compared."
+    },
+    {
+      "text": "Read or searched for the changelog between v2.4.4 and the latest version",
+      "passed": true,
+      "evidence": "'Read the full official changelog (raw.githubusercontent.com/biomejs/biome/main/packages/@biomejs/biome/CHANGELOG.md) for every entry between 2.4.4 and 2.5.2', with a detailed 'What changed' section summarizing patch releases 2.4.5-2.4.16, and the 2.5.0 minor release contents (preset option, 73 promoted nursery rules, concise reporter, --watch, SVG support)."
+    },
+    {
+      "text": "Checked for biomejs security advisories via a live source (OSV.dev scan or WebSearch)",
+      "passed": true,
+      "evidence": "'Security advisories: None found for the published @biomejs/biome npm package via: WebSearch \"biome biomejs CVE 2026 security advisory\"; GitHub Security Advisories API (api.github.com/repos/biomejs/biome/security-advisories -> 0 results); GitHub Advisories database search'. Also traced down an 'internal CVE' PR (#10690) and confirmed via diff inspection it only touches a dev-only codegen crate, not the shipped package."
+    },
+    {
+      "text": "Presented findings using the decision format with all required fields",
+      "passed": true,
+      "evidence": "'### @biomejs/biome: 2.4.4 -> 2.5.2' and '### biome migrate silently disables all lint rules for this config pattern' both use Risk level / Verified via / What changed / Breaking changes / Migration steps / Security advisories / Recommendation / Your call."
+    },
+    {
+      "text": "Assessed whether the existing biome.json config needs changes for the new version",
+      "passed": true,
+      "evidence": "Beyond noting the recommended->preset deprecation and running 'npx @biomejs/biome@2.5.2 check .' and 'ci .' directly against the project's real biome.json (both exit 0), the report empirically reproduced a real bug: 'ran npx @biomejs/biome@2.5.2 migrate --write against (a) the project's actual biome.json and (b) a minimal isolated file. Both times, \"rules\": { \"recommended\": true } was rewritten to \"rules\": { \"preset\": \"none\" } -- not the correct \"preset\": \"recommended\"', cross-referenced against an open GitHub issue (#10716). This is a substantive, empirically-verified assessment, not just a documentation read."
+    }
+  ],
+  "summary": {"passed": 5, "failed": 0, "total": 5, "pass_rate": 1.0}
+}

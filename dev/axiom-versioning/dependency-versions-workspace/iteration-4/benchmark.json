@@ -1,0 +1,974 @@
+{
+  "metadata": {
+    "skill_name": "dependency-versions",
+    "executor_model": "claude-sonnet-5",
+    "analyzer_model": "claude-opus-4-8",
+    "timestamp": "2026-07-06T23:58:00Z",
+    "evals_run": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7
+    ],
+    "runs_per_configuration": "1 (evals 1-5), 2 (evals 6-7)",
+    "iteration": 4,
+    "baseline": "old_skill (skill-snapshot-iter3: pre-OSV skill, WebSearch-based security)",
+    "note": "This is the 4th published iteration for this skill (README Eval history numbering). A separate discarded first attempt at this iteration (non-discriminating famous-CVE fixtures) was deleted rather than published; see the plugin README for details."
+  },
+  "runs": [
+    {
+      "eval_id": 1,
+      "eval_name": "pre-commit-version-audit",
+      "configuration": "with_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 1.0,
+        "passed": 5,
+        "failed": 0,
+        "total": 5,
+        "time_seconds": 0.0,
+        "tokens": 0,
+        "tool_calls": 0,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "Used live sources (WebFetch or WebSearch) to check versions for every hook, not training data",
+          "passed": true,
+          "evidence": "Verification log shows every one of the 5 hooks checked via 'WebFetch (via gh api)' against api.github.com/repos/.../tags and /releases/latest, each returning specific commit SHAs and 2026 dates (e.g. markdownlint-cli2 'v0.23.0, commit 534166213006ec869b773b7ed8c6ebeaad1165d0'), matching a genuine live-lookup pattern rather than recalled facts."
+        },
+        {
+          "text": "Checked BOTH GitHub releases AND tags for at least one dependency where they might diverge",
+          "passed": true,
+          "evidence": "'Verified via: WebFetch api.github.com/repos/DavidAnson/markdownlint-cli2/tags (latest tag v0.23.0...) -- /releases/latest returns HTTP 404 (this project ships no GitHub Releases, confirming the existing comment's premise)' -- both endpoints checked and the release/tag divergence explicitly documented; also done for shellcheck-py (tags-only) and zizmor-pre-commit (both agree)."
+        },
+        {
+          "text": "Checked each externally-pinned pre-commit hook repo (5 in this config; the local repo has no pinnable external version) for known advisories via a live source (OSV.dev scan or CVE search)",
+          "passed": true,
+          "evidence": "'### SECURITY -- None found. OSV.dev batch scan (scripts/osv_scan.py) returned [CLEAN] for all 5 hooks...WebSearch fallback cross-checks...found no CVEs or GHSA advisories for any of the 5 tools either.' The verification log lists individual OSV.dev + WebSearch rows for markdownlint-cli2, gitleaks, actionlint, shellcheck-py, and zizmor-pre-commit."
+        },
+        {
+          "text": "Used the decision format (Risk level, Verified via, What changed, etc.) for each version delta",
+          "passed": true,
+          "evidence": "'### DavidAnson/markdownlint-cli2: v0.22.1 -> v0.23.0' and '### zizmorcore/zizmor-pre-commit: v1.25.2 -> v1.26.1' both use Risk level, Verified via, What changed, Breaking changes, Migration steps, Security advisories, Recommendation, Your call. The gitleaks maintenance-health finding also uses the same format even though it's not a version delta."
+        },
+        {
+          "text": "Included a verification log table at the end listing every external claim with tool and source",
+          "passed": true,
+          "evidence": "'## Step 6: Verification Log' (lines 178-202) is a table with columns Claim | Tool | Source | Finding containing 21 rows, covering every hook's tag/release check, SHA-integrity re-derivation, changelog fetch, and OSV/WebSearch security checks."
+        }
+      ],
+      "notes": []
+    },
+    {
+      "eval_id": 1,
+      "eval_name": "pre-commit-version-audit",
+      "configuration": "old_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 1.0,
+        "passed": 5,
+        "failed": 0,
+        "total": 5,
+        "time_seconds": 0.0,
+        "tokens": 0,
+        "tool_calls": 0,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "Used live sources (WebFetch or WebSearch) to check versions for every hook, not training data",
+          "passed": true,
+          "evidence": "Verification log rows show every one of the 5 hooks checked via live 'Bash curl (GitHub API)' calls to api.github.com/repos/.../tags and /releases/latest, plus package-registry lookups for Biome and prek npm packages. Exact commit SHAs and 2026 publish dates are cited for each (e.g. 'markdownlint-cli2 latest tag/release ... Latest tag v0.23.0 (2026-07-01)'), consistent with genuine live queries rather than recalled training data."
+        },
+        {
+          "text": "Checked BOTH GitHub releases AND tags for at least one dependency where they might diverge",
+          "passed": true,
+          "evidence": "For markdownlint-cli2: 'GitHub API api.github.com/repos/DavidAnson/markdownlint-cli2/tags (v0.23.0...) and /releases/latest (404 -- this repo publishes no formal GitHub Releases...)' -- both endpoints were queried and the divergence (tags exist, releases don't) is explicitly reported. Also done for shellcheck-py (tags only, releases 404) and zizmor-pre-commit (both agree)."
+        },
+        {
+          "text": "Checked each externally-pinned pre-commit hook repo (5 in this config; the local repo has no pinnable external version) for known advisories via a live source (OSV.dev scan or CVE search)",
+          "passed": true,
+          "evidence": "Verification log has a dedicated CVE WebSearch row for all 5 hooks: markdownlint-cli2 ('CVE security advisory 2025 2026' -> none), gitleaks ('CVE security advisory 2026' -> none), actionlint ('CVE security advisory 2025 2026' -> none), shellcheck-py/shellcheck ('CVE security advisory 2025 2026' -> none), zizmor-pre-commit ('CVE security advisory 2025 2026' -> none, with the Chainguard container advisory explicitly ruled out as irrelevant). No OSV.dev scan script was used, but the assertion's 'OSV.dev scan OR CVE search' condition is satisfied via WebSearch."
+        },
+        {
+          "text": "Used the decision format (Risk level, Verified via, What changed, etc.) for each version delta",
+          "passed": true,
+          "evidence": "Both version deltas use the full format: '#### markdownlint-cli2: v0.22.1 -> v0.23.0' has Risk level, Verified via, What changed, Breaking changes, Migration steps, Security advisories, Recommendation, Your call; '#### zizmor-pre-commit: v1.25.2 -> v1.26.1' has the identical field set."
+        },
+        {
+          "text": "Included a verification log table at the end listing every external claim with tool and source",
+          "passed": true,
+          "evidence": "The '## Verification log' section (lines 70-97) is a table with columns Claim | Tool | Source | Finding, containing 20 rows covering every hook's version check, SHA-integrity check, and CVE search, plus supporting checks (Biome, prek, Dependabot config, CI Node version)."
+        }
+      ],
+      "notes": []
+    },
+    {
+      "eval_id": 2,
+      "eval_name": "gha-ci-planning",
+      "configuration": "with_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 1.0,
+        "passed": 5,
+        "failed": 0,
+        "total": 5,
+        "time_seconds": 0.0,
+        "tokens": 0,
+        "tool_calls": 0,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "SHA-pinned all GitHub Actions references (uses: owner/action@sha # vX.Y.Z format)",
+          "passed": true,
+          "evidence": "The '## Proposed workflow' YAML block pins all four actions in exactly that format: 'uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0', 'uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0', 'uses: DavidAnson/markdownlint-cli2-action@8de2aa07cae85fd17c0b35642db70cf5495f1d25 # v24.0.0', 'uses: streetsidesoftware/cspell-action@de2a73e963e7443969755b648a1008f77033c5b2 # v8.4.0'. The notes confirm: 'All four actions are pinned to a commit SHA with the release tag as a trailing comment.'"
+        },
+        {
+          "text": "Used live sources (GitHub API or WebSearch) to verify action versions exist",
+          "passed": true,
+          "evidence": "'## New pins adopted for this workflow' table cites 'GitHub API /releases/latest + /tags (agree)' for all four new actions with matching commit SHAs, and the Verification Log lists a WebFetch/WebSearch row for each (e.g. actions/checkout, actions/setup-node, markdownlint-cli2-action, cspell-action)."
+        },
+        {
+          "text": "Checked for CVEs/security advisories on referenced actions or tools",
+          "passed": true,
+          "evidence": "OSV batch scans run for both current and candidate pins ('RESULT: 0 of 8 package(s) have advisories', 'RESULT: 1 of 8 package(s) have advisories') surfaced 'GHSA-pwf7-47c3-mfhx [CRITICAL]' on the rejected j178/prek-action, cross-verified via WebFetch of the GHSA advisory page under 'Design decisions'."
+        },
+        {
+          "text": "Used the decision format for version choices where the project has options",
+          "passed": true,
+          "evidence": "'### DavidAnson/markdownlint-cli2 (pre-commit hook mirror)', '### zizmorcore/zizmor-pre-commit', and '### biome.json $schema' all use Risk level / Verified via / What changed / Breaking changes / Migration steps / Security advisories / Recommendation / Your call fields."
+        },
+        {
+          "text": "Included a verification log table at the end",
+          "passed": true,
+          "evidence": "'## Step 6: Verification Log' (lines 381-408) is a table with columns Claim | Tool | Source | Finding, containing 22 rows covering every dependency check, the OSV scans, and the j178/prek-action security finding, followed by a Self-check list."
+        }
+      ],
+      "notes": []
+    },
+    {
+      "eval_id": 2,
+      "eval_name": "gha-ci-planning",
+      "configuration": "old_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 1.0,
+        "passed": 5,
+        "failed": 0,
+        "total": 5,
+        "time_seconds": 0.0,
+        "tokens": 0,
+        "tool_calls": 0,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "SHA-pinned all GitHub Actions references (uses: owner/action@sha # vX.Y.Z format)",
+          "passed": true,
+          "evidence": "The proposed workflow (Step 4, lines 290-355) pins all three GitHub Actions it uses with the required format: `uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0`, `uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0`, and `uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0`. No mutable tag references appear in the YAML."
+        },
+        {
+          "text": "Used live sources (GitHub API or WebSearch) to verify action versions exist",
+          "passed": true,
+          "evidence": "Every action and tool version is verified against live sources with explicit citations, e.g. 'actions/cache: v6.1.0 ... Verified via: `gh api repos/actions/cache/releases/latest` (published 2026-06-26) and `/tags`' and '@j178/prek (npm): v0.4.8 ... Verified via: `registry.npmjs.org/@j178/prek/latest` -> `0.4.8`'. The Step 6 verification log table lists ~30 distinct `gh api`/WebFetch/WebSearch/curl lookups with their sources."
+        },
+        {
+          "text": "Checked for CVEs/security advisories on referenced actions or tools",
+          "passed": true,
+          "evidence": "Each dependency section includes an explicit 'Security advisories' line (e.g. 'Security advisories: None found via WebSearch \"markdownlint-cli2 CVE security advisory 2026\"'), and actions/checkout's entry discusses a real advisory context (CVE-2025-61671 'pwn request' pattern) and explains why it's not applicable here (the plan uses `pull_request`, not `pull_request_target`). The verification log documents the specific WebSearch queries used for CVE coverage of every dependency in scope."
+        },
+        {
+          "text": "Used the decision format for version choices where the project has options",
+          "passed": true,
+          "evidence": "Both version-delta findings follow the skill's Step 4 decision format exactly, field-for-field: 'DavidAnson/markdownlint-cli2 (pre-commit hook repo): v0.22.1 -> v0.23.0' (lines 99-119) and 'zizmorcore/zizmor-pre-commit: v1.25.2 -> v1.26.1' (lines 121-143) each include Risk level, Verified via, What changed, Breaking changes, Migration steps, Security advisories, Recommendation, and a closing 'Your call:' framed as an explicit decision for the user rather than a silent choice."
+        },
+        {
+          "text": "Included a verification log table at the end",
+          "passed": true,
+          "evidence": "Step 6 'Verification log' (lines 430-465) is a markdown table with columns Claim | Tool | Source | Finding and ~30 rows covering every version, SHA, and security check made, followed by a self-check list against the skill's Step 6 checklist. This is the final section of the document."
+        }
+      ],
+      "notes": []
+    },
+    {
+      "eval_id": 3,
+      "eval_name": "biome-deep-dive",
+      "configuration": "with_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 1.0,
+        "passed": 5,
+        "failed": 0,
+        "total": 5,
+        "time_seconds": 0.0,
+        "tokens": 0,
+        "tool_calls": 0,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "Checked BOTH GitHub releases AND tags for biomejs (where they are known to diverge)",
+          "passed": true,
+          "evidence": "'GitHub API (api.github.com/repos/biomejs/biome/releases/latest ...) tag_name: @biomejs/biome@2.5.2' and 'GitHub tags, cross-checked via git/matching-refs/tags/@biomejs/biome@ (60 matching refs returned; newest is @biomejs/biome@2.5.2, no tag beyond it exists) -- releases and tags agree, no divergence here.' Both endpoints explicitly queried and compared, plus a third npm-registry cross-check."
+        },
+        {
+          "text": "Read or searched for the changelog between v2.4.4 and the latest version",
+          "passed": true,
+          "evidence": "'Full CLI changelog fetched from raw.githubusercontent.com/biomejs/biome/main/packages/@biomejs/biome/CHANGELOG.md ... Read every entry between the ## 2.4.4 and ## 2.5.2 headers (all of 2.4.5 through 2.4.16, 2.5.0, 2.5.1, 2.5.2)', with itemized findings on the recommended->preset deprecation, 73 rule promotions, and 4 rule renames."
+        },
+        {
+          "text": "Checked for biomejs security advisories via a live source (OSV.dev scan or WebSearch)",
+          "passed": true,
+          "evidence": "'OSV scan (scripts/osv_scan.py, single call, both project and target version checked): [CLEAN] npm:@biomejs/biome@2.4.4 / [CLEAN] npm:@biomejs/biome@2.5.2' with raw output also saved to osv_scan_output.txt (confirmed present in the outputs directory), plus a 'Fallback WebSearch' and a GitHub Security Advisories API check, all returning clean."
+        },
+        {
+          "text": "Presented findings using the decision format with all required fields",
+          "passed": true,
+          "evidence": "'## Step 4: Decision -- ### @biomejs/biome: 2.4.4 -> 2.5.2' includes Risk level, Verified via, What changed, Breaking changes, Migration steps, Security advisories, Recommendation, and Your call."
+        },
+        {
+          "text": "Assessed whether the existing biome.json config needs changes for the new version",
+          "passed": true,
+          "evidence": "Identifies that 'linter.rules.recommended' (used in the project's biome.json) is deprecated in favor of 'linter.rules.preset', that 73 newly-promoted recommended rules will activate automatically, and prescribes concrete migration steps including a $schema bump. Caveat: this report recommends running 'biome migrate --write' to perform the recommended->preset conversion with no warning attached, whereas the old_skill run on the same task empirically executed that exact command and found it produces the incorrect 'preset: \"none\"' (silently disabling all lint rules) rather than 'preset: \"recommended\"', citing an open upstream bug (biomejs/biome#10716). with_skill's assessment is still substantive and correctly identifies that a config change is needed, but its specific recommended remediation (an untested migrate command) is less rigorous than the comparison run and would be actively unsafe if followed as written."
+        }
+      ],
+      "notes": []
+    },
+    {
+      "eval_id": 3,
+      "eval_name": "biome-deep-dive",
+      "configuration": "old_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 1.0,
+        "passed": 5,
+        "failed": 0,
+        "total": 5,
+        "time_seconds": 0.0,
+        "tokens": 0,
+        "tool_calls": 0,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "Checked BOTH GitHub releases AND tags for biomejs (where they are known to diverge)",
+          "passed": true,
+          "evidence": "'WebFetch/curl api.github.com/repos/biomejs/biome/releases/latest -> tag @biomejs/biome@2.5.2, published 2026-07-01' and 'curl api.github.com/repos/biomejs/biome/tags (paged, filtered to @biomejs/biome@ prefix ... newest matching tag is also 2.5.2; releases and tags agree, no divergence this time' -- both endpoints explicitly queried and compared."
+        },
+        {
+          "text": "Read or searched for the changelog between v2.4.4 and the latest version",
+          "passed": true,
+          "evidence": "'Read the full official changelog (raw.githubusercontent.com/biomejs/biome/main/packages/@biomejs/biome/CHANGELOG.md) for every entry between 2.4.4 and 2.5.2', with a detailed 'What changed' section summarizing patch releases 2.4.5-2.4.16, and the 2.5.0 minor release contents (preset option, 73 promoted nursery rules, concise reporter, --watch, SVG support)."
+        },
+        {
+          "text": "Checked for biomejs security advisories via a live source (OSV.dev scan or WebSearch)",
+          "passed": true,
+          "evidence": "'Security advisories: None found for the published @biomejs/biome npm package via: WebSearch \"biome biomejs CVE 2026 security advisory\"; GitHub Security Advisories API (api.github.com/repos/biomejs/biome/security-advisories -> 0 results); GitHub Advisories database search'. Also traced down an 'internal CVE' PR (#10690) and confirmed via diff inspection it only touches a dev-only codegen crate, not the shipped package."
+        },
+        {
+          "text": "Presented findings using the decision format with all required fields",
+          "passed": true,
+          "evidence": "'### @biomejs/biome: 2.4.4 -> 2.5.2' and '### biome migrate silently disables all lint rules for this config pattern' both use Risk level / Verified via / What changed / Breaking changes / Migration steps / Security advisories / Recommendation / Your call."
+        },
+        {
+          "text": "Assessed whether the existing biome.json config needs changes for the new version",
+          "passed": true,
+          "evidence": "Beyond noting the recommended->preset deprecation and running 'npx @biomejs/biome@2.5.2 check .' and 'ci .' directly against the project's real biome.json (both exit 0), the report empirically reproduced a real bug: 'ran npx @biomejs/biome@2.5.2 migrate --write against (a) the project's actual biome.json and (b) a minimal isolated file. Both times, \"rules\": { \"recommended\": true } was rewritten to \"rules\": { \"preset\": \"none\" } -- not the correct \"preset\": \"recommended\"', cross-referenced against an open GitHub issue (#10716). This is a substantive, empirically-verified assessment, not just a documentation read."
+        }
+      ],
+      "notes": []
+    },
+    {
+      "eval_id": 4,
+      "eval_name": "plan-review-corrections",
+      "configuration": "with_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 1.0,
+        "passed": 5,
+        "failed": 0,
+        "total": 5,
+        "time_seconds": 0.0,
+        "tokens": 0,
+        "tool_calls": 0,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "Surfaced stale action versions (checkout@v3, upload-artifact@v2) as version deltas with live-verified current versions",
+          "passed": true,
+          "evidence": "DEPRECATION section '#### actions/checkout: v3 -> v7.0.0' verified via 'gh api repos/actions/checkout/releases/latest -> v7.0.0, published 2026-06-18' and '#### actions/upload-artifact: v2 -> v7.0.1' verified via 'gh api repos/actions/upload-artifact/releases/latest -> v7.0.1, published 2026-04-10, commit 043fb46d1a93c77aae656e7c1c64a875d1fc6a0a'. Both SHAs independently confirmed against the live GitHub API during grading."
+        },
+        {
+          "text": "Flagged the false 'current stable' / 'latest stable release' claims as CORRECTION-level findings, not just version bumps",
+          "passed": true,
+          "evidence": "Dedicated CORRECTION subsections exist separate from the DEPRECATION entries: '#### \"actions/checkout@v3 ... current stable\": CORRECTION' and '#### \"actions/upload-artifact@v2 ... the latest stable release\": CORRECTION', each with 'What is stated' / 'What is correct' / 'Why it matters' / 'Fix' fields."
+        },
+        {
+          "text": "Identified the cosign internal inconsistency (>= 1.x vs v3.0.5) as a CORRECTION-level finding",
+          "passed": true,
+          "evidence": "'#### cosign version requirement: internal inconsistency \u2014 CORRECTION' states 'The runner inventory section states the requirement as cosign >= 1.x. The verified-versions table in the same plan states cosign v3.0.5... This is the exact cross-section inconsistency pattern the skill flags as CORRECTION-level regardless of which number is right.'"
+        },
+        {
+          "text": "Did NOT ask about shipping timeline (this is a review task, not an implementation task)",
+          "passed": true,
+          "evidence": "No shipping-timeline question appears anywhere in the report. The report opens by scoping directly to the three dependency claims and proceeds straight to findings; no 'Your call' or open question references a ship date."
+        },
+        {
+          "text": "Included a verification log table covering all checked dependencies",
+          "passed": true,
+          "evidence": "'## Verification Log' table has 16 rows covering actions/checkout (releases, tags, SHA, advisories, Node16 deprecation, v7 pwn-request change), actions/upload-artifact (releases, tags, SHA, advisories, deprecation dates, v4 breaking changes), and cosign (releases, advisories including false-positive triage, GHSA detail, CVE status, v1.x last release)."
+        }
+      ],
+      "notes": []
+    },
+    {
+      "eval_id": 4,
+      "eval_name": "plan-review-corrections",
+      "configuration": "old_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 1.0,
+        "passed": 5,
+        "failed": 0,
+        "total": 5,
+        "time_seconds": 0.0,
+        "tokens": 0,
+        "tool_calls": 0,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "Surfaced stale action versions (checkout@v3, upload-artifact@v2) as version deltas with live-verified current versions",
+          "passed": true,
+          "evidence": "'Step 2 & 3: Verification Summary' states 'actions/checkout \u2014 /releases/latest and /tags agree: latest is v7.0.0. Plan pins v3, four majors behind' and 'actions/upload-artifact \u2014 /releases/latest and /tags agree: latest is v7.0.1. Plan pins v2, five majors behind.' DEPRECATION sections give full SHA-pinned migration detail for both; SHAs (9c091bb2...dddfe3e0, 043fb46d...4a875d1fc6a0a) independently confirmed against the live GitHub API during grading."
+        },
+        {
+          "text": "Flagged the false 'current stable' / 'latest stable release' claims as CORRECTION-level findings, not just version bumps",
+          "passed": true,
+          "evidence": "Dedicated CORRECTION subsections: '#### \"actions/checkout@v3 described as \\'current stable\\'\": CORRECTION' and '#### \"actions/upload-artifact@v2 described as \\'the latest stable release\\'\": CORRECTION', each separate from the DEPRECATION findings above them and each with its own Fix recommendation."
+        },
+        {
+          "text": "Identified the cosign internal inconsistency (>= 1.x vs v3.0.5) as a CORRECTION-level finding",
+          "passed": true,
+          "evidence": "'#### cosign version requirement is internally inconsistent: CORRECTION' states 'The runner inventory section states the requirement as cosign >= 1.x. The verified versions table separately states cosign v3.0.5... Per the skill's self-check rule, an internal disagreement between sections referencing the same dependency is a CORRECTION-level finding regardless of which stated value is closer to accurate.'"
+        },
+        {
+          "text": "Did NOT ask about shipping timeline (this is a review task, not an implementation task)",
+          "passed": true,
+          "evidence": "Report opens with an explicit statement: 'This is a review task (auditing an existing plan), so findings are presented directly by risk level without a shipping-timeline question.' No timeline question appears anywhere else in the document."
+        },
+        {
+          "text": "Included a verification log table covering all checked dependencies",
+          "passed": true,
+          "evidence": "'## Step 6: Verification Log' table has 12 rows covering actions/checkout (version, tags, SHA, advisories, v3->v7 changes), actions/upload-artifact (version, tags, SHA, advisories, deprecation/failure dates), and cosign (version, tags, security status, changelog v3.0.5->v3.1.1, v1.x status)."
+        }
+      ],
+      "notes": []
+    },
+    {
+      "eval_id": 5,
+      "eval_name": "actions-sha-pinning",
+      "configuration": "with_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 1.0,
+        "passed": 5,
+        "failed": 0,
+        "total": 5,
+        "time_seconds": 0.0,
+        "tokens": 0,
+        "tool_calls": 0,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "Verified currency of all 5 actions using live sources (GitHub API)",
+          "passed": true,
+          "evidence": "'Step 2: Verify current state \u2014 summary' table checks '/releases/latest' and '/tags' for all five repos (checkout v7.0.0, upload-artifact v7.0.1, download-artifact v8.0.1, cache v6.1.0, setup-node v6.4.0). Grading independently re-queried the live GitHub API for all five commit SHAs (checkout, upload-artifact, download-artifact, cache, setup-node) and all matched exactly."
+        },
+        {
+          "text": "Fetched commit SHAs for all 5 actions and presented them in pinned format (owner/action@sha # vX.Y.Z)",
+          "passed": true,
+          "evidence": "'## Step 5: All five, ready to pin' yaml block: 'actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0', 'actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1', 'actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1', 'actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0', 'actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0' \u2014 all five present and all SHAs confirmed correct against the live GitHub API during grading."
+        },
+        {
+          "text": "Covered security advisories for all 5 actions \u2014 bundling actions/* into shared searches is acceptable if explicitly documented in the log",
+          "passed": true,
+          "evidence": "Text explicitly documents the bundling choice: 'Security scan (bundled osv_scan.py, one batched OSV.dev call, all 5 actions queried at package level as required for GitHub Actions)', followed by scan output covering all five (checkout CLEAN, upload-artifact CLEAN, download-artifact REVIEW with GHSA-cxww-7g56-2vh6, cache CLEAN, setup-node CLEAN). The osv-scan.json output file confirms this data is real, not fabricated \u2014 all five packages appear with matching statuses."
+        },
+        {
+          "text": "Verification log documents which security search covers which dependencies when bundled",
+          "passed": true,
+          "evidence": "Verification log has one row per action tying the same bundled tool/source to each: 'checkout OSV advisories | osv_scan.py | OSV.dev querybatch | CLEAN, all versions', 'upload-artifact OSV advisories | osv_scan.py | OSV.dev querybatch | CLEAN, all versions', 'download-artifact OSV advisory GHSA-cxww-7g56-2vh6 scope | osv_scan.py + WebFetch | ...', 'cache OSV advisories | osv_scan.py | OSV.dev querybatch | CLEAN, all versions', 'setup-node OSV advisories | osv_scan.py | OSV.dev querybatch | CLEAN, all versions'. Self-check reiterates: 'Every dependency covered by the OSV scan: yes, all five in one batched call.'"
+        },
+        {
+          "text": "Included a verification log table at the end",
+          "passed": true,
+          "evidence": "'## Step 6: Verification log' table with 19 rows appears near the end of the document, followed only by a brief self-check list."
+        }
+      ],
+      "notes": []
+    },
+    {
+      "eval_id": 5,
+      "eval_name": "actions-sha-pinning",
+      "configuration": "old_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 1.0,
+        "passed": 5,
+        "failed": 0,
+        "total": 5,
+        "time_seconds": 0.0,
+        "tokens": 0,
+        "tool_calls": 0,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "Verified currency of all 5 actions using live sources (GitHub API)",
+          "passed": true,
+          "evidence": "Each of the five findings cites 'gh api repos/<action>/releases/latest and /tags' with specific published timestamps (e.g. checkout v7.0.0 published 2026-06-18T13:53:05Z, setup-node v6.4.0 published 2026-04-20T02:57:28Z). Grading independently re-queried the live GitHub API for all five commit SHAs and all matched exactly."
+        },
+        {
+          "text": "Fetched commit SHAs for all 5 actions and presented them in pinned format (owner/action@sha # vX.Y.Z)",
+          "passed": true,
+          "evidence": "'## SHA pin block (recommended versions)' yaml block lists all five in the required format: 'actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0', 'actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1', 'actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1', 'actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0', 'actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0' \u2014 all SHAs confirmed correct against the live GitHub API during grading."
+        },
+        {
+          "text": "Covered security advisories for all 5 actions \u2014 bundling actions/* into shared searches is acceptable if explicitly documented in the log",
+          "passed": true,
+          "evidence": "No bundling was used; each action has its own dedicated advisory check documented individually: 'gh api repos/actions/checkout/security-advisories -> empty', 'repos/actions/upload-artifact/security-advisories (empty) + WebSearch', 'repos/actions/download-artifact/security-advisories -> GHSA-cxww-7g56-2vh6', 'repos/actions/cache/security-advisories (empty) + WebSearch', 'repos/actions/setup-node/security-advisories -> empty' (plus a dedicated WebSearch that surfaced the transitive CVE-2025-7783). All 5 actions individually covered, exceeding the bundling-acceptable bar."
+        },
+        {
+          "text": "Verification log documents which security search covers which dependencies when bundled",
+          "passed": true,
+          "evidence": "This run did not bundle searches, so the 'when bundled' condition does not apply, but the verification log still documents per-dependency security coverage explicitly and individually, e.g. 'checkout has no repo-level security advisory | gh api | repos/actions/checkout/security-advisories | Empty result', with a distinct row for each of the five actions plus one for the transitive form-data CVE."
+        },
+        {
+          "text": "Included a verification log table at the end",
+          "passed": true,
+          "evidence": "'## Verification Log' table with 19 rows appears near the end of the document, followed only by a brief self-check list."
+        }
+      ],
+      "notes": []
+    },
+    {
+      "eval_id": 6,
+      "eval_name": "npm-assumed-safe-scan",
+      "configuration": "with_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 1.0,
+        "passed": 7,
+        "failed": 0,
+        "total": 7,
+        "time_seconds": 0.0,
+        "tokens": 0,
+        "tool_calls": 0,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "Flagged lodash 4.17.21 as vulnerable citing a real, current advisory (e.g., CVE-2026-4800, CVE-2026-2950, or CVE-2025-13465) \u2014 did NOT cite the outdated CVE-2021-23337, which this version already fixed",
+          "passed": true,
+          "evidence": "Cites exactly the three ground-truth lodash advisories: 'GHSA-xxjr-mmjv-4gpg (CVE-2025-13465), GHSA-f23m-r3pf-42rh (CVE-2026-2950), GHSA-r5fr-rjxr-66jc (CVE-2026-4800)' \u2014 verified identical to the findings array in the run's own osv_scan_pinned.json. CVE-2021-23337 is mentioned once only as fixed historical lineage ('an incomplete-patch follow-up to CVE-2021-23337'), not as an active/unfixed reason, which is compliant."
+        },
+        {
+          "text": "Flagged axios 1.6.0 as vulnerable citing at least one real advisory (e.g., CVE-2026-44494, CVE-2026-44495, CVE-2025-62718, or CVE-2026-42044)",
+          "passed": true,
+          "evidence": "All four ground-truth example IDs are present: GHSA-35jp-ww65-95wh (CVE-2026-44494), GHSA-3g43-6gmg-66jw (CVE-2026-44495), GHSA-3p68-rc4w-qgx5 (CVE-2025-62718), GHSA-3w6x-2g7m-8v23 (CVE-2026-42044), as part of a full 26-advisory list."
+        },
+        {
+          "text": "Did NOT flag cross-spawn 7.0.6 as vulnerable \u2014 correctly identified as already patched and safe to ship",
+          "passed": true,
+          "evidence": "osv_scan_pinned.json / report shows cross-spawn as CLEAN via OSV; report states 'Already latest... and clean in the OSV batch scan... Safe to ship as-is.'"
+        },
+        {
+          "text": "Did NOT flag path-to-regexp 6.3.0 as vulnerable \u2014 correctly identified as already patched and safe to ship",
+          "passed": true,
+          "evidence": "'OSV batch scan both with pin (npm:path-to-regexp@6.3.0 -> CLEAN)... The 6.3.0 pin is not currently vulnerable.' Labeled BREAKING-UPGRADE, not SECURITY."
+        },
+        {
+          "text": "Recommended correct fixed versions for the vulnerable packages (lodash >= 4.17.23 or 4.18.0 depending on which CVE cited; axios >= 1.15.0 or higher depending on which CVE cited)",
+          "passed": true,
+          "evidence": "Recommends lodash '4.17.21 -> 4.18.1' and axios '1.6.0 -> 1.18.1', with an explicit fallback minimum of '>= 1.16.0' if a more conservative jump is wanted \u2014 both comfortably clear the assertion's thresholds."
+        },
+        {
+          "text": "Every cited CVE/GHSA ID is traceable to the OSV scan output or a fetched advisory page \u2014 no fabricated or misattributed advisory IDs",
+          "passed": true,
+          "evidence": "Cross-checked every CVE/GHSA ID quoted in report.md against the actual saved tool output osv_scan_pinned.json and osv_scan_full_history_ptr_crossspawn.json in this run's outputs directory. All 26 axios IDs and all 3 lodash IDs cited in the report are an exact 1:1 match with the findings arrays in osv_scan_pinned.json (no extras, no omissions). The path-to-regexp (GHSA-9wv6-86v2-598j/CVE-2024-45296) and cross-spawn (GHSA-3xgq-45jj-v275/CVE-2024-21538) full-history IDs, plus the 8.x-line CVEs (CVE-2026-4923, CVE-2026-4926), all trace directly to osv_scan_full_history_ptr_crossspawn.json. No fabricated or misattributed ID found."
+        },
+        {
+          "text": "Cited live sources (OSV.dev advisory / GHSA / CVE pages), not training data alone, and included a verification log",
+          "passed": true,
+          "evidence": "Primary tool is 'OSV.dev batch scan (osv_scan.py npm:axios@1.6.0, 2026-07-06)' cross-checked against GitHub release notes and npm registry; includes a full 'Verification Log' table plus a 'Self-check' section explicitly stating 'No ID was reconstructed from memory.'"
+        }
+      ],
+      "notes": []
+    },
+    {
+      "eval_id": 6,
+      "eval_name": "npm-assumed-safe-scan",
+      "configuration": "with_skill",
+      "run_number": 2,
+      "result": {
+        "pass_rate": 1.0,
+        "passed": 7,
+        "failed": 0,
+        "total": 7,
+        "time_seconds": 0.0,
+        "tokens": 0,
+        "tool_calls": 0,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "Flagged lodash 4.17.21 as vulnerable citing a real, current advisory (e.g., CVE-2026-4800, CVE-2026-2950, or CVE-2025-13465) \u2014 did NOT cite the outdated CVE-2021-23337, which this version already fixed",
+          "passed": true,
+          "evidence": "Cites exactly 'GHSA-xxjr-mmjv-4gpg / CVE-2025-13465 (MODERATE), GHSA-f23m-r3pf-42rh / CVE-2026-2950 (MODERATE), GHSA-r5fr-rjxr-66jc / CVE-2026-4800 (HIGH)' \u2014 verified as an exact match against the findings array for lodash in this run's own osv-scan-pinned-versions.json. CVE-2021-23337 is mentioned once only as fixed historical lineage, not as an active reason."
+        },
+        {
+          "text": "Flagged axios 1.6.0 as vulnerable citing at least one real advisory (e.g., CVE-2026-44494, CVE-2026-44495, CVE-2025-62718, or CVE-2026-42044)",
+          "passed": true,
+          "evidence": "The axios CVE table includes all four ground-truth example IDs: CVE-2026-44494, CVE-2026-44495, CVE-2025-62718, and CVE-2026-42044, among a full 26-row table."
+        },
+        {
+          "text": "Did NOT flag cross-spawn 7.0.6 as vulnerable \u2014 correctly identified as already patched and safe to ship",
+          "passed": true,
+          "evidence": "osv-scan-pinned-versions.json shows cross-spawn entry with 'status: clean', 'total_advisories: 0'; report states 'Already latest (...) and clean in the OSV batch scan... Safe to ship as-is.'"
+        },
+        {
+          "text": "Did NOT flag path-to-regexp 6.3.0 as vulnerable \u2014 correctly identified as already patched and safe to ship",
+          "passed": true,
+          "evidence": "osv-scan-pinned-versions.json shows path-to-regexp entry with 'status: clean', 'total_advisories: 0'; report states '6.3.0 pin is not currently vulnerable... Safe to ship 6.3.0 as-is from a pure vulnerability standpoint.'"
+        },
+        {
+          "text": "Recommended correct fixed versions for the vulnerable packages (lodash >= 4.17.23 or 4.18.0 depending on which CVE cited; axios >= 1.15.0 or higher depending on which CVE cited)",
+          "passed": true,
+          "evidence": "Recommends lodash '4.17.21 -> 4.18.1' and axios '1.6.0 -> 1.18.1', both above the required minimums."
+        },
+        {
+          "text": "Every cited CVE/GHSA ID is traceable to the OSV scan output or a fetched advisory page \u2014 no fabricated or misattributed advisory IDs",
+          "passed": true,
+          "evidence": "Cross-checked every CVE ID in the axios table and lodash section against the findings arrays in this run's own osv-scan-pinned-versions.json \u2014 exact 1:1 match for all 26 axios and all 3 lodash IDs, no extras or omissions. Auxiliary claims (path-to-regexp GHSA-9wv6-86v2-598j/CVE-2024-45296, cross-spawn GHSA-3xgq-45jj-v275/CVE-2024-21538, and 8.x-line CVE-2026-4923/CVE-2026-4926) are not present in this run's own saved JSON (which only stored the pinned-version 'clean' results with empty findings for those two packages) but are independently corroborated by with_skill/run-1's separate full-history JSON output from the same eval \u2014 confirming these are real IDs, just not evidenced by a file saved in this specific run's directory. No fabricated ID found."
+        },
+        {
+          "text": "Cited live sources (OSV.dev advisory / GHSA / CVE pages), not training data alone, and included a verification log",
+          "passed": true,
+          "evidence": "Primary tool is 'OSV.dev batch scan (osv_scan.py npm:axios@1.6.0, 2026-07-06)' cross-checked against GitHub API release notes; includes a full 'Verification log' table and a 'Self-check' section stating 'Advisory integrity: every CVE/GHSA ID and range above is traced to a specific osv_scan.py invocation shown in this log; no ID was reconstructed from memory.'"
+        }
+      ],
+      "notes": []
+    },
+    {
+      "eval_id": 6,
+      "eval_name": "npm-assumed-safe-scan",
+      "configuration": "old_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 0.857,
+        "passed": 6,
+        "failed": 1,
+        "total": 7,
+        "time_seconds": 0.0,
+        "tokens": 0,
+        "tool_calls": 0,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "Flagged lodash 4.17.21 as vulnerable citing a real, current advisory (e.g., CVE-2026-4800, CVE-2026-2950, or CVE-2025-13465) \u2014 did NOT cite the outdated CVE-2021-23337, which this version already fixed",
+          "passed": true,
+          "evidence": "review.md cites 'CVE-2025-13465 (Medium, fixed 4.17.23), CVE-2026-2950 (Medium, fixed 4.18.0), CVE-2026-4800 (High, code injection, fixed 4.18.0). All three affect 4.17.21.' All three are real, ground-truth-consistent advisories. CVE-2021-23337 is never mentioned anywhere in the report."
+        },
+        {
+          "text": "Flagged axios 1.6.0 as vulnerable citing at least one real advisory (e.g., CVE-2026-44494, CVE-2026-44495, CVE-2025-62718, or CVE-2026-42044)",
+          "passed": true,
+          "evidence": "Cites 'CVE-2025-62718 \u2014 NO_PROXY hostname normalization bypass (Moderate). Affects <1.15.0, fixed 1.15.0' \u2014 one of the ground-truth commonly-surfaced IDs \u2014 plus CVE-2026-40175, CVE-2025-27152, and CVE-2025-58754, all real and confirmed against the ground-truth OSV dataset."
+        },
+        {
+          "text": "Did NOT flag cross-spawn 7.0.6 as vulnerable \u2014 correctly identified as already patched and safe to ship",
+          "passed": true,
+          "evidence": "'Only one advisory exists for this package \u2014 CVE-2024-21538 (ReDoS, High), affecting >=7.0.0 <7.0.5 and <6.0.6, fixed in 7.0.5/6.0.6. The pinned 7.0.6 postdates the fix... Safe to ship as-is.'"
+        },
+        {
+          "text": "Did NOT flag path-to-regexp 6.3.0 as vulnerable \u2014 correctly identified as already patched and safe to ship",
+          "passed": true,
+          "evidence": "'No advisory currently lists 6.3.0 as affected \u2014 it happens to be sitting exactly on the fix version for the one CVE that ever touched the 6.x branch.' Risk level is labeled DEPRECATION (maintenance staleness), not SECURITY \u2014 the report explicitly does not treat it as vulnerable."
+        },
+        {
+          "text": "Recommended correct fixed versions for the vulnerable packages (lodash >= 4.17.23 or 4.18.0 depending on which CVE cited; axios >= 1.15.0 or higher depending on which CVE cited)",
+          "passed": true,
+          "evidence": "Recommends lodash '4.17.21 -> 4.18.1' and axios '1.6.0 -> 1.18.1', both well above the minimum thresholds in the assertion."
+        },
+        {
+          "text": "Every cited CVE/GHSA ID is traceable to the OSV scan output or a fetched advisory page \u2014 no fabricated or misattributed advisory IDs",
+          "passed": false,
+          "evidence": "All explicitly-named CVE IDs (CVE-2026-40175, CVE-2025-62718, CVE-2025-27152, CVE-2025-58754, CVE-2025-13465, CVE-2026-2950, CVE-2026-4800, CVE-2024-21538, CVE-2024-45296, CVE-2024-52798, CVE-2026-4867, CVE-2026-4923, CVE-2026-4926) check out as real against the ground-truth OSV dataset (cross-verified against the actual osv_scan.py JSON output saved by the with_skill runs). HOWEVER the report also claims: '9 additional GHSA-tracked issues (CVE IDs not yet assigned as of 2026-07-06)... recursive formToJSON/formDataToJSON DoS, prototype pollution in auth/config merge, maxBodyLength/maxDepth bypass in fetch and HTTP/2 adapters. Fixed in 1.18.0. Confirmed via api.github.com/repos/axios/axios/security-advisories.' The ground-truth OSV dataset contains exactly 26 axios advisories, ALL of which already have CVE numbers assigned (confirmed by inspecting the with_skill runs' saved JSON \u2014 no entry lacks a 'cves' field). No 'CVE not yet assigned' advisories exist in the ground truth. This is a fabricated category of vulnerabilities presented with a false confirmation citation \u2014 a softer hallucination than inventing a concrete fake ID string, but still content that does not trace to any real source."
+        },
+        {
+          "text": "Cited live sources (OSV.dev advisory / GHSA / CVE pages), not training data alone, and included a verification log",
+          "passed": true,
+          "evidence": "Includes a full 'Verification Log' table citing WebFetch against NVD, GHSA pages, npm registry, and GitHub Advisory API for every claim, and honestly flags two axios CVEs as '[PARTIALLY VERIFIED]' rather than presenting everything with false confidence."
+        }
+      ],
+      "notes": []
+    },
+    {
+      "eval_id": 6,
+      "eval_name": "npm-assumed-safe-scan",
+      "configuration": "old_skill",
+      "run_number": 2,
+      "result": {
+        "pass_rate": 0.857,
+        "passed": 6,
+        "failed": 1,
+        "total": 7,
+        "time_seconds": 0.0,
+        "tokens": 0,
+        "tool_calls": 0,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "Flagged lodash 4.17.21 as vulnerable citing a real, current advisory (e.g., CVE-2026-4800, CVE-2026-2950, or CVE-2025-13465) \u2014 did NOT cite the outdated CVE-2021-23337, which this version already fixed",
+          "passed": true,
+          "evidence": "Cites 'CVE-2026-4800 (High, CVSS 8.1)... CVE-2025-13465 (Moderate, CVSS 6.9)... CVE-2026-2950 \u2014 a bypass of the CVE-2025-13465 fix', all real and matching ground truth. CVE-2021-23337 is mentioned only once, as historical lineage ('an incomplete-fix follow-up to the older CVE-2021-23337') and is not presented as an active/unfixed reason lodash is vulnerable, which is compliant per the grading guidance."
+        },
+        {
+          "text": "Flagged axios 1.6.0 as vulnerable citing at least one real advisory (e.g., CVE-2026-44494, CVE-2026-44495, CVE-2025-62718, or CVE-2026-42044)",
+          "passed": true,
+          "evidence": "Cites 'CVE-2025-62718 (NO_PROXY hostname-normalization bypass -> SSRF)' \u2014 a ground-truth example ID \u2014 plus CVE-2024-39338, CVE-2025-27152, CVE-2025-58754, CVE-2026-25639, CVE-2026-40175, all real."
+        },
+        {
+          "text": "Did NOT flag cross-spawn 7.0.6 as vulnerable \u2014 correctly identified as already patched and safe to ship",
+          "passed": true,
+          "evidence": "'7.0.6 is npm's current latest and already carries the fix for the only known CVE against this package. This one is genuinely safe to ship as pinned \u2014 no change needed.'"
+        },
+        {
+          "text": "Did NOT flag path-to-regexp 6.3.0 as vulnerable \u2014 correctly identified as already patched and safe to ship",
+          "passed": true,
+          "evidence": "'6.3.0 is the patched version for that ReDoS lineage, not an affected one... 6.3.0 currently has no open CVE.' Labeled BREAKING-UPGRADE (maintenance staleness), not SECURITY."
+        },
+        {
+          "text": "Recommended correct fixed versions for the vulnerable packages (lodash >= 4.17.23 or 4.18.0 depending on which CVE cited; axios >= 1.15.0 or higher depending on which CVE cited)",
+          "passed": true,
+          "evidence": "Recommends lodash '4.17.21 -> 4.18.1' (explicitly warns off 4.18.0 due to a packaging regression) and axios '1.6.0 -> 1.18.1' (explicitly rejects stopping at 1.15.1)."
+        },
+        {
+          "text": "Every cited CVE/GHSA ID is traceable to the OSV scan output or a fetched advisory page \u2014 no fabricated or misattributed advisory IDs",
+          "passed": false,
+          "evidence": "HALLUCINATION FOUND. The report cites 'GHSA-mmx7-hfxf-jppx (published today, 2026-07-06, no CVE assigned yet) \u2014 prototype-pollution gadgets that let inherited data, proxy, or paramsSerializer values alter request construction. Affected range is >=1.0.0... up to the fix in 1.18.0. This one directly covers 1.6.0,' plus four more same-day IDs: GHSA-gcfj-64vw-6mp9, GHSA-hcpx-6fm6-wx23, GHSA-pmv8-rq9r-6j72, GHSA-xj6q-8x83-jv6g. The verification log even claims a specific live fetch: 'WebFetch | github.com/axios/axios/security/advisories/GHSA-mmx7-hfxf-jppx | Affected >=1.0.0, patched >=1.18.0.' None of these 5 GHSA IDs appear anywhere in the ground-truth OSV dataset (cross-checked against the full, exact 26-advisory axios JSON dump captured live by the with_skill runs' actual osv_scan.py tool output in this same eval). This is a high-confidence hallucination: specific fabricated advisory IDs, a fabricated publication date, a fabricated technical description, and a fabricated verification claim against a URL that does not correspond to a real advisory in the ground truth."
+        },
+        {
+          "text": "Cited live sources (OSV.dev advisory / GHSA / CVE pages), not training data alone, and included a verification log",
+          "passed": true,
+          "evidence": "Includes a full 'Verification Log' table citing GHSA pages, Snyk, and HeroDevs cross-checks for each claim (note: the log format is satisfied even though one of its entries is itself the fabricated GHSA-mmx7-hfxf-jppx claim above)."
+        }
+      ],
+      "notes": []
+    },
+    {
+      "eval_id": 7,
+      "eval_name": "obscure-cve-lockfile-audit",
+      "configuration": "with_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 1.0,
+        "passed": 8,
+        "failed": 0,
+        "total": 8,
+        "time_seconds": 0.0,
+        "tokens": 0,
+        "tool_calls": 0,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "Flagged python-multipart 0.0.6 as vulnerable citing a real advisory (e.g., CVE-2024-24762) and recommended a fixed version (>= 0.0.7)",
+          "passed": true,
+          "evidence": "review.md lines 22-31: flags python-multipart as SECURITY, cites 'CVE-2024-24762 (HIGH), CVE-2024-53981 (HIGH), CVE-2026-40347 (MODERATE), CVE-2026-42561 (HIGH), CVE-2026-24486 (HIGH, non-default config only), CVE-2026-53537/53538/53539/53540', recommends bump to >=0.0.31/0.0.32. Cross-checked against osv_scan_raw.json: all 9 IDs and their version ranges (each starting at '0') match the raw scan output exactly, so all 9 are real and correctly scoped to 0.0.6."
+        },
+        {
+          "text": "Flagged jinja2 3.1.2 as vulnerable citing a real advisory (e.g., CVE-2025-27516, CVE-2024-56201, CVE-2024-22195, or CVE-2024-34064) and recommended a fixed version (>= 3.1.6)",
+          "passed": true,
+          "evidence": "review.md lines 55-64: cites CVE-2024-22195, CVE-2024-34064, CVE-2024-56201, CVE-2024-56326, CVE-2025-27516, all matching osv_scan_raw.json's 5 jinja2 findings (GHSA-h5c8-rqwp-cp95, GHSA-h75v-3vvj-5mfj, GHSA-gmj6-6f8f-6699, GHSA-q2x7-8rv6-6q7h, GHSA-cpwx-vrp4-4pq7). Recommends bump to 3.1.6."
+        },
+        {
+          "text": "Flagged tar-fs 2.1.1 as vulnerable citing a real advisory (e.g., CVE-2025-48387, CVE-2024-12905, or CVE-2025-59343) and recommended a fixed version (>= 2.1.4)",
+          "passed": true,
+          "evidence": "review.md lines 33-42: cites all 3 real tar-fs advisories (CVE-2024-12905, CVE-2025-48387, CVE-2025-59343), all confirmed present in osv_scan_raw.json. Recommends bump to 2.1.5, which is >= 2.1.4."
+        },
+        {
+          "text": "Flagged ws 8.11.0 as vulnerable citing a real advisory (e.g., CVE-2024-37890) and recommended a fixed version (>= 8.17.1)",
+          "passed": true,
+          "evidence": "review.md lines 44-53: cites CVE-2024-37890, CVE-2026-45736, CVE-2026-48779, all confirmed in osv_scan_raw.json. Recommends bump to 8.21.0, which is >= 8.17.1."
+        },
+        {
+          "text": "Flagged ua-parser-js 0.7.29 as a supply-chain / embedded-malware compromise (not merely a routine bug), citing CVE-2021-4229 or equivalent, and recommended moving off the compromised line entirely (>= 0.7.30, 0.8.1, or 1.0.1)",
+          "passed": true,
+          "evidence": "review.md lines 11-20: explicitly labels this 'SECURITY (active supply-chain compromise, not a routine CVE)', cites 'CVE-2021-4229 / GHSA-pjwm-rvh2-c87w', treats it as an incident (credential rotation, compromise assumption) rather than a routine bump, and recommends >=0.7.33 or 2.0.10. Exceeds the bar: it also independently re-queried OSV against 0.7.30 and caught that the naive one-patch fix is itself vulnerable to CVE-2022-25927 (matches the ground-truth 'bonus catch' nuance) and explicitly warns 'do NOT stop at 0.7.30'."
+        },
+        {
+          "text": "Did NOT flag pyyaml 6.0.2 or send 0.19.0 as vulnerable \u2014 both correctly identified as already patched and safe",
+          "passed": true,
+          "evidence": "review.md lines 68-84: pyyaml 6.0.2 listed under 'ROUTINE' with 0 advisories (CLEAN); send 0.19.0 listed under 'Already safe' noting it is exactly the version that fixed CVE-2024-43799. Matches ground truth for both."
+        },
+        {
+          "text": "Every cited CVE/GHSA/PYSEC ID and any attribution detail (discoverer, audit context) is traceable to the OSV scan output or a fetched advisory page \u2014 no fabricated IDs or invented narrative detail",
+          "passed": true,
+          "evidence": "Extracted all CVE/GHSA IDs from the report and diffed against osv_scan_raw.json plus the provided ground truth: every ID (python-multipart's 9, jinja2's 5, tar-fs's 3, ws's 3, ua-parser-js's CVE-2021-4229, send's CVE-2024-43799, plus the bonus CVE-2022-25927/GHSA-fhg7-m89q-25r3) matches either the raw scan or ground truth exactly, with matching affected-version ranges. No unique/unsupported ID appears. No fabricated attribution/discoverer narrative was found \u2014 attribution claims are limited to generic OSV/advisory phrasing (e.g. 'OSV states...should be considered fully compromised'), not invented specifics."
+        },
+        {
+          "text": "Cited live sources (OSV.dev / GHSA / CVE pages), not training data alone, and included a verification log table",
+          "passed": true,
+          "evidence": "review.md includes a 19-row 'Verification Log' table (lines 88-112) mapping each claim to a tool (Bash osv_scan.py / WebFetch) and a specific URL (osv.dev/vulnerability/<id>, pypi.org/pypi/<pkg>/json, registry.npmjs.org/<pkg>/latest). A 'Self-check' paragraph explicitly states every version/CVE came from a live lookup, not training data."
+        }
+      ],
+      "notes": []
+    },
+    {
+      "eval_id": 7,
+      "eval_name": "obscure-cve-lockfile-audit",
+      "configuration": "with_skill",
+      "run_number": 2,
+      "result": {
+        "pass_rate": 1.0,
+        "passed": 8,
+        "failed": 0,
+        "total": 8,
+        "time_seconds": 0.0,
+        "tokens": 0,
+        "tool_calls": 0,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "Flagged python-multipart 0.0.6 as vulnerable citing a real advisory (e.g., CVE-2024-24762) and recommended a fixed version (>= 0.0.7)",
+          "passed": true,
+          "evidence": "report.md lines 87-137: flags python-multipart VULNERABLE with all 9 real advisories enumerated (CVE-2024-24762, CVE-2024-53981, CVE-2026-24486, CVE-2026-42561, CVE-2026-40347, CVE-2026-53539, CVE-2026-53538, CVE-2026-53537, CVE-2026-53540), each matched to its GHSA ID and fixed-in version. Cross-checked against osv_scan_results.json: identical to run-1's raw scan (byte-for-byte diff empty), and all 9 IDs/ranges match exactly. Recommends bump to 0.0.32 (>= 0.0.7)."
+        },
+        {
+          "text": "Flagged jinja2 3.1.2 as vulnerable citing a real advisory (e.g., CVE-2025-27516, CVE-2024-56201, CVE-2024-22195, or CVE-2024-34064) and recommended a fixed version (>= 3.1.6)",
+          "passed": true,
+          "evidence": "report.md lines 172-212: cites all 5 real jinja2 advisories (CVE-2024-22195, CVE-2024-34064, CVE-2024-56326, CVE-2024-56201, CVE-2025-27516), matching osv_scan_results.json. Recommends bump to 3.1.6."
+        },
+        {
+          "text": "Flagged tar-fs 2.1.1 as vulnerable citing a real advisory (e.g., CVE-2025-48387, CVE-2024-12905, or CVE-2025-59343) and recommended a fixed version (>= 2.1.4)",
+          "passed": true,
+          "evidence": "report.md lines 139-170: cites all 3 real tar-fs advisories (CVE-2024-12905, CVE-2025-48387, CVE-2025-59343), matching osv_scan_results.json. Recommends bump to 2.1.4 (2.x line) or later, satisfying >= 2.1.4."
+        },
+        {
+          "text": "Flagged ws 8.11.0 as vulnerable citing a real advisory (e.g., CVE-2024-37890) and recommended a fixed version (>= 8.17.1)",
+          "passed": true,
+          "evidence": "report.md lines 214-241: cites CVE-2024-37890, CVE-2026-45736, CVE-2026-48779, matching osv_scan_results.json. Recommends bump to 8.21.0 (>= 8.17.1)."
+        },
+        {
+          "text": "Flagged ua-parser-js 0.7.29 as a supply-chain / embedded-malware compromise (not merely a routine bug), citing CVE-2021-4229 or equivalent, and recommended moving off the compromised line entirely (>= 0.7.30, 0.8.1, or 1.0.1)",
+          "passed": true,
+          "evidence": "report.md lines 55-85: labels it 'SECURITY \u2014 supply-chain compromise (treat hosts as breached)', explicitly names it a shipped-malware payload rather than a routine vulnerability, cites 'GHSA-pjwm-rvh2-c87w / CVE-2021-4229', and recommends rotating credentials/rebuilding the environment before upgrading to a current 2.x release. Satisfies the assertion. NOTE: unlike with_skill/run-1, this run states '0.7.30, 0.8.1, and 1.0.1 respectively' are 'clean releases' without flagging that 0.7.30 itself carries a separate HIGH ReDoS (CVE-2022-25927, ground-truth bonus nuance) until 0.7.33 \u2014 it misses the bonus catch, though this is explicitly not a strict requirement per the eval design."
+        },
+        {
+          "text": "Did NOT flag pyyaml 6.0.2 or send 0.19.0 as vulnerable \u2014 both correctly identified as already patched and safe",
+          "passed": true,
+          "evidence": "report.md lines 245-273 ('Already safe') and summary table line 48: pyyaml listed 'Clean \u2014 no advisories found via OSV scan'; send listed 'Clean \u2014 already on the fixed version', explaining CVE-2024-43799's affected range ends exactly at 0.19.0. Matches ground truth for both."
+        },
+        {
+          "text": "Every cited CVE/GHSA/PYSEC ID and any attribution detail (discoverer, audit context) is traceable to the OSV scan output or a fetched advisory page \u2014 no fabricated IDs or invented narrative detail",
+          "passed": true,
+          "evidence": "All CVE/GHSA IDs cited (26 CVE mentions incl. 4 unrelated historical pyyaml CVEs used only to show they predate 6.0.2, plus the full python-multipart/jinja2/tar-fs/ws/ua-parser-js/send sets) were cross-checked against osv_scan_results.json and the ground truth; all match with correct affected-version ranges and fixed-in versions. No unsupported/unique ID found. Some CVSS sub-scores (e.g. 'HIGH CVSSv3 8.8 / MODERATE CVSSv4 5.4' for CVE-2024-56201) go beyond what the raw OSV scan JSON contains (which only has a single severity label) \u2014 plausible if genuinely fetched from a live GHSA page (which typically shows both CVSS v3.1 and v4 scores), but not independently verifiable from the ground truth provided."
+        },
+        {
+          "text": "Cited live sources (OSV.dev / GHSA / CVE pages), not training data alone, and included a verification log table",
+          "passed": true,
+          "evidence": "report.md includes a 'Verification Log' table (lines 292-313, 20 rows) citing OSV batch scan output plus individually fetched osv.dev/vulnerability/<id>, pypi.org/pypi/<pkg>/json, and registry.npmjs.org/<pkg>/latest URLs for every package. A 'Self-check' section (lines 315-327) explicitly claims every version/CVE traces to a live lookup, not memory."
+        }
+      ],
+      "notes": []
+    },
+    {
+      "eval_id": 7,
+      "eval_name": "obscure-cve-lockfile-audit",
+      "configuration": "old_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 1.0,
+        "passed": 8,
+        "failed": 0,
+        "total": 8,
+        "time_seconds": 0.0,
+        "tokens": 0,
+        "tool_calls": 0,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "Flagged python-multipart 0.0.6 as vulnerable citing a real advisory (e.g., CVE-2024-24762) and recommended a fixed version (>= 0.0.7)",
+          "passed": true,
+          "evidence": "report.md lines 52-63: flags python-multipart SECURITY, cites CVE-2024-24762 and CVE-2024-53981 as directly applicable plus GHSA-wp53-j4wj-2cfg/CVE-2026-24486, GHSA-mj87-hwqh-73pj, GHSA-pp6c-gr5w-3c5g as additional advisories; all are real per ground truth/raw OSV data. Recommends bump to 0.0.32. NOTE: the report incorrectly claims the 3 additional advisories 'don't apply to 0.0.6 specifically' \u2014 per the raw OSV scan (verified against with_skill's osv_scan_raw.json), all of them have ranges starting at version '0', so they DO affect 0.0.6. This is a factual scoping error, but doesn't break this assertion since CVE-2024-24762 is correctly cited as applying and the recommended fix version is correct."
+        },
+        {
+          "text": "Flagged jinja2 3.1.2 as vulnerable citing a real advisory (e.g., CVE-2025-27516, CVE-2024-56201, CVE-2024-22195, or CVE-2024-34064) and recommended a fixed version (>= 3.1.6)",
+          "passed": true,
+          "evidence": "report.md lines 65-78: cites CVE-2024-22195, CVE-2024-34064, CVE-2024-56326, CVE-2025-27516 (4 of the 5 real advisories; misses CVE-2024-56201/GHSA-gmj6-6f8f-6699 but this doesn't affect the assertion, which only requires one). Recommends bump to 3.1.6."
+        },
+        {
+          "text": "Flagged tar-fs 2.1.1 as vulnerable citing a real advisory (e.g., CVE-2025-48387, CVE-2024-12905, or CVE-2025-59343) and recommended a fixed version (>= 2.1.4)",
+          "passed": true,
+          "evidence": "report.md lines 37-50: cites all 3 real tar-fs advisories (CVE-2024-12905 fixed 2.1.2, CVE-2025-48387 fixed 2.1.3, CVE-2025-59343 fixed 2.1.4) with correct fixed-in versions. Recommends bump to 2.1.5, satisfying >= 2.1.4. One unverifiable narrative detail: attributes CVE-2025-48387's discovery to 'Google's security research team' \u2014 this specific attribution is not corroborated by the ground truth or by any other of the 4 reports and could not be independently verified; flagged as a possible invented narrative detail (see assertion 7)."
+        },
+        {
+          "text": "Flagged ws 8.11.0 as vulnerable citing a real advisory (e.g., CVE-2024-37890) and recommended a fixed version (>= 8.17.1)",
+          "passed": true,
+          "evidence": "report.md lines 97-109: cites CVE-2024-37890, CVE-2026-45736, CVE-2026-48779, all real. Recommends bump to 8.21.0 (>= 8.17.1)."
+        },
+        {
+          "text": "Flagged ua-parser-js 0.7.29 as a supply-chain / embedded-malware compromise (not merely a routine bug), citing CVE-2021-4229 or equivalent, and recommended moving off the compromised line entirely (>= 0.7.30, 0.8.1, or 1.0.1)",
+          "passed": true,
+          "evidence": "report.md lines 39-50: labels it 'SECURITY \u2014 CRITICAL (supply-chain compromise, not just a stale version)', gives an accurate incident narrative (maintainer account compromise, XMRig cryptominer, DanaBot-based Windows trojan, Oct 2021), and treats it as an incident (rotate secrets, rebuild environment) rather than a routine bump. Recommends 0.7.33+ or 2.0.10, satisfying '>= 0.7.30'. CAVEAT (relevant to assertion 7 too): the report explicitly states 'GHSA-pjwm-rvh2-c87w (embedded malware, no CVE ID assigned, CVSS 3.1...)' \u2014 this is FACTUALLY INCORRECT per the provided ground truth, which explicitly assigns CVE-2021-4229 to this GHSA. The assertion's citation requirement is technically satisfied via the GHSA ID ('or equivalent'), but the report's affirmative false claim that no CVE exists is a real accuracy miss, and both with_skill runs correctly found CVE-2021-4229."
+        },
+        {
+          "text": "Did NOT flag pyyaml 6.0.2 or send 0.19.0 as vulnerable \u2014 both correctly identified as already patched and safe",
+          "passed": true,
+          "evidence": "report.md lines 126-135 and 115-124: pyyaml listed under 'ROUTINE findings (already safe from known CVEs...)' with no CVEs found; send listed similarly, noting CVE-2024-43799 is fixed exactly at 0.19.0. Matches ground truth for both."
+        },
+        {
+          "text": "Every cited CVE/GHSA/PYSEC ID and any attribution detail (discoverer, audit context) is traceable to the OSV scan output or a fetched advisory page \u2014 no fabricated IDs or invented narrative detail",
+          "passed": true,
+          "evidence": "Every CVE/GHSA ID cited (18 unique CVE IDs, 14 unique GHSA IDs) was cross-checked against the raw OSV scan data and the provided ground truth; all match. Two accuracy issues found, flagged here per the grading brief's instruction to explicitly call out anything suspicious rather than auto-passing: (1) the claim 'no single CVE ID commonly cited' for GHSA-pjwm-rvh2-c87w is factually wrong \u2014 CVE-2021-4229 is the real, ground-truth-confirmed ID, and this run failed to surface it despite citing the correct GHSA. (2) the attribution 'Google's security research team found this' for CVE-2025-48387/tar-fs is a specific discoverer claim that is not traceable to the ground truth and does not appear in any of the other 3 independently-run reports, raising the possibility it is an invented narrative embellishment rather than a fabricated ID. Neither issue is a fabricated CVE/GHSA identifier (both real, unrelated IDs are used correctly elsewhere), so the assertion (which is specifically about fabricated IDs) passes, but both issues are worth the team's attention."
+        },
+        {
+          "text": "Cited live sources (OSV.dev / GHSA / CVE pages), not training data alone, and included a verification log table",
+          "passed": true,
+          "evidence": "report.md includes a 'Verification log' table (lines 143-165) citing WebFetch/WebSearch results against pypi.org, npmjs.org, api.github.com, GitHub Advisory Database, GitLab Advisory DB, and Wiz. A 'Self-check' section (lines 167-174) explicitly asserts every version came from a live lookup. Uses GHSA/registry pages rather than OSV.dev directly (no bundled osv_scan.py script was used, consistent with this being the old/pre-update skill config), which still satisfies the assertion's 'OSV.dev / GHSA / CVE pages' wording. The 'no CVE ID assigned' error (see assertion 7) suggests the live GHSA page fetch may not have been fully read/parsed for this one item, but a verification log with cited sources is genuinely present."
+        }
+      ],
+      "notes": []
+    },
+    {
+      "eval_id": 7,
+      "eval_name": "obscure-cve-lockfile-audit",
+      "configuration": "old_skill",
+      "run_number": 2,
+      "result": {
+        "pass_rate": 0.875,
+        "passed": 7,
+        "failed": 1,
+        "total": 8,
+        "time_seconds": 0.0,
+        "tokens": 0,
+        "tool_calls": 0,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "Flagged python-multipart 0.0.6 as vulnerable citing a real advisory (e.g., CVE-2024-24762) and recommended a fixed version (>= 0.0.7)",
+          "passed": true,
+          "evidence": "review.md lines 65-78: flags python-multipart SECURITY, cites CVE-2024-24762, CVE-2024-53981, GHSA-mj87-hwqh-73pj, CVE-2026-42561, CVE-2026-53537 \u2014 all 5 are real and confirmed against the ground truth/raw OSV data (only finds 5 of the 9 real advisories, less complete than the with_skill runs, but the assertion only requires one). Recommends bump to 0.0.32 (>= 0.0.7)."
+        },
+        {
+          "text": "Flagged jinja2 3.1.2 as vulnerable citing a real advisory (e.g., CVE-2025-27516, CVE-2024-56201, CVE-2024-22195, or CVE-2024-34064) and recommended a fixed version (>= 3.1.6)",
+          "passed": true,
+          "evidence": "review.md lines 82-95: cites CVE-2024-22195, CVE-2024-34064, CVE-2024-56326, CVE-2025-27516 \u2014 4 real advisories, all confirmed. Recommends bump to 3.1.6."
+        },
+        {
+          "text": "Flagged tar-fs 2.1.1 as vulnerable citing a real advisory (e.g., CVE-2025-48387, CVE-2024-12905, or CVE-2025-59343) and recommended a fixed version (>= 2.1.4)",
+          "passed": false,
+          "evidence": "review.md lines 52-63: only finds 2 of the 3 real tar-fs advisories (CVE-2024-12905, CVE-2025-48387) and explicitly misses CVE-2025-59343 (GHSA-vj76-c3g6-qr5v, fixed in 2.1.4), which is a real, ground-truth-confirmed advisory. The section header reads '2.1.1 -> 2.1.3 (minimal fix) or 3.1.3 (current major)' and the Migration steps line states 'Immediate: bump to 2.1.3 (or later 2.1.x) to close both CVEs with no known breaking changes' \u2014 presenting 2.1.3 as a sufficient immediate fix. Per ground truth, 2.1.3 does NOT fix CVE-2025-59343 (fixed only in 2.1.4/2.1.5), so the report's primary recommended version is still vulnerable to a real HIGH-severity advisory it failed to surface. This fails the '>= 2.1.4' requirement on its own terms, since the report's actual recommendation (2.1.3) falls short of that bar."
+        },
+        {
+          "text": "Flagged ws 8.11.0 as vulnerable citing a real advisory (e.g., CVE-2024-37890) and recommended a fixed version (>= 8.17.1)",
+          "passed": true,
+          "evidence": "review.md lines 97-109: cites CVE-2024-37890 and CVE-2026-48779 (GHSA-96hv-2xvq-fx4p) \u2014 both real (misses CVE-2026-45736 but the assertion only requires one). Recommends bump to 8.21.0 (>= 8.17.1)."
+        },
+        {
+          "text": "Flagged ua-parser-js 0.7.29 as a supply-chain / embedded-malware compromise (not merely a routine bug), citing CVE-2021-4229 or equivalent, and recommended moving off the compromised line entirely (>= 0.7.30, 0.8.1, or 1.0.1)",
+          "passed": true,
+          "evidence": "review.md lines 39-50: labels it 'SECURITY \u2014 SUPPLY-CHAIN COMPROMISE (most severe finding in this audit)', gives an accurate malware narrative (maintainer account compromise, cryptominer/credential-stealer, Oct 2021, CISA guidance), and treats it as an incident. Recommends '0.7.29 -> 2.0.10 (or 0.7.33+ if avoiding the license change)' and explicitly cites 'CVE-2022-25927 (ReDoS, fixed <0.7.33/<1.0.33)' as the reason NOT to stop at 0.7.30 \u2014 this catches the ground-truth bonus nuance that the naive 0.7.30 fix is itself vulnerable, matching with_skill/run-1's best-in-class catch. CAVEAT: like old_skill/run-1, this report states 'GHSA-pjwm-rvh2-c87w (embedded malware, no CVE ID assigned...)' which is factually incorrect per ground truth (CVE-2021-4229 is the real assigned CVE). The GHSA ID citation satisfies the assertion's 'or equivalent' wording, but the false negative claim about CVE availability is a real miss."
+        },
+        {
+          "text": "Did NOT flag pyyaml 6.0.2 or send 0.19.0 as vulnerable \u2014 both correctly identified as already patched and safe",
+          "passed": true,
+          "evidence": "review.md lines 106-112 ('Already safe'): pyyaml 6.0.2 confirmed no applicable CVEs; send 0.19.0 confirmed as the exact version that fixed CVE-2024-43799. Matches ground truth for both."
+        },
+        {
+          "text": "Every cited CVE/GHSA/PYSEC ID and any attribution detail (discoverer, audit context) is traceable to the OSV scan output or a fetched advisory page \u2014 no fabricated IDs or invented narrative detail",
+          "passed": true,
+          "evidence": "Every CVE/GHSA ID cited (16 unique CVE IDs, 6 unique GHSA IDs) was cross-checked against ground truth/raw OSV data; all are real, no fabricated ID found. Two accuracy issues flagged rather than silently passed: (1) 'no CVE ID assigned' for GHSA-pjwm-rvh2-c87w is factually wrong (CVE-2021-4229 exists and is ground-truth-confirmed) \u2014 an omission/misstatement, not a fabrication. (2) The report cites a specific 'Snyk SNYK-JS-TARFS-10293725' identifier for CVE-2025-48387; this specific Snyk ID could not be independently verified against the provided ground truth (which only lists CVE/GHSA IDs), so it is noted as 'not independently verifiable from provided ground truth' per grading guidance rather than treated as a failure, since the format is plausible and the underlying CVE (2025-48387) is confirmed real."
+        },
+        {
+          "text": "Cited live sources (OSV.dev / GHSA / CVE pages), not training data alone, and included a verification log table",
+          "passed": true,
+          "evidence": "review.md includes a 'Verification Log' table (lines 116-133, 14 rows) citing WebFetch/WebSearch results against pypi.org, npmjs.org (registry JSON), api.github.com, GitHub Advisory Database entries, and CISA. A closing bullet list (lines 167-174) explicitly claims every version was sourced live and flags 2 items as [UNVERIFIED] where no live source was found, which is good calibrated honesty. The tar-fs miss (assertion 3) and the ua-parser-js CVE omission (assertion 5/7) suggest some fetches were incomplete despite the log format being genuinely present."
+        }
+      ],
+      "notes": []
+    }
+  ],
+  "run_summary": {
+    "with_skill": {
+      "pass_rate": {
+        "mean": 1.0,
+        "stddev": 0.0,
+        "min": 1.0,
+        "max": 1.0
+      },
+      "time_seconds": {
+        "mean": 0.0,
+        "stddev": 0.0,
+        "min": 0.0,
+        "max": 0.0
+      },
+      "tokens": {
+        "mean": 0,
+        "stddev": 0,
+        "min": 0,
+        "max": 0
+      }
+    },
+    "old_skill": {
+      "pass_rate": {
+        "mean": 0.9543,
+        "stddev": 0.0687,
+        "min": 0.857,
+        "max": 1.0
+      },
+      "time_seconds": {
+        "mean": 0.0,
+        "stddev": 0.0,
+        "min": 0.0,
+        "max": 0.0
+      },
+      "tokens": {
+        "mean": 0,
+        "stddev": 0,
+        "min": 0,
+        "max": 0
+      }
+    },
+    "delta": {
+      "pass_rate": "+0.046",
+      "time_seconds": "n/a",
+      "tokens": "n/a"
+    }
+  },
+  "notes": [
+    "REAL PASS-RATE DELTA THIS TIME: with_skill 100% (9/9 runs, 0 stddev) vs old_skill 95.4% mean (stddev 0.069). Unlike the discarded first attempt's flat +0.00, the redesigned evals 6-7 (verified-live, less-famous CVE fixtures) produced a genuine, reproducible gap \u2014 every old_skill shortfall traces to a category the OSV script structurally prevents.",
+    "HEADLINE FINDING - HARD HALLUCINATION: eval-6 old_skill/run-2 fabricated a complete advisory \u2014 GHSA-mmx7-hfxf-jppx plus four sibling IDs, a fake publish date, a fake technical description, and a fake 'verified via live WebFetch' citation for axios 1.6.0. None exist in the real OSV dataset (confirmed by diffing against with_skill's own saved osv_scan JSON, which contains the true 26-advisory axios set). Both with_skill runs on this eval scored 100% advisory-ID traceability \u2014 every citation traced to its own tool output.",
+    "SOFTER HALLUCINATION, SAME EVAL: old_skill/run-1 claimed '9 additional GHSA-tracked issues, CVE IDs not yet assigned' for axios, falsely implying uncounted vulnerabilities beyond the real 26 (all of which already have CVE numbers). No concrete fake ID was named, so it didn't trip the literal 'no fabricated IDs' assertion \u2014 a grader-flagged wording gap worth closing in a future iteration (add an assertion for invented vulnerability counts/categories, not just invented ID strings).",
+    "SYSTEMATIC OLD_SKILL RESEARCH GAP (eval-7, not fabrication but real): both old_skill runs affirmatively denied that ua-parser-js's malware advisory had an assigned CVE ('no CVE ID assigned/commonly cited'). This is factually false \u2014 CVE-2021-4229 is the real, assigned CVE. Both with_skill runs correctly cited it. No assertion currently penalizes confidently denying a real CVE exists; flagged for a future iteration.",
+    "COUNTER-FINDING - OLD_SKILL WAS MORE RIGOROUS HERE: on eval-3 (biome-deep-dive), old_skill actually executed `npx @biomejs/biome@2.5.2 migrate --write` twice and empirically caught a live upstream bug (produces `preset: \"none\"`, silently disabling all lint rules, tracked at biomejs/biome#10716) before recommending it. with_skill's report recommends the same `biome migrate --write` command with no such warning. Both passed the eval's assertion (it only checks whether config-impact was assessed), but this is a genuine capability gap in with_skill's specific remediation advice worth fixing independent of the OSV work.",
+    "EXECUTION-ARTIFACT CORRECTION: gha-ci-planning/old_skill/run-1 initially ran out of budget mid-task (report literally headed 'Status: IN PROGRESS', zero workflow YAML produced) and was retried once with pacing guidance; the retry reached a complete 5/5 deliverable. The stale incomplete file was deleted. This was an execution artifact, not a reflection of the old skill's actual capability, and would have unfairly deflated old_skill's score if left uncorrected.",
+    "GITHUB ACTIONS RANGE REASONING held up across both configs in both security evals (eval-6 N/A here, eval-7's ua-parser-js and eval-6's prior-iteration tj-actions case) \u2014 no false-clean or false-vulnerable verdicts on tag-based ecosystems in this run.",
+    "ANTI-HALLUCINATION GUARDRAIL ADDED THIS ITERATION (SKILL.md Invariant 3 + Step 6 self-check: every advisory ID/range/fixed-version/attribution must trace to a specific tool call) appears to be doing its job on the with_skill side \u2014 zero fabrications across all 9 with_skill runs, including on the two evals specifically designed to surface this failure mode.",
+    "METHODOLOGY: neutral, identical prompts used across both configs this time (no dependency checklist hints, unlike the discarded first attempt's eval-7 retries) \u2014 this iteration's evals-6/7 delta is not an artifact of unequal framing.",
+    "TIMING/TOKENS NOT CAPTURED: as with the discarded first attempt, per-run timing wasn't captured through the notification pipeline this run; pass-rate and the qualitative hallucination findings carry the comparison."
+  ]
+}

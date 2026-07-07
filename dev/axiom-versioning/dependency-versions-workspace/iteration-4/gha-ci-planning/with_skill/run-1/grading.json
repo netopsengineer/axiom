@@ -1,0 +1,30 @@
+{
+  "expectations": [
+    {
+      "text": "SHA-pinned all GitHub Actions references (uses: owner/action@sha # vX.Y.Z format)",
+      "passed": true,
+      "evidence": "The '## Proposed workflow' YAML block pins all four actions in exactly that format: 'uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0', 'uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0', 'uses: DavidAnson/markdownlint-cli2-action@8de2aa07cae85fd17c0b35642db70cf5495f1d25 # v24.0.0', 'uses: streetsidesoftware/cspell-action@de2a73e963e7443969755b648a1008f77033c5b2 # v8.4.0'. The notes confirm: 'All four actions are pinned to a commit SHA with the release tag as a trailing comment.'"
+    },
+    {
+      "text": "Used live sources (GitHub API or WebSearch) to verify action versions exist",
+      "passed": true,
+      "evidence": "'## New pins adopted for this workflow' table cites 'GitHub API /releases/latest + /tags (agree)' for all four new actions with matching commit SHAs, and the Verification Log lists a WebFetch/WebSearch row for each (e.g. actions/checkout, actions/setup-node, markdownlint-cli2-action, cspell-action)."
+    },
+    {
+      "text": "Checked for CVEs/security advisories on referenced actions or tools",
+      "passed": true,
+      "evidence": "OSV batch scans run for both current and candidate pins ('RESULT: 0 of 8 package(s) have advisories', 'RESULT: 1 of 8 package(s) have advisories') surfaced 'GHSA-pwf7-47c3-mfhx [CRITICAL]' on the rejected j178/prek-action, cross-verified via WebFetch of the GHSA advisory page under 'Design decisions'."
+    },
+    {
+      "text": "Used the decision format for version choices where the project has options",
+      "passed": true,
+      "evidence": "'### DavidAnson/markdownlint-cli2 (pre-commit hook mirror)', '### zizmorcore/zizmor-pre-commit', and '### biome.json $schema' all use Risk level / Verified via / What changed / Breaking changes / Migration steps / Security advisories / Recommendation / Your call fields."
+    },
+    {
+      "text": "Included a verification log table at the end",
+      "passed": true,
+      "evidence": "'## Step 6: Verification Log' (lines 381-408) is a table with columns Claim | Tool | Source | Finding, containing 22 rows covering every dependency check, the OSV scans, and the j178/prek-action security finding, followed by a Self-check list."
+    }
+  ],
+  "summary": {"passed": 5, "failed": 0, "total": 5, "pass_rate": 1.0}
+}

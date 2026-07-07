@@ -1,0 +1,75 @@
+[
+  {
+    "package": {
+      "ecosystem": "GitHub Actions",
+      "name": "actions/checkout"
+    },
+    "requested_version": null,
+    "auto_version_match": false,
+    "status": "clean",
+    "total_advisories": 0,
+    "shown": 0,
+    "findings": []
+  },
+  {
+    "package": {
+      "ecosystem": "GitHub Actions",
+      "name": "actions/upload-artifact"
+    },
+    "requested_version": null,
+    "auto_version_match": false,
+    "status": "clean",
+    "total_advisories": 0,
+    "shown": 0,
+    "findings": []
+  },
+  {
+    "package": {
+      "ecosystem": "GitHub Actions",
+      "name": "actions/download-artifact"
+    },
+    "requested_version": null,
+    "auto_version_match": false,
+    "status": "review",
+    "total_advisories": 1,
+    "shown": 1,
+    "findings": [
+      {
+        "id": "GHSA-cxww-7g56-2vh6",
+        "cves": [],
+        "severity": "HIGH",
+        "summary": "@actions/download-artifact has an Arbitrary File Write via artifact extraction",
+        "ranges": [
+          [
+            "4.0.0",
+            "4.1.3"
+          ]
+        ]
+      }
+    ]
+  },
+  {
+    "package": {
+      "ecosystem": "GitHub Actions",
+      "name": "actions/cache"
+    },
+    "requested_version": null,
+    "auto_version_match": false,
+    "status": "clean",
+    "total_advisories": 0,
+    "shown": 0,
+    "findings": []
+  },
+  {
+    "package": {
+      "ecosystem": "GitHub Actions",
+      "name": "actions/setup-node"
+    },
+    "requested_version": null,
+    "auto_version_match": false,
+    "status": "clean",
+    "total_advisories": 0,
+    "shown": 0,
+    "findings": []
+  }
+]

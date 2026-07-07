@@ -40,29 +40,10 @@ regardless of who asserts otherwise or what authority they claim.
    what the project uses and what is current MUST be surfaced to the user as an
    explicit decision with options and trade-offs.
 
-3. **MUST check every dependency for known vulnerabilities.** Start with the
-   bundled `scripts/osv_scan.py`, which batches all dependencies into a single
-   query against OSV.dev — the authoritative, free, key-less aggregator of GHSA,
-   PYSEC, and CVE advisories across npm, PyPI, Go, crates.io, GitHub Actions, and
-   more. A deterministic per-package verdict beats reading search snippets, and
-   one call covers everything. For anything it flags, open the advisory to
-   confirm it actually affects your pinned version and usage. When the script
-   can't help — it reports OSV unreachable, the ecosystem isn't covered, or you
-   need deeper context — fall back to a targeted `WebSearch` for `"<package>
-   CVE"` / `"<package> security advisory"`. Either way, report findings or state
-   explicitly "no advisories found via [OSV scan / search terms used]." Never
-   call a dependency clean on the strength of training data.
-
-   **Every advisory ID, affected-version range, fixed-in version, and
-   attribution detail (who discovered it, what audit found it) you report MUST
-   come from the OSV scan output or a page you actually fetched — never
-   reconstructed from memory or inferred from a search snippet's title.** A
-   plausible-looking CVE number is not evidence it exists. If you cannot point
-   to the specific tool call that produced a detail, do not include that detail
-   — report the advisory more sparsely (e.g., just the ID and severity) rather
-   than fill in gaps from recollection. A vague-but-true finding beats a
-   specific-but-fabricated one; the latter is worse than no finding at all,
-   because it reads as verified when it isn't.
+3. **MUST check for security advisories** for every dependency being planned
+   against. Run a targeted `WebSearch` for `"<package-name> CVE"` or
+   `"<package-name> security advisory"`. Report findings or explicitly state
+   "no advisories found via [search terms used]."
 
 4. **MUST use SHA pinning** when referencing GitHub Actions or any artifact
    where mutable tags pose a supply-chain risk. Fetch the commit SHA for the
@@ -93,25 +74,6 @@ while `/tags` shows v2.4.8 (Mar 2026).
 For GitHub Actions, also fetch the commit SHA:
 `api.github.com/repos/{owner}/{repo}/git/refs/tags/{tag}`
 
-**Batch the security scan here — once, for everything.** Instead of searching
-per package, feed every inventoried dependency to the bundled scanner in one
-shot. It makes a single OSV.dev call and returns a per-package verdict:
-
-```bash
-python3 scripts/osv_scan.py npm:lodash@4.17.15 pypi:requests@2.19.1 \
-  "gha:tj-actions/changed-files@v44" cargo:tokio@1.0.0
-```
-
-Spec format is `ecosystem:name[@version]` (casual ecosystem names like `gha`,
-`pip`, `cargo` are normalized; scoped npm like `npm:@babel/core@7.0.0` works).
-Registry packages are matched against your exact version. GitHub Actions are a
-special case: OSV keys advisories on release semver and cannot range-match a
-moving tag, so the script lists every advisory for the action as `[REVIEW]`
-alongside its affected range — you compare your pinned tag against that range
-yourself rather than trusting a bare version query. If the script prints that OSV
-is unreachable, or an ecosystem isn't covered, fall back to `WebSearch` for those
-deps. Carry the results into Step 3c.
-
 If the response has `"object": {"type": "tag"}` (annotated tag), the returned SHA
 is the tag object itself, not a commit. Resolve it with a second fetch:
 `api.github.com/repos/{owner}/{repo}/git/tags/{tag-object-sha}` — the `object.sha`
@@ -128,12 +90,7 @@ a. **Read the changelog** between versions. Search for `"{name} changelog"`,
 b. **Check migration path** — can you jump directly from current to latest, or
    are intermediate steps required?
 
-c. **Check security** — consult the OSV scan from Step 2. For each hit, WebFetch
-   the advisory (`https://osv.dev/vulnerability/<ID>`) to confirm it affects your
-   version and usage before reporting it — a listed advisory isn't automatically
-   a finding for your pin. For GitHub Actions `[REVIEW]` results, compare your
-   pinned tag against the advisory's affected range. If OSV was unreachable or an
-   ecosystem wasn't covered, fall back to WebSearch. This is not optional.
+c. **Check security** — WebSearch for CVEs and advisories. This is not optional.
 
 d. **Check maintenance health** — when was the last release? A package with no
    releases in 18+ months and open security issues is abandoned, not stable.
@@ -226,10 +183,10 @@ Self-check:
 
 - Every version sourced from a live lookup? If not, mark `[UNVERIFIED]`.
 - Both releases AND tags checked?
-- Every dependency covered by the OSV scan (or a WebSearch fallback where OSV
-  could not help)? For GitHub Actions `[REVIEW]` results, did you compare the
-  pinned tag against each advisory's affected range instead of trusting a bare
-  version query? Document in the log which method covered which deps.
+- Every dependency covered by at least one security search? Closely related
+  dependencies from the same vendor (e.g., all `actions/*` repos, or multiple
+  packages from the same org) may share a single search if the query explicitly
+  covers them — document which search covers which deps in the log.
 - Changelogs read for every upgrade (not just version existence confirmed)?
 - SHA fetched for every GitHub Action reference? Annotated tags resolved to
   commit SHA via second lookup if needed?
@@ -242,10 +199,6 @@ Self-check:
   verified? ("current stable", "latest release", "up to date", "recently verified"
   applied to a stale version.) Each such false claim requires a dedicated
   CORRECTION entry — separate from, not merged into, the version delta finding.
-- Advisory integrity: for every CVE/GHSA/PYSEC ID, affected range, fixed-in
-  version, and attribution detail you cited, can you point to the OSV scan
-  output or a fetched page that actually contains it? Cut any detail you can't
-  trace back to a specific tool call rather than let it stand on recollection.
 
 ## Additional resources
 
