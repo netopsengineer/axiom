@@ -8,10 +8,9 @@ updates:
     schedule:
       interval: "daily"
     cooldown:
+      # github-actions is not SemVer-aware for cooldown; only default-days is
+      # supported here (semver-*-days is npm-style ecosystems only).
       default-days: 7
-      semver-major-days: 30
-      semver-minor-days: 7
-      semver-patch-days: 3
     groups:
       github-actions:
         patterns: ["*"]
@@ -49,10 +48,9 @@ updates:
     schedule:
       interval: "daily"
     cooldown:
+      # pre-commit is not SemVer-aware for cooldown; only default-days is
+      # supported here (semver-*-days is npm-style ecosystems only).
       default-days: 7
-      semver-major-days: 30
-      semver-minor-days: 7
-      semver-patch-days: 3
     groups:
       pre-commit:
         patterns: ["*"]
