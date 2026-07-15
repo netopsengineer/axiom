@@ -110,7 +110,10 @@ runs:
         NPM_REGISTRY: ${{ inputs.npm-registry }}
       run: npm config set registry "$NPM_REGISTRY"
 
-    - name: Install claude CLI
+    # The CLI is installed globally at a caller-supplied version; there is no
+    # lockfile for a one-off tool install, so zizmor's adhoc-packages audit
+    # (added in v1.26) is a known false positive for this step.
+    - name: Install claude CLI # zizmor: ignore[adhoc-packages]
       shell: bash
       env:
         CLAUDE_CLI_VERSION: ${{ inputs.claude-cli-version }}
