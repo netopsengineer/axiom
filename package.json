@@ -40,7 +40,7 @@
     "conventional-changelog-conventionalcommits": "^10.2.1",
     "cspell": "^10.0.1",
     "markdown-link-check": "^3.14.2",
-    "semantic-release": "^25.0.7",
+    "semantic-release": "^25.0.8",
     "semantic-release-monorepo": "8.0.2",
     "yaml": "^2.9.0"
   }
