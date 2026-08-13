@@ -8,6 +8,13 @@ name: Dependency audit fix
 # trigger), dispatches a Validate pass, and enables auto-merge so a green fix lands
 # hands-off. Advisories with no available fix are handled by the dependency-audit
 # gate's allowlist instead, not here.
+#
+# A green run therefore means "nothing this workflow could reach", NOT "the audit
+# is clean" - `npm audit fix` cannot touch advisories with no semver-compatible
+# fix, nor any dependency bundled inside another package's tarball. To keep that
+# green from reading as a resolved audit, a run that changes nothing reports the
+# current audit-gate status and the next action to the job summary. It stays
+# advisory: failing here would only duplicate the dependency-audit run's red.
 
 on:
   schedule:
@@ -56,6 +63,40 @@ jobs:
       - name: Run npm audit fix
         id: fix
         run: node .github/scripts/run-npm-audit-fix.mjs
+
+      # An explicit `if:` drops the implicit success() guard, so restate it: a
+      # failed fix step means there is no trustworthy `changed` output to report on.
+      - name: Report unfixable advisories
+        if: success() && steps.fix.outputs.changed != 'true'
+        run: |
+          set -uo pipefail
+          cat >> "$GITHUB_STEP_SUMMARY" <<'HEADER'
+          ## Dependency audit fix: no lockfile change
+
+          No advisory had a fix `npm audit fix` could apply. Current audit gate status:
+
+          ```text
+          HEADER
+
+          if npm run --silent audit:ci >> "$GITHUB_STEP_SUMMARY" 2>&1; then
+            blocking=false
+          else
+            blocking=true
+          fi
+          echo '```' >> "$GITHUB_STEP_SUMMARY"
+
+          if [ "$blocking" = true ]; then
+            cat >> "$GITHUB_STEP_SUMMARY" <<'BLOCKED'
+
+          **Next step:** upgrade the dependency that pulls the advisory in, or - if no
+          upstream fix is reachable - add each advisory to
+          `.github/npm-audit-allowlist.json` with an `expires` date and a reason.
+          BLOCKED
+            echo "::warning::npm audit fix found no applicable fix and the audit gate is still blocking. See the job summary for the advisories and the next step."
+          else
+            echo "" >> "$GITHUB_STEP_SUMMARY"
+            echo "Audit gate passes; nothing to do." >> "$GITHUB_STEP_SUMMARY"
+          fi
 
       - name: Open / update PR and enable auto-merge
         if: steps.fix.outputs.changed == 'true'

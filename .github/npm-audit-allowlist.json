@@ -1,9 +1,17 @@
 {
   "_comment": "Advisories that `npm audit fix` cannot resolve and that are accepted for now. Keyed by GHSA id or advisory URL (case-insensitive). Each entry must be an object with a real `expires` date in YYYY-MM-DD format and a non-blank `reason`; .github/scripts/check-npm-audit.mjs fails the audit gate on malformed entries and on any at/above-threshold advisory that is missing or expired, so entries are forced back through review. Keep this list as small as possible.",
   "advisories": {
-    "GHSA-vxpw-j846-p89q": {
+    "GHSA-mh99-v99m-4gvg": {
       "expires": "2026-12-31",
-      "reason": "undici WebSocket DoS, present only in the copy bundled inside npm@11 (npm > node-gyp > undici). Bundled deps are shipped inside the npm tarball, so neither `npm audit fix` nor package `overrides` can reach it, and npm@latest still bundles the vulnerable version. Dev/release tooling only — never shipped to marketplace consumers (plugins carry zero dependencies). Clears automatically when npm publishes a re-bundled release."
+      "reason": "brace-expansion DoS, present only in the copy bundled inside the npm CLI (semantic-release > @semantic-release/npm > npm@11.19.0 > node_modules/npm/node_modules/brace-expansion@5.0.7). Bundled deps ship inside the npm tarball, so neither `npm audit fix` nor package `overrides` can reach them; npm@12.0.2 (latest) still bundles 5.0.7. Dev/release tooling only - never shipped to marketplace consumers (plugins carry zero dependencies). Clears when npm bundles brace-expansion >= 5.0.8."
+    },
+    "GHSA-rgw5-rvv9-x895": {
+      "expires": "2026-12-31",
+      "reason": "brace-expansion DoS bypassing the earlier mitigation, same bundled copy as GHSA-mh99-v99m-4gvg (node_modules/npm/node_modules/brace-expansion@5.0.7, unreachable by `npm audit fix` and `overrides`; npm@12.0.2 still bundles 5.0.7). Dev/release tooling only. Clears when npm bundles brace-expansion >= 5.0.9."
+    },
+    "GHSA-mwp4-54f8-5fhr": {
+      "expires": "2026-12-31",
+      "reason": "ip-address parses leading-zero IPv4 octets as decimal, present only in the copy bundled inside the npm CLI (semantic-release > @semantic-release/npm > npm@11.19.0 > node_modules/npm/node_modules/ip-address@10.2.0). Bundled deps are unreachable by `npm audit fix` and `overrides`; npm@12.0.2 (latest) still bundles 10.2.0. Dev/release tooling only, and nothing here resolves attacker-supplied addresses. Clears when npm bundles ip-address >= 10.3.1."
     }
   }
 }
