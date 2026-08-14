@@ -5,6 +5,11 @@ import test from "node:test";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { generateNotes } from "@semantic-release/release-notes-generator";
 import { parse as parseYaml } from "yaml";
+import {
+  extractGeneratedBody,
+  fillEmptyReleaseSection,
+  findEmptyReleaseSections,
+} from "./backfill-plugin-changelog.mjs";
 
 const ROOT = fileURLToPath(new URL("../../", import.meta.url));
 const DISABLED_NPM_PUBLISHER =
@@ -124,6 +129,98 @@ test("the release-note preset renders every releasing commit family", async () =
   }
 });
 
+test("every committed plugin changelog release has generated content", async () => {
+  const expectations = new Map([
+    [
+      "axiom-git",
+      new Map([
+        [
+          "axiom-git-v1.1.0",
+          [
+            /### Features/u,
+            /add native Codex marketplace support/u,
+            /38399bc/u,
+          ],
+        ],
+      ]),
+    ],
+    [
+      "axiom-versioning",
+      new Map([
+        [
+          "axiom-versioning-v1.1.0",
+          [
+            /### Features/u,
+            /Add batched OSV\.dev vulnerability scanning/u,
+            /77acaef/u,
+          ],
+        ],
+        [
+          "axiom-versioning-v1.1.1",
+          [
+            /### Bug Fixes/u,
+            /harden OSV scanner typing contracts/u,
+            /9485a9d/u,
+          ],
+        ],
+        [
+          "axiom-versioning-v1.2.0",
+          [
+            /### Features/u,
+            /add native Codex marketplace support/u,
+            /38399bc/u,
+          ],
+        ],
+      ]),
+    ],
+  ]);
+
+  for (const [plugin, releaseExpectations] of expectations) {
+    const changelog = await readFile(
+      path.join(ROOT, "plugins", plugin, "CHANGELOG.md"),
+      "utf8",
+    );
+    assert.deepEqual(findEmptyReleaseSections(changelog), []);
+
+    for (const [releaseTag, patterns] of releaseExpectations) {
+      const section = extractChangelogSection(changelog, releaseTag);
+      for (const pattern of patterns) {
+        assert.match(section, pattern, `${plugin}: ${releaseTag}`);
+      }
+    }
+  }
+});
+
+test("changelog backfill helpers reject missing output and preserve headings", () => {
+  assert.throws(
+    () =>
+      extractGeneratedBody("## [plugin-v1.1.0](compare)\n", "plugin-v1.1.0"),
+    /generated an empty release body/u,
+  );
+
+  const empty =
+    "# Changelog\n\n## [plugin-v1.1.0](compare) (2026-08-14)\n\n## plugin-v1.0.0 (2026-01-01)\n\n### Features\n\n* initial release\n";
+  const filled = fillEmptyReleaseSection({
+    changelogText: empty,
+    generatedBody: "### Features\n\n* repaired release",
+    releaseTag: "plugin-v1.1.0",
+  });
+  assert.match(
+    filled,
+    /## \[plugin-v1\.1\.0\]\(compare\) \(2026-08-14\)\n\n### Features\n\n\* repaired release/u,
+  );
+  assert.deepEqual(findEmptyReleaseSections(filled), []);
+  assert.throws(
+    () =>
+      fillEmptyReleaseSection({
+        changelogText: filled,
+        generatedBody: "### Features\n\n* duplicate repair",
+        releaseTag: "plugin-v1.1.0",
+      }),
+    /already has a non-empty release body/u,
+  );
+});
+
 test("Dependabot preserves the release-note compatibility boundary", async () => {
   const dependabot = parseYaml(
     await readFile(path.join(ROOT, ".github/dependabot.yml"), "utf8"),
@@ -142,4 +239,14 @@ test("Dependabot preserves the release-note compatibility boundary", async () =>
 
 async function readJson(relativePath) {
   return JSON.parse(await readFile(path.join(ROOT, relativePath), "utf8"));
+}
+
+function extractChangelogSection(changelog, releaseTag) {
+  const headings = [...changelog.matchAll(/^## .+$/gmu)];
+  const targetIndex = headings.findIndex(({ 0: heading }) =>
+    heading.includes(`[${releaseTag}]`),
+  );
+  assert.notEqual(targetIndex, -1, `${releaseTag}: missing changelog section`);
+  const sectionEnd = headings[targetIndex + 1]?.index ?? changelog.length;
+  return changelog.slice(headings[targetIndex].index, sectionEnd);
 }

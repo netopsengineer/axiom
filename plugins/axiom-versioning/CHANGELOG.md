@@ -14,9 +14,21 @@
 
 ## [axiom-versioning-v1.2.0](https://github.com/netopsengineer/axiom/compare/axiom-versioning-v1.1.1...axiom-versioning-v1.2.0) (2026-08-14)
 
+### Features
+
+* add native Codex marketplace support ([38399bc](https://github.com/netopsengineer/axiom/commit/38399bc12861a1db9cfa75c1ff29c92fe9f955b1))
+
 ## [axiom-versioning-v1.1.1](https://github.com/netopsengineer/axiom/compare/axiom-versioning-v1.1.0...axiom-versioning-v1.1.1) (2026-07-07)
 
+### Bug Fixes
+
+* **axiom-versioning:** harden OSV scanner typing contracts ([#50](https://github.com/netopsengineer/axiom/issues/50)) ([9485a9d](https://github.com/netopsengineer/axiom/commit/9485a9d6e40bdc771fce800883876e8e36c370b4))
+
 ## [axiom-versioning-v1.1.0](https://github.com/netopsengineer/axiom/compare/axiom-versioning-v1.0.2...axiom-versioning-v1.1.0) (2026-07-07)
+
+### Features
+
+* Add batched OSV.dev vulnerability scanning ([#48](https://github.com/netopsengineer/axiom/issues/48)) ([77acaef](https://github.com/netopsengineer/axiom/commit/77acaef22bcd80fac7f791732374704f0d2f2c9a))
 
 ## [axiom-versioning-v1.0.2](https://github.com/netopsengineer/axiom/compare/axiom-versioning-v1.0.1...axiom-versioning-v1.0.2) (2026-06-16)
 

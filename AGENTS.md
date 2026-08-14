@@ -78,6 +78,10 @@ package-lock.json
   at runtime.
 - Do not hand-edit either vendor catalog or vendor manifest.
 - Do not hand-edit `plugins/<plugin>/CHANGELOG.md`.
+- Repair an empty historical release section only with
+  `.github/scripts/backfill-plugin-changelog.mjs`. Pass the registered plugin
+  root, previous tag, and empty release tag. Stop if the target section already
+  has content or the tagged commit range cannot generate release notes.
 - Semantic-release owns plugin version bumps, changelog entries, tags, and
   GitHub Releases. Release preparation changes the canonical version and emits
   both generated vendor manifests in one transaction.
@@ -195,6 +199,17 @@ npm run lint
 
 ```bash
 npm run lint:fix
+```
+
+For release-note generation or historical changelog recovery:
+
+```bash
+node --test .github/scripts/release-tooling-contract.test.mjs
+```
+
+```bash
+node .github/scripts/backfill-plugin-changelog.mjs \
+  plugins/<plugin> <previous-tag> <empty-release-tag>
 ```
 
 For marketplace entries, shipped plugin layout, skill directories, or shipped

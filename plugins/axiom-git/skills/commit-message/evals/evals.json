@@ -98,6 +98,31 @@
         "Ended with: `Fix the hook's root cause, re-stage the intended files, and invoke the commit-message skill again.`",
         "Did not run another commit command."
       ]
+    },
+    {
+      "id": 8,
+      "prompt": "Commit this as a fix to the OAuth timeout.",
+      "expected_output": "Skill drafts one fix commit message and waits for a new explicit confirmation; it does not treat the requested subject as authorization to commit.",
+      "files": [],
+      "expectations": [
+        "Chose commit type `fix`.",
+        "Showed one complete assembled commit message.",
+        "Did not treat the user-specified subject as confirmation.",
+        "Did not run `git commit` before a new affirmative user response."
+      ]
+    },
+    {
+      "id": 9,
+      "prompt": "I'm on main with staged changes and unstaged work. Move it to fix/cache-timeout and commit it.",
+      "expected_output": "Skill creates the requested branch without stashing, verifies that the staged diff is unchanged, and still waits for final commit confirmation.",
+      "files": [],
+      "expectations": [
+        "Refused to commit on `main`.",
+        "Created `fix/cache-timeout` with `git switch -c` without using stash.",
+        "Compared the staged diff hash before and after branch creation.",
+        "Stopped instead of committing if branch creation or staged-diff verification failed.",
+        "Waited for explicit confirmation of the assembled message before `git commit`."
+      ]
     }
   ]
 }

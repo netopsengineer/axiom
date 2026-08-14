@@ -20,6 +20,10 @@
 
 ## [axiom-git-v1.1.0](https://github.com/netopsengineer/axiom/compare/axiom-git-v1.0.0...axiom-git-v1.1.0) (2026-08-14)
 
+### Features
+
+* add native Codex marketplace support ([38399bc](https://github.com/netopsengineer/axiom/commit/38399bc12861a1db9cfa75c1ff29c92fe9f955b1))
+
 ## axiom-git-v1.0.0 (2026-06-09)
 
 ### Features

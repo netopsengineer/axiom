@@ -116,6 +116,18 @@ manifest, or `CHANGELOG.md`. Semantic-release owns the canonical version and
 changelog. Release preparation writes that version to both vendor manifests in
 one transaction.
 
+If an existing tagged release has an empty changelog section, regenerate it
+from the tagged commit range through the repository-owned recovery tool:
+
+```bash
+node .github/scripts/backfill-plugin-changelog.mjs \
+  plugins/<plugin> <previous-tag> <empty-release-tag>
+node --test .github/scripts/release-tooling-contract.test.mjs
+```
+
+The tool fills only an empty section and stops if the section already has
+content. Do not replace this recovery with a direct changelog edit.
+
 A release happens per plugin when both are true:
 
 1. The squash commit changes at least one file under `plugins/<plugin>/**`.

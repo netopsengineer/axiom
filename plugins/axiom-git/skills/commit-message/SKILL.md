@@ -45,7 +45,9 @@ Only stop and ask in these cases — otherwise decide and continue:
 4. **Genuinely ambiguous type or emoji choice** — i.e., two options are equally defensible from the rubric and the choice changes how a reader will interpret the commit (e.g., `feat` vs `fix` when the change adds a new code path that also corrects bad behavior). State the options and the tradeoff in one line, then wait. If the rubric picks a clear winner, do not ask.
 5. **Final assembled message.** Always show the complete commit message in a fenced block and wait for explicit confirmation before running `git commit`.
 
-If the user's invoking message unambiguously specifies the subject ("commit this as a fix to the OAuth timeout"), step 5 may be skipped — otherwise still confirm.
+Specifying a type, scope, subject, or complete message in the invoking request
+does not waive step 5. Only a new affirmative user response after the assembled
+message is shown authorizes `git commit`.
 
 ## Phase 1 — Preflight (silent unless something fails)
 
@@ -72,15 +74,21 @@ Run these checks in parallel where possible. Surface results to the user only if
 
 ### Moving off master/main
 
-If the branch check trips, propose a branch name derived from the staged diff (e.g., from the most-changed top-level dir, or the subject about to be drafted). Confirm the name, then:
+If the branch check trips, propose a branch name derived from the staged diff (e.g., from the most-changed top-level dir, or the subject about to be drafted). Confirm the name. Record the staged diff hash, create the branch directly, and verify that the staged diff is unchanged:
 
 ```bash
-git stash --keep-index   # preserve staged set, set aside any unstaged work
+git diff --cached --binary | git hash-object --stdin
 git switch -c <new-branch>
-git stash pop || true    # restore unstaged work onto the new branch
+git diff --cached --binary | git hash-object --stdin
+git status --short
 ```
 
-Then resume preflight on the new branch. Don't commit on the original branch under any circumstances.
+`git switch -c` preserves staged, unstaged, and untracked work because the new
+branch starts at the same commit. Require the two hashes to match. If branch
+creation fails or the hashes differ, reproduce the full error or mismatch and
+stop. Do not stash, commit, or retry automatically. Resume preflight only after
+the branch and staged-diff postcondition checks pass. Don't commit on the original
+branch under any circumstances.
 
 ## Phase 2 — Decide every field
 
