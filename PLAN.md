@@ -264,7 +264,7 @@ Checkpoint 0 and record any delta. Do not silently preserve or silently upgrade.
 | `@biomejs/biome`                             | Installed `2.5.8`                              | npm `2.5.8`                                                                | Ship the current remote-main update.                                                                        |
 | `@semantic-release/changelog`                | Installed `7.0.0`                              | npm `7.0.0`                                                                | Ship the native-ES-module major upgrade with the coordinated Node floor.                                    |
 | `@semantic-release/git`                      | Installed `11.0.1`                             | npm `11.0.1`                                                               | Ship with the changelog upgrade and test both real release configurations.                                  |
-| `conventional-changelog-conventionalcommits` | Installed `10.3.0`                             | npm `10.3.0`                                                               | Ship and verify release-note grouping and reference formatting in dry runs.                                 |
+| `conventional-changelog-conventionalcommits` | Exact compatible pin `9.3.1`                   | npm `10.3.0`; compatible v9 line ends at `9.3.1`                           | Pin v9.3.1; v10 render functions silently lose commit groups under the current writer v8 pipeline.          |
 | `@semantic-release/npm`                      | Fail-closed local replacement; never invoked   | Registry `13.1.5` pulls vulnerable bundled npm tooling                     | Keep npm publication disabled, require explicit plugin configurations, and require zero raw audit findings. |
 | Other direct npm packages                    | Lockfile resolutions inspected                 | Current at the registry on the evidence date                               | Ship current versions.                                                                                      |
 | GitHub Actions and pre-commit hooks          | SHA-pinned with release or frozen-tag comments | Releases and tags checked; every current tag resolves to the pinned commit | Ship current pins, including `actions/setup-node@v7.0.0` in the local validator wrapper.                    |
@@ -1502,9 +1502,10 @@ or artifact paths. Exactly one row may be `IN_PROGRESS`.
   the registry integrity. Checkpoint 2 command:
   `npm install --save-dev --save-exact @openai/codex@0.147.0`.
 - Shipped dependency deltas: remote Biome `2.5.8`,
-  `@semantic-release/changelog@7.0.0`, `@semantic-release/git@11.0.1`, and
-  `conventional-changelog-conventionalcommits@10.3.0`. The coordinated release
-  upgrade raises the Node floor to `^22.22.2 || >=24.15`.
+  `@semantic-release/changelog@7.0.0`, `@semantic-release/git@11.0.1`, and the
+  exact compatible `conventional-changelog-conventionalcommits@9.3.1` pin. The
+  coordinated release upgrade raises the Node floor to
+  `^22.22.2 || >=24.15`.
 - Security: the bundled OSV scanner reported zero advisories for 23 npm,
   Claude comparison, GitHub Action, and pre-commit coordinates. The unused
   default npm publisher was replaced with a fail-closed local package; raw

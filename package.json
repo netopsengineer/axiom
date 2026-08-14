@@ -48,7 +48,7 @@
     "@semantic-release/exec": "^7.1.0",
     "@semantic-release/git": "^11.0.1",
     "@semantic-release/npm": "file:.github/release-tooling/semantic-release-npm-disabled",
-    "conventional-changelog-conventionalcommits": "^10.3.0",
+    "conventional-changelog-conventionalcommits": "9.3.1",
     "cspell": "^10.0.1",
     "markdown-link-check": "^3.15.0",
     "semantic-release": "^25.0.9",

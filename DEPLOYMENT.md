@@ -260,9 +260,11 @@ Perform this phase on the day the branch is pushed.
   `@semantic-release/git@11.0.1` as a coordinated native-ES-module upgrade.
   Raise the repository Node floor to `^22.22.2 || >=24.15` and exercise both
   real release configurations plus both semantic-release dry runs.
-- Ship `conventional-changelog-conventionalcommits@10.3.0`. Its note grouping
-  and reference-formatting changes are covered by release prediction and
-  changelog inspection.
+- Pin `conventional-changelog-conventionalcommits@9.3.1`, the newest compatible
+  release. Version 10 replaces Handlebars partials with render functions while
+  the current release-notes generator uses writer version 8; that combination
+  silently emits headings without commit groups. Require feature, fix, scoped,
+  breaking-header, and breaking-footer note fixtures before changing the pin.
 - Replace semantic-release's unused default npm-publish plugin with the
   repository-owned fail-closed package. Require explicit per-plugin release
   configurations, prove they exclude npm publication, and require raw
