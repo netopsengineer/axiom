@@ -1,6 +1,6 @@
 {
   "name": "axiom-versioning",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "Audits and updates external versioned dependencies across application, infrastructure, and CI/CD configurations.",
   "author": {
     "name": "axiom-plugins",

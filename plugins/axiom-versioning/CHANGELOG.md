@@ -1,5 +1,11 @@
 # Changelog
 
+## [axiom-versioning-v1.2.1](https://github.com/netopsengineer/axiom/compare/axiom-versioning-v1.2.0...axiom-versioning-v1.2.1) (2026-08-14)
+
+### Bug Fixes
+
+* **release:** preserve release note compatibility ([a019eb3](https://github.com/netopsengineer/axiom/commit/a019eb33cc29c360b13afa1a84d8f7338bb91217))
+
 ## [axiom-versioning-v1.2.0](https://github.com/netopsengineer/axiom/compare/axiom-versioning-v1.1.1...axiom-versioning-v1.2.0) (2026-08-14)
 
 ## [axiom-versioning-v1.1.1](https://github.com/netopsengineer/axiom/compare/axiom-versioning-v1.1.0...axiom-versioning-v1.1.1) (2026-07-07)
