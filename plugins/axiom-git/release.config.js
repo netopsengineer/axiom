@@ -8,7 +8,7 @@ export default {
     ["@semantic-release/commit-analyzer", { preset: "conventionalcommits" }],
     [
       "@semantic-release/release-notes-generator",
-      { preset: "conventionalcommits" },
+      { preset: "conventionalcommits", presetConfig: {} },
     ],
     [
       "@semantic-release/changelog",

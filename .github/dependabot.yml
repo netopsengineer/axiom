@@ -41,6 +41,11 @@ updates:
     commit-message:
       prefix: "chore"
     labels: ["dependencies", "npm"]
+    ignore:
+      # v10 render-function presets are incompatible with the current
+      # release-notes-generator writer v8 and silently emit empty notes.
+      - dependency-name: "conventional-changelog-conventionalcommits"
+        update-types: ["version-update:semver-major"]
 
   # Third-party pre-commit hooks in .pre-commit-config.yaml.
   - package-ecosystem: "pre-commit"
