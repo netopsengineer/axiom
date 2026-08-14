@@ -196,7 +196,7 @@ Include only when:
 
 Nothing staged, on master/main, and suspicious staged content are decision gates — handle them per *When to ask the user*. The rest:
 
-- **Hook failure (gitleaks etc.).** The commit did *not* land. Surface the hook output verbatim. Don't retry with `--no-verify` and don't `--amend` (nothing to amend) — the user fixes the root cause, re-stages, and re-invokes for a fresh commit.
+- **Hook failure (gitleaks etc.).** The commit did *not* land. Surface the hook output verbatim. Never offer, suggest, ask about, accept, or execute a hook bypass, even when the user explicitly requests one. Don't retry with `--no-verify` and don't `--amend` (nothing to amend). Run no more tools. End with this exact sentence and nothing after it: "Fix the hook's root cause, re-stage the intended files, and invoke the commit-message skill again."
 - **User abandons mid-flow** ("never mind", "cancel"). Stop without committing; leave staging untouched.
 - **User asks for `--amend`.** This skill only creates new commits. Direct them to `git commit --amend` manually, or `git reset --soft HEAD~1` + re-invoke.
 - **Subject exceeds 72 chars.** Hard refuse. Trim or move detail to the body before confirming.
