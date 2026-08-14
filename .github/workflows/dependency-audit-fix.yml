@@ -6,15 +6,14 @@ name: Dependency audit fix
 # never land on their own. This workflow runs `npm audit fix` daily; if the
 # lockfile changes it opens a PR with the repo GitHub App token (so PR checks
 # trigger), dispatches a Validate pass, and enables auto-merge so a green fix lands
-# hands-off. Advisories with no available fix are handled by the dependency-audit
-# gate's allowlist instead, not here.
+# hands-off. Advisories without a lockfile-only fix remain red until the owning
+# dependency is upgraded, replaced, or removed.
 #
 # A green run therefore means "nothing this workflow could reach", NOT "the audit
 # is clean" - `npm audit fix` cannot touch advisories with no semver-compatible
 # fix, nor any dependency bundled inside another package's tarball. To keep that
 # green from reading as a resolved audit, a run that changes nothing reports the
-# current audit-gate status and the next action to the job summary. It stays
-# advisory: failing here would only duplicate the dependency-audit run's red.
+# current audit-gate status and the next action to the job summary.
 
 on:
   schedule:
@@ -88,9 +87,8 @@ jobs:
           if [ "$blocking" = true ]; then
             cat >> "$GITHUB_STEP_SUMMARY" <<'BLOCKED'
 
-          **Next step:** upgrade the dependency that pulls the advisory in, or - if no
-          upstream fix is reachable - add each advisory to
-          `.github/npm-audit-allowlist.json` with an `expires` date and a reason.
+          **Next step:** upgrade, replace, or remove the dependency that pulls the
+          advisory in. The audit gate does not permit thresholds or allowlists.
           BLOCKED
             echo "::warning::npm audit fix found no applicable fix and the audit gate is still blocking. See the job summary for the advisories and the next step."
           else
@@ -116,7 +114,7 @@ jobs:
           if [ "$(gh pr list --head "$BRANCH" --state open --json number --jq 'length')" = "0" ]; then
             gh pr create --head "$BRANCH" --base main \
               --title "chore: npm audit fix" \
-              --body "Automated \`npm audit fix\` (lockfile-only). Resolves advisories that have a semver-compatible upstream fix. Advisories with no available fix are handled by \`.github/npm-audit-allowlist.json\` instead. Auto-merges once the required checks pass."
+              --body "Automated \`npm audit fix\` (lockfile-only). Resolves advisories that have a semver-compatible upstream fix. Auto-merges once the required checks pass; unresolved advisories remain blocking."
           fi
 
           # The App-created PR triggers normal PR checks. Dispatch Validate too,

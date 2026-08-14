@@ -1,25 +1,20 @@
 #!/usr/bin/env node
-// Keeps the top-level README plugin list in sync with the canonical marketplace
-// catalog. The marketplace owns plugin names, descriptions, categories, and
-// display order; plugin READMEs own detailed docs.
+// Keeps the top-level README plugin list in sync with canonical marketplace and
+// plugin metadata. Plugin READMEs own detailed docs.
 import { access, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { loadMarketplaceContract } from "./lib/marketplace-contract.mjs";
 
 const REPO_ROOT = fileURLToPath(new URL("../../", import.meta.url));
 const README_PATH = path.join(REPO_ROOT, "README.md");
-const MARKETPLACE_PATH = path.join(
-  REPO_ROOT,
-  ".claude-plugin/marketplace.json",
-);
 const START = "<!-- plugin-list:start -->";
 const END = "<!-- plugin-list:end -->";
-const KEBAB_CASE = /^[a-z0-9]+(?:-[a-z0-9]+)*$/u;
 
 const checkMode = process.argv.includes("--check");
 
-const marketplace = await readJson(MARKETPLACE_PATH);
-const plugins = await collectPlugins(marketplace);
+const contract = await loadMarketplaceContract(REPO_ROOT);
+const plugins = await collectPlugins(contract);
 const block = renderPluginBlock(plugins);
 const readme = await readFile(README_PATH, "utf8");
 const nextReadme = syncBlock(readme, block);
@@ -45,57 +40,25 @@ await writeFile(README_PATH, nextReadme);
 console.log("Updated README.md plugin list.");
 
 async function collectPlugins({ plugins }) {
-  if (!Array.isArray(plugins) || plugins.length === 0) {
-    throw new Error(
-      ".claude-plugin/marketplace.json must list at least one plugin.",
-    );
-  }
-
   const result = [];
 
   for (const plugin of plugins) {
-    validateMarketplacePlugin(plugin);
-
-    const sourcePath = plugin.source.replace(/^\.\//u, "");
+    const sourcePath = `plugins/${plugin.name}`;
     const pluginPath = path.join(REPO_ROOT, sourcePath);
     const readmePath = path.join(pluginPath, "README.md");
-    const manifestPath = path.join(pluginPath, ".claude-plugin/plugin.json");
 
     await assertFileExists(readmePath);
-    const manifest = await readJson(manifestPath);
-    validatePluginManifest(manifest, { manifestPath, plugin });
 
     result.push({
       name: plugin.name,
       sourcePath,
-      description: plugin.description.trim(),
-      category: plugin.category.trim(),
+      description: plugin.metadata.description.trim(),
+      claudeCategory: plugin.metadata.platforms.claude.category.trim(),
+      codexCategory: plugin.metadata.platforms.codex.category.trim(),
     });
   }
 
   return result;
-}
-
-async function readText(filePath) {
-  return readFile(filePath, "utf8").catch((error) => {
-    if (error.code === "ENOENT") {
-      throw new Error(`Missing ${relativePath(filePath)}.`);
-    }
-
-    throw error;
-  });
-}
-
-async function readJson(filePath) {
-  const raw = await readText(filePath);
-
-  try {
-    return JSON.parse(raw);
-  } catch (error) {
-    throw new Error(
-      `Could not parse ${relativePath(filePath)}: ${error.message}`,
-    );
-  }
 }
 
 async function assertFileExists(filePath) {
@@ -106,52 +69,6 @@ async function assertFileExists(filePath) {
 
     throw error;
   });
-}
-
-function validateMarketplacePlugin(plugin) {
-  if (!plugin || typeof plugin !== "object") {
-    throw new Error("Every marketplace plugin entry must be an object.");
-  }
-
-  if (typeof plugin.name !== "string" || !KEBAB_CASE.test(plugin.name)) {
-    throw new Error(`Invalid marketplace plugin name: ${plugin.name}`);
-  }
-
-  const expectedSource = `./plugins/${plugin.name}`;
-
-  if (plugin.source !== expectedSource) {
-    throw new Error(
-      `Marketplace source for ${plugin.name} must be "${expectedSource}", got "${plugin.source}".`,
-    );
-  }
-
-  assertNonEmptyString(plugin.description, `${plugin.name} description`);
-  assertNonEmptyString(plugin.category, `${plugin.name} category`);
-}
-
-function validatePluginManifest(manifest, { manifestPath, plugin }) {
-  if (!manifest || typeof manifest !== "object" || Array.isArray(manifest)) {
-    throw new Error(
-      `${relativePath(manifestPath)} must contain a JSON object.`,
-    );
-  }
-
-  if (manifest.name !== plugin.name) {
-    throw new Error(
-      `${relativePath(manifestPath)} name "${manifest.name}" does not match marketplace entry "${plugin.name}".`,
-    );
-  }
-
-  assertNonEmptyString(
-    manifest.description,
-    `${relativePath(manifestPath)} description`,
-  );
-}
-
-function assertNonEmptyString(value, label) {
-  if (typeof value !== "string" || value.trim().length === 0) {
-    throw new Error(`${label} must be a non-empty string.`);
-  }
 }
 
 function renderPluginBlock(plugins) {
@@ -167,10 +84,20 @@ function renderPluginSection(plugin) {
 
 ${wrapText(plugin.description)}
 
-Category: \`${plugin.category}\`
+Claude Code category: \`${plugin.claudeCategory}\`
+
+Codex category: \`${plugin.codexCategory}\`
+
+Claude Code:
 
 \`\`\`shell
 /plugin install ${plugin.name}@axiom
+\`\`\`
+
+Codex:
+
+\`\`\`shell
+codex plugin add ${plugin.name}@axiom
 \`\`\``;
 }
 

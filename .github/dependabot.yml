@@ -24,7 +24,7 @@ updates:
       # can't track it. .github/workflows/bump-validate-action.yml re-pins it.
       - dependency-name: "anthropics/claude-plugins-community*"
 
-  # Release tooling (semantic-release + plugins).
+  # Repository tooling (release, validation, lint, and exact Codex CLI tools).
   - package-ecosystem: "npm"
     directory: "/"
     schedule:
@@ -36,7 +36,7 @@ updates:
       semver-patch-days: 3
     versioning-strategy: "increase"
     groups:
-      release-tooling:
+      repository-tooling:
         patterns: ["*"]
     commit-message:
       prefix: "chore"

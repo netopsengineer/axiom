@@ -1,0 +1,11 @@
+{
+  "name": "@semantic-release/npm",
+  "version": "13.1.5-axiom-disabled.0",
+  "private": true,
+  "description": "Fail-closed replacement for the unused npm publisher bundled with semantic-release.",
+  "type": "module",
+  "exports": "./index.js",
+  "engines": {
+    "node": "^22.22.2 || >=24.15"
+  }
+}

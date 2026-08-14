@@ -55,6 +55,15 @@ jobs:
           claude-cli-version: latest
       # Node/npm are already on PATH from the validate-plugins composite
       # action's own setup-node step above.
+      - run: npm ci --loglevel=error
+      - name: Generated marketplace drift
+        run: npm run marketplaces:check
+      - name: Claude isolated install smoke
+        run: npm run check:claude:smoke
+      - name: Codex static validation
+        run: npm run check:codex:static
+      - name: Codex isolated install smoke
+        run: npm run check:codex:smoke
       - name: Validator smoke tests
         run: npm run test:validate-plugins
 
@@ -87,6 +96,7 @@ jobs:
           node-version: 24
           cache: npm
       - run: npm ci --loglevel=error
+      - run: npm run audit:ci
       - run: npm run check:repo
       - run: npm run lint:yaml
       - run: npm run lint:spelling
@@ -125,9 +135,10 @@ jobs:
       # scoped to the repo's hand-written JS. Installed via npm, so there is no
       # extra action to SHA-pin — reuses the pinned checkout + setup-node above.
       - run: npm ci --loglevel=error
-      - run: npm run docs:readme:check
+      - run: npm run generate:check
       - run: npm run lint
       # Unit tests for the CI/automation helper scripts (audit gate,
-      # audit-fix classifier) — required here so a regression fails the PR
+      # audit-fix classifier) - required here so a regression fails the PR
       # instead of only surfacing later in scheduled security automation.
       - run: npm run test:automation
+      - run: npm run test:marketplaces

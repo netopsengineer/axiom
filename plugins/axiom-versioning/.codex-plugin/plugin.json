@@ -1,0 +1,39 @@
+{
+  "name": "axiom-versioning",
+  "version": "1.1.1",
+  "description": "Audits and updates external versioned dependencies across application, infrastructure, and CI/CD configurations.",
+  "author": {
+    "name": "axiom-plugins",
+    "email": "enterprise.code.developer@gmail.com"
+  },
+  "repository": "https://github.com/netopsengineer/axiom",
+  "license": "MIT",
+  "keywords": [
+    "dependencies",
+    "versioning",
+    "dependency-drift",
+    "dependency-updates",
+    "ci-cd",
+    "github-actions",
+    "docker",
+    "terraform",
+    "helm",
+    "kubernetes",
+    "dependabot",
+    "pre-commit",
+    "security",
+    "sha-pinning"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Axiom Versioning",
+    "shortDescription": "Verify dependencies with live version and security evidence.",
+    "longDescription": "Audits and updates external versioned dependencies across application, infrastructure, and CI/CD configurations.",
+    "developerName": "axiom-plugins",
+    "category": "Productivity",
+    "websiteURL": "https://github.com/netopsengineer/axiom",
+    "defaultPrompt": [
+      "Audit this repository's dependency versions and security status."
+    ]
+  }
+}

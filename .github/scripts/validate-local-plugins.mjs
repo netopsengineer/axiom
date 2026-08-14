@@ -1,27 +1,28 @@
 import { spawn } from "node:child_process";
-import { readdir } from "node:fs/promises";
 import path from "node:path";
+import { fileURLToPath } from "node:url";
+import { loadMarketplaceContract } from "./lib/marketplace-contract.mjs";
 
-const ROOT = process.cwd();
+const ROOT = fileURLToPath(new URL("../../", import.meta.url));
+const contract = await loadMarketplaceContract(ROOT);
 
-const pluginDirs = (
-  await readdir(path.join(ROOT, "plugins"), { withFileTypes: true })
-)
-  .filter((entry) => entry.isDirectory() && !entry.name.startsWith("."))
-  .map((entry) => path.join("plugins", entry.name))
-  .sort();
+console.log("Validating .claude-plugin/marketplace.json");
+await run("claude", [
+  "plugin",
+  "validate",
+  "./.claude-plugin/marketplace.json",
+  "--strict",
+]);
 
-if (pluginDirs.length === 0) {
-  console.error("No plugin directories found under plugins/.");
-  process.exit(1);
-}
-
-for (const pluginDir of pluginDirs) {
+for (const { name } of contract.plugins) {
+  const pluginDir = path.posix.join("plugins", name);
   console.log(`Validating ${pluginDir}`);
-  await run("claude", ["plugin", "validate", `./${pluginDir}`]);
+  await run("claude", ["plugin", "validate", `./${pluginDir}`, "--strict"]);
 }
 
-console.log(`Validated ${pluginDirs.length} plugin(s).`);
+console.log(
+  `Validated the Claude marketplace and ${contract.plugins.length} plugin(s) in strict mode.`,
+);
 
 function run(command, args) {
   return new Promise((resolve, reject) => {
