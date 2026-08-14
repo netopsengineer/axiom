@@ -24,7 +24,7 @@ updates:
       # can't track it. .github/workflows/bump-validate-action.yml re-pins it.
       - dependency-name: "anthropics/claude-plugins-community*"
 
-  # Repository tooling (release, validation, lint, and exact Codex CLI tools).
+  # Repository tooling (release, validation, lint, and exact host CLI tools).
   - package-ecosystem: "npm"
     directory: "/"
     schedule:

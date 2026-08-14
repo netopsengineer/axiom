@@ -76,8 +76,14 @@ package-lock.json
 - Treat `package.json` and `package-lock.json` as repository release, lint, and
   validation tooling only. Shipped plugins must not depend on root npm packages
   at runtime.
+- Keep the name-only `allowScripts` approval limited to
+  `@anthropic-ai/claude-code`. Its exact `devDependencies` version, lockfile
+  integrity, and required validation gates constrain every approved update.
 - Do not hand-edit either vendor catalog or vendor manifest.
 - Do not hand-edit `plugins/<plugin>/CHANGELOG.md`.
+- Keep `conventional-changelog-conventionalcommits` exact and retain its
+  semver-major Dependabot ignore. The scheduled release-note compatibility
+  workflow owns major upgrades through a fixture-tested, audit-clean PR.
 - Repair an empty historical release section only with
   `.github/scripts/backfill-plugin-changelog.mjs`. Pass the registered plugin
   root, previous tag, and empty release tag. Stop if the target section already
@@ -252,6 +258,17 @@ For workflow, Dependabot, pre-commit, or repository YAML changes:
 ```bash
 npm run lint:yaml
 ```
+
+For the live release-note major compatibility boundary:
+
+```bash
+npm run check:release-notes:compatibility
+```
+
+Treat `managed`, `held`, `security-blocked`, and `ready` as successful probe
+outcomes. Treat command, registry, installation, audit parsing, or fixture
+execution errors as failed checks. Do not remove the major-update ignore to
+silence a held result.
 
 For GitHub Actions or pre-commit security hook changes:
 

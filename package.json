@@ -11,7 +11,7 @@
   "scripts": {
     "marketplaces:build": "node .github/scripts/build-marketplaces.mjs",
     "marketplaces:check": "node .github/scripts/build-marketplaces.mjs --check",
-    "test:marketplaces": "node --test .github/scripts/marketplace-contract.test.mjs .github/scripts/check-codex-marketplace.test.mjs .github/scripts/check-repo-invariants.test.mjs .github/scripts/marketplace-smoke-fixture.test.mjs .github/scripts/codex-package-contract.test.mjs .github/scripts/prepare-plugin-release.test.mjs .github/scripts/commit-message-contract.test.mjs",
+    "test:marketplaces": "node --test .github/scripts/marketplace-contract.test.mjs .github/scripts/check-codex-marketplace.test.mjs .github/scripts/check-repo-invariants.test.mjs .github/scripts/marketplace-smoke-fixture.test.mjs .github/scripts/claude-package-contract.test.mjs .github/scripts/codex-package-contract.test.mjs .github/scripts/prepare-plugin-release.test.mjs .github/scripts/commit-message-contract.test.mjs",
     "docs:badges": "node .github/scripts/sync-readme-badges.mjs",
     "docs:badges:check": "node .github/scripts/sync-readme-badges.mjs --check",
     "docs:evals": "node .github/scripts/sync-readme-evals.mjs",
@@ -29,8 +29,9 @@
     "check:codex:smoke": "node .github/scripts/smoke-codex-marketplace.mjs",
     "check:codex": "npm run check:codex:static && npm run check:codex:smoke",
     "check:repo": "node .github/scripts/check-repo-invariants.mjs",
+    "check:release-notes:compatibility": "node .github/scripts/probe-release-note-compatibility.mjs",
     "audit:ci": "node .github/scripts/check-npm-audit.mjs",
-    "test:automation": "node --test .github/scripts/check-npm-audit.test.mjs .github/scripts/dual-marketplace-automation.test.mjs .github/scripts/release-tooling-contract.test.mjs .github/scripts/run-npm-audit-fix.test.mjs",
+    "test:automation": "node --test .github/scripts/check-markdown-links.test.mjs .github/scripts/check-npm-audit.test.mjs .github/scripts/dual-marketplace-automation.test.mjs .github/scripts/release-tooling-contract.test.mjs .github/scripts/run-npm-audit-fix.test.mjs",
     "test:validate-plugins": "node .github/scripts/check-validate-plugins-smoke.mjs",
     "test": "npm run test:automation && npm run test:marketplaces",
     "check:precommit:security": "prek run actionlint --all-files && prek run shellcheck --all-files && prek run zizmor --all-files",
@@ -40,7 +41,11 @@
     "lint": "biome ci",
     "lint:fix": "biome check --write"
   },
+  "allowScripts": {
+    "@anthropic-ai/claude-code": true
+  },
   "devDependencies": {
+    "@anthropic-ai/claude-code": "2.1.232",
     "@biomejs/biome": "^2.5.8",
     "@j178/prek": "^0.4.13",
     "@openai/codex": "0.147.0",

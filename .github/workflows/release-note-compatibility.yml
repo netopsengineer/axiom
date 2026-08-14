@@ -1,0 +1,187 @@
+name: Release-note compatibility
+
+# Dependabot deliberately holds major updates to the conventional-commits
+# preset because an incompatible writer contract can silently emit empty release
+# notes. This weekly probe tests the newest major against repository-owned
+# fixtures and npm audit. It keeps one issue open while the boundary is blocked
+# and opens an auto-merged upgrade PR only after the candidate passes both gates.
+
+on:
+  schedule:
+    - cron: "23 7 * * 1" # weekly Monday 07:23 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release-note-compatibility
+  cancel-in-progress: false
+
+env:
+  BRANCH: chore/release-note-compatibility
+  ISSUE_TITLE: Release-note major compatibility
+
+jobs:
+  probe:
+    name: Release-note compatibility
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      actions: write # gh workflow run validate.yml --ref <branch>
+      contents: read
+    steps:
+      - name: Configure git defaults
+        run: git config --global init.defaultBranch main
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci --loglevel=error
+
+      - name: Probe latest major preset
+        id: probe
+        run: npm run check:release-notes:compatibility
+
+      - name: Report probe result
+        env:
+          CANDIDATE_PRESET: ${{ steps.probe.outputs.candidate_preset }}
+          COMPATIBLE: ${{ steps.probe.outputs.compatible }}
+          CURRENT_PRESET: ${{ steps.probe.outputs.current_preset }}
+          GENERATOR: ${{ steps.probe.outputs.generator }}
+          STATUS: ${{ steps.probe.outputs.status }}
+          VULNERABILITIES: ${{ steps.probe.outputs.vulnerabilities }}
+          WRITER: ${{ steps.probe.outputs.writer }}
+        run: |
+          {
+            echo "## Release-note compatibility"
+            echo
+            echo "- Status: \`$STATUS\`"
+            echo "- Current preset: \`$CURRENT_PRESET\`"
+            echo "- Candidate preset: \`$CANDIDATE_PRESET\`"
+            echo "- Generator: \`$GENERATOR\`"
+            echo "- Candidate writer: \`$WRITER\`"
+            echo "- Fixtures compatible: \`$COMPATIBLE\`"
+            echo "- Candidate audit vulnerabilities: \`$VULNERABILITIES\`"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Mint GitHub App token
+        id: app-token
+        env:
+          APP_ID: ${{ vars.APP_ID }}
+          APP_PRIVATE_KEY: ${{ secrets.APP_PRIVATE_KEY }}
+          TOKEN_PERMISSIONS: '{"contents":"write","issues":"write","pull_requests":"write"}'
+        run: node .github/scripts/create-app-token.mjs
+
+      - name: Synchronize compatibility issue
+        env:
+          CANDIDATE_PRESET: ${{ steps.probe.outputs.candidate_preset }}
+          COMPATIBLE: ${{ steps.probe.outputs.compatible }}
+          CURRENT_PRESET: ${{ steps.probe.outputs.current_preset }}
+          GENERATOR: ${{ steps.probe.outputs.generator }}
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+          STATUS: ${{ steps.probe.outputs.status }}
+          VULNERABILITIES: ${{ steps.probe.outputs.vulnerabilities }}
+          WRITER: ${{ steps.probe.outputs.writer }}
+        run: |
+          set -euo pipefail
+          issue_number="$(gh issue list --state all \
+            --search "$ISSUE_TITLE in:title" \
+            --json number,title \
+            --jq 'map(select(.title == "Release-note major compatibility")) | .[0].number // empty')"
+
+          if [ "$STATUS" = "managed" ]; then
+            if [ -n "$issue_number" ]; then
+              issue_state="$(gh issue view "$issue_number" --json state --jq '.state')"
+              if [ "$issue_state" = "OPEN" ]; then
+                gh issue close "$issue_number" \
+                  --reason completed \
+                  --comment "The latest preset is now on the managed major line; the compatibility hold is no longer pending."
+              fi
+            fi
+            exit 0
+          fi
+
+          body="$(mktemp)"
+          cat > "$body" <<EOF
+          <!-- release-note-compatibility -->
+          This issue is maintained by the weekly release-note compatibility workflow.
+
+          - Status: \`${STATUS}\`
+          - Current preset: \`${CURRENT_PRESET}\`
+          - Candidate preset: \`${CANDIDATE_PRESET}\`
+          - Release-notes generator: \`${GENERATOR}\`
+          - Candidate writer: \`${WRITER}\`
+          - Release-note fixtures compatible: \`${COMPATIBLE}\`
+          - Candidate npm audit vulnerabilities: \`${VULNERABILITIES}\`
+
+          The repository keeps major preset updates ignored while this issue is open.
+          A compatible, audit-clean candidate is promoted through an automated PR and
+          the full required check suite before merge.
+          EOF
+
+          if [ -z "$issue_number" ]; then
+            gh issue create --title "$ISSUE_TITLE" --body-file "$body"
+            exit 0
+          fi
+
+          issue_state="$(gh issue view "$issue_number" --json state --jq '.state')"
+          current_body="$(gh issue view "$issue_number" --json body --jq '.body')"
+          desired_body="$(cat "$body")"
+          if [ "$current_body" != "$desired_body" ]; then
+            gh issue edit "$issue_number" --body-file "$body"
+          fi
+          if [ "$issue_state" != "OPEN" ]; then
+            gh issue reopen "$issue_number"
+          fi
+
+      # The exact registry SemVer was installed with scripts disabled, exercised
+      # against repository fixtures, and audited by the probe. This second
+      # install emits the reviewed package.json and lockfile change for the PR.
+      - name: Open upgrade PR and enable auto-merge # zizmor: ignore[adhoc-packages]
+        if: steps.probe.outputs.status == 'ready'
+        env:
+          CANDIDATE_PRESET: ${{ steps.probe.outputs.candidate_preset }}
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+          WORKFLOW_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          npm install --save-dev --save-exact --ignore-scripts --loglevel=error \
+            "conventional-changelog-conventionalcommits@${CANDIDATE_PRESET}"
+          npm run test:automation
+          npm run audit:ci
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git checkout -B "$BRANCH"
+          git add package.json package-lock.json
+          git commit -m "chore: upgrade release-note preset to ${CANDIDATE_PRESET}"
+          git push -f "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" "$BRANCH"
+
+          body="$(mktemp)"
+          cat > "$body" <<EOF
+          Automated upgrade of \`conventional-changelog-conventionalcommits\` to
+          \`${CANDIDATE_PRESET}\` after the candidate passed every repository-owned
+          release-note fixture and a zero-vulnerability npm audit.
+
+          The major-update ignore remains in place as a rolling compatibility gate
+          for the next upstream major. The weekly probe owns that boundary.
+          EOF
+
+          pr_number="$(gh pr list --head "$BRANCH" --state open --json number --jq '.[0].number // empty')"
+          if [ -z "$pr_number" ]; then
+            gh pr create --head "$BRANCH" --base main \
+              --title "chore: upgrade release-note preset to ${CANDIDATE_PRESET}" \
+              --body-file "$body"
+          else
+            gh pr edit "$pr_number" \
+              --title "chore: upgrade release-note preset to ${CANDIDATE_PRESET}" \
+              --body-file "$body"
+          fi
+
+          GH_TOKEN="$WORKFLOW_TOKEN" gh workflow run validate.yml --ref "$BRANCH"
+          gh pr merge --auto --squash "$BRANCH" \
+            || echo "::warning::Could not enable auto-merge; verify repository auto-merge and required-check settings."

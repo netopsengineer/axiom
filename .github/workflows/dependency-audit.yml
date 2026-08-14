@@ -26,6 +26,7 @@ jobs:
   audit:
     name: Dependency audit
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - name: Configure git defaults
         run: git config --global init.defaultBranch main

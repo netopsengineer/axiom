@@ -6,6 +6,10 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { promisify } from "node:util";
 import {
+  assertClaudePackageContract,
+  CLAUDE_BIN,
+} from "./lib/claude-package-contract.mjs";
+import {
   assertCanonicalPathInside,
   assertExactPluginSequence,
   assertInstalledPluginMatches,
@@ -28,6 +32,7 @@ async function main() {
   let stateWasChecked = false;
 
   try {
+    await assertClaudePackageContract();
     realStateBefore = await snapshotClaudeRealState();
     const selection = await collectMarketplaceFixtureFiles(marketplaceRoot);
     const fixture = await createMarketplaceFixture(selection, {
@@ -157,7 +162,7 @@ async function verifyCommandSurface(environment) {
 
 async function runClaude(argumentsList, environment) {
   try {
-    return await execFileAsync("claude", argumentsList, {
+    return await execFileAsync(CLAUDE_BIN, argumentsList, {
       cwd: TOOLING_ROOT,
       encoding: "utf8",
       env: { ...process.env, ...environment },
@@ -165,7 +170,7 @@ async function runClaude(argumentsList, environment) {
       timeout: COMMAND_TIMEOUT_MS,
     });
   } catch (error) {
-    throw commandError(["claude", ...argumentsList], error);
+    throw commandError([CLAUDE_BIN, ...argumentsList], error);
   }
 }
 
@@ -202,7 +207,10 @@ function errorMessage(error) {
   return error instanceof Error ? error.message : String(error);
 }
 
-main().catch((error) => {
-  console.error(errorMessage(error));
-  process.exitCode = 1;
-});
+const scriptPath = process.argv[1] ? path.resolve(process.argv[1]) : "";
+if (scriptPath === fileURLToPath(import.meta.url)) {
+  main().catch((error) => {
+    console.error(errorMessage(error));
+    process.exitCode = 1;
+  });
+}

@@ -16,6 +16,7 @@ jobs:
   secrets:
     name: Secret scan
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - name: Configure git defaults
         run: git config --global init.defaultBranch main
@@ -35,6 +36,7 @@ jobs:
   plugins:
     name: Plugin manifests
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - name: Configure git defaults
         run: git config --global init.defaultBranch main
@@ -42,6 +44,11 @@ jobs:
         with:
           fetch-depth: 0
           persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci --loglevel=error
       # Canonical validator: runs `claude plugin validate` (source-of-truth
       # schema check) plus the marketplace invariant lints. The local wrapper
       # keeps the untagged upstream action SHA-pinned and allows bumps without
@@ -52,10 +59,6 @@ jobs:
           warn-invariants: ""
           fail-on-warnings: "true"
           skip-external: "true" # every entry is a local folder source
-          claude-cli-version: latest
-      # Node/npm are already on PATH from the validate-plugins composite
-      # action's own setup-node step above.
-      - run: npm ci --loglevel=error
       - name: Generated marketplace drift
         run: npm run marketplaces:check
       - name: Claude isolated install smoke
@@ -70,6 +73,7 @@ jobs:
   markdown:
     name: Markdown lint
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - name: Configure git defaults
         run: git config --global init.defaultBranch main
@@ -85,6 +89,7 @@ jobs:
   repository:
     name: Repository checks
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - name: Configure git defaults
         run: git config --global init.defaultBranch main
@@ -105,6 +110,7 @@ jobs:
   workflows:
     name: Workflow security lint
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - name: Configure git defaults
         run: git config --global init.defaultBranch main
@@ -121,6 +127,7 @@ jobs:
   javascript:
     name: JavaScript lint
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - name: Configure git defaults
         run: git config --global init.defaultBranch main

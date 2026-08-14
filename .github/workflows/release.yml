@@ -19,6 +19,7 @@ jobs:
   release:
     name: semantic-release
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     steps:
       - name: Configure git defaults
         run: git config --global init.defaultBranch main
@@ -28,7 +29,7 @@ jobs:
           persist-credentials: false
       - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
-          node-version: 24 # current LTS; release plugins need ^22.22.2 || >=24.15
+          node-version: 24 # release plugins need ^22.22.2 || >=24.15
           cache: npm
       # Mint a short-lived token from the axiom-release-bot GitHub App. The
       # built-in GITHUB_TOKEN (github-actions[bot]) is not an admin and is rejected
@@ -49,8 +50,9 @@ jobs:
       - name: Release changed plugins
         run: |
           set -euo pipefail
-          for dir in plugins/*/; do
-            name="$(basename "$dir")"
+          mapfile -t plugins < <(node .github/scripts/list-release-plugins.mjs)
+          for name in "${plugins[@]}"; do
+            dir="plugins/$name"
             echo "::group::semantic-release: $name"
             ( cd "$dir" && npx --no-install semantic-release )
             echo "::endgroup::"
@@ -61,3 +63,7 @@ jobs:
           GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
       - name: Verify generated marketplaces
         run: npm run marketplaces:check
+      - name: Verify post-release repository contracts
+        run: npm run check:repo
+      - name: Verify post-release automation contracts
+        run: npm run test:automation

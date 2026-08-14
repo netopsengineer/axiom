@@ -2,6 +2,11 @@ import { spawnSync } from "node:child_process";
 import { cpSync, mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
+import {
+  assertClaudePackageContract,
+  CLAUDE_BIN,
+  CLAUDE_SHIM_DIR,
+} from "./lib/claude-package-contract.mjs";
 
 const ROOT = process.cwd();
 const ACTION_PATH = path.join(
@@ -16,7 +21,7 @@ const cases = [
   ["warnings fail when fail-on-warnings is true", runWarningFixture],
 ];
 
-preflight();
+await preflight();
 
 for (const [name, run] of cases) {
   run();
@@ -157,6 +162,7 @@ function runValidatorScript(fixture, scriptName, { expect, includes = [] }) {
     encoding: "utf8",
     env: {
       ...process.env,
+      PATH: `${CLAUDE_SHIM_DIR}${path.delimiter}${process.env.PATH ?? ""}`,
       ACTION_PATH,
       BASE_REF: "HEAD",
       FAIL_ON_WARNINGS: "true",
@@ -186,8 +192,9 @@ function runValidatorScript(fixture, scriptName, { expect, includes = [] }) {
   }
 }
 
-function preflight() {
-  for (const command of ["bash", "jq", "claude"]) {
+async function preflight() {
+  await assertClaudePackageContract();
+  for (const command of ["bash", "jq", CLAUDE_BIN]) {
     const result = spawnSync(command, ["--version"], {
       encoding: "utf8",
       stdio: ["ignore", "pipe", "pipe"],
