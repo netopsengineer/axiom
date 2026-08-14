@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "name": "axiom-versioning",
-  "version": "1.2.1",
+  "version": "1.2.2",
   "displayName": "Axiom Versioning",
   "description": "Audits and updates external versioned dependencies across application, infrastructure, and CI/CD configurations.",
   "author": {

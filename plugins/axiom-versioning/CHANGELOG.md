@@ -1,5 +1,11 @@
 # Changelog
 
+## [axiom-versioning-v1.2.2](https://github.com/netopsengineer/axiom/compare/axiom-versioning-v1.2.1...axiom-versioning-v1.2.2) (2026-08-14)
+
+### Bug Fixes
+
+* **dependency-versions:** disambiguate advisory aliases ([#127](https://github.com/netopsengineer/axiom/issues/127)) ([5f93767](https://github.com/netopsengineer/axiom/commit/5f937675d3ac916b02b41f80c0be1858d4ddfdb5))
+
 ## [axiom-versioning-v1.2.1](https://github.com/netopsengineer/axiom/compare/axiom-versioning-v1.2.0...axiom-versioning-v1.2.1) (2026-08-14)
 
 ### Bug Fixes
