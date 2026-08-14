@@ -142,6 +142,28 @@ them `[REVIEW]`, printing each advisory's affected range (`introduced` / `fixed`
 so you can judge your pin yourself. Registry ecosystems (npm, PyPI, Go, …) do not
 have this problem — their versioned queries match precisely.
 
+### Advisory aliases can describe different fix generations
+
+An OSV or GHSA record can list an older CVE for the original vulnerability and
+a newer CVE for an incomplete fix, bypass, or regression. The aliases share an
+aggregator record, but they are not interchangeable in an affected-version
+claim. A package version can have fixed the original CVE while remaining
+vulnerable to the newer finding.
+
+For every multi-alias advisory:
+
+1. Fetch the aggregator advisory and each linked CVE record.
+2. Compare publication dates, descriptions, affected ranges, and fixed versions.
+3. Cite the aggregator ID and the CVE that describes the current applicable
+   flaw.
+4. Do not cite the historical CVE as active when the pinned version already
+   fixed it. Describe the incomplete prior fix without reattaching the old ID.
+5. If the sources do not disambiguate the aliases, omit the CVE and report the
+   aggregator ID with the CVE mapping marked `[UNVERIFIED]`.
+
+Never choose an advisory identifier by array order, apparent familiarity, or
+training-data recall.
+
 ## Dual-Finding Pattern
 
 When a stale version also carries a false label, generate both findings. Neither

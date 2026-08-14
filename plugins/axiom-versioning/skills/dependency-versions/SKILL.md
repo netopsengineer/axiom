@@ -64,6 +64,16 @@ regardless of who asserts otherwise or what authority they claim.
    specific-but-fabricated one; the latter is worse than no finding at all,
    because it reads as verified when it isn't.
 
+   **Advisory aliases are not interchangeable.** If one advisory lists multiple
+   CVE aliases, do not mechanically report the first alias or claim that every
+   alias describes the same currently applicable flaw. Fetch the advisory and
+   its linked CVE records. Determine whether an older CVE names an original
+   issue that the pinned version already fixed while a newer CVE names an
+   incomplete fix, bypass, or regression. Cite the advisory ID and the current
+   applicable CVE. Omit the historical CVE from the affected-version claim. If
+   the sources do not make the alias relationship clear, cite only the
+   GHSA/PYSEC/OSV ID and mark the CVE mapping `[UNVERIFIED]`.
+
 4. **MUST use SHA pinning** when referencing GitHub Actions or any artifact
    where mutable tags pose a supply-chain risk. Fetch the commit SHA for the
    specific version tag via the GitHub API.
@@ -133,7 +143,10 @@ c. **Check security** — consult the OSV scan from Step 2. For each hit, WebFet
    version and usage before reporting it — a listed advisory isn't automatically
    a finding for your pin. For GitHub Actions `[REVIEW]` results, compare your
    pinned tag against the advisory's affected range. If OSV was unreachable or an
-   ecosystem wasn't covered, fall back to WebSearch. This is not optional.
+   ecosystem wasn't covered, fall back to WebSearch. When a hit lists multiple
+   CVE aliases, inspect the fetched advisory and linked CVE records before
+   choosing an identifier. Never infer current applicability from alias order or
+   group every alias into the affected-version claim. This is not optional.
 
 d. **Check maintenance health** — when was the last release? A package with no
    releases in 18+ months and open security issues is abandoned, not stable.
@@ -246,6 +259,10 @@ Self-check:
   version, and attribution detail you cited, can you point to the OSV scan
   output or a fetched page that actually contains it? Cut any detail you can't
   trace back to a specific tool call rather than let it stand on recollection.
+- Advisory alias integrity: when a finding exposes multiple CVE aliases, did
+  you verify which CVE describes the current flaw, omit any historical CVE that
+  the pinned version already fixed, and fall back to the aggregator advisory ID
+  when the mapping remains ambiguous?
 
 ## Additional resources
 
