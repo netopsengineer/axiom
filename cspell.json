@@ -60,6 +60,7 @@
     "gitmojis",
     "healthcheck",
     "loglevel",
+    "mapfile",
     "markdownlint",
     "markdownlint-cli2",
     "markdownlint-cli2-action",

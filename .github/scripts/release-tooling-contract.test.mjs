@@ -10,6 +10,11 @@ import {
   fillEmptyReleaseSection,
   findEmptyReleaseSections,
 } from "./backfill-plugin-changelog.mjs";
+import {
+  assertReleaseNoteFixtures,
+  RELEASE_NOTE_OPTIONS,
+} from "./lib/release-note-contract.mjs";
+import { determineProbeStatus } from "./probe-release-note-compatibility.mjs";
 
 const ROOT = fileURLToPath(new URL("../../", import.meta.url));
 const DISABLED_NPM_PUBLISHER =
@@ -63,30 +68,10 @@ test("every shipped plugin has an explicit non-npm release pipeline", async () =
 
 test("the release-note preset renders every releasing commit family", async () => {
   const packageRecord = await readJson("package.json");
-  assert.equal(
+  assert.match(
     packageRecord.devDependencies["conventional-changelog-conventionalcommits"],
-    "9.3.1",
+    /^\d+\.\d+\.\d+$/u,
   );
-
-  const cases = [
-    {
-      message: "feat: add marketplace support",
-      expected: [/### Features/u, /add marketplace support/u],
-    },
-    {
-      message: "fix(api): correct validation",
-      expected: [/### Bug Fixes/u, /api:/u, /correct validation/u],
-    },
-    {
-      message: "feat!: remove a legacy manifest",
-      expected: [/BREAKING CHANGES/u, /remove a legacy manifest/u],
-    },
-    {
-      message:
-        "feat(api): change behavior\n\nBREAKING CHANGE: the old API is removed",
-      expected: [/BREAKING CHANGES/u, /the old API is removed/u],
-    },
-  ];
 
   for (const plugin of ["axiom-git", "axiom-versioning"]) {
     const moduleUrl = pathToFileURL(
@@ -99,34 +84,39 @@ test("the release-note preset renders every releasing commit family", async () =
         entry[0] === "@semantic-release/release-notes-generator",
     );
     assert.ok(releaseNotesEntry);
-    assert.deepEqual(releaseNotesEntry[1], {
-      preset: "conventionalcommits",
-      presetConfig: {},
+    assert.deepEqual(releaseNotesEntry[1], RELEASE_NOTE_OPTIONS);
+    await assertReleaseNoteFixtures({
+      cwd: path.join(ROOT, "plugins", plugin),
+      generateNotes,
+      pluginName: plugin,
     });
-
-    for (const fixture of cases) {
-      const notes = await generateNotes(releaseNotesEntry[1], {
-        commits: [
-          {
-            hash: "38399bc12861a1db9cfa75c1ff29c92fe9f955b1",
-            message: fixture.message,
-          },
-        ],
-        cwd: path.join(ROOT, "plugins", plugin),
-        lastRelease: { gitTag: `${plugin}-v1.0.0` },
-        nextRelease: {
-          gitTag: `${plugin}-v1.1.0`,
-          version: `${plugin}-v1.1.0`,
-        },
-        options: {
-          repositoryUrl: "https://github.com/netopsengineer/axiom.git",
-        },
-      });
-      for (const expected of fixture.expected) {
-        assert.match(notes, expected, `${plugin}: ${fixture.message}`);
-      }
-    }
   }
+});
+
+test("the release-note probe distinguishes managed, held, ready, and unsafe upgrades", () => {
+  const base = {
+    currentPresetVersion: "9.3.1",
+    candidatePresetVersion: "10.3.0",
+    vulnerabilities: 0,
+  };
+  assert.equal(
+    determineProbeStatus({
+      ...base,
+      candidatePresetVersion: "9.4.0",
+      compatible: true,
+    }),
+    "managed",
+  );
+  assert.equal(determineProbeStatus({ ...base, compatible: false }), "held");
+  assert.equal(determineProbeStatus({ ...base, compatible: true }), "ready");
+  assert.equal(
+    determineProbeStatus({
+      ...base,
+      compatible: true,
+      vulnerabilities: 1,
+    }),
+    "security-blocked",
+  );
 });
 
 test("every committed plugin changelog release has generated content", async () => {

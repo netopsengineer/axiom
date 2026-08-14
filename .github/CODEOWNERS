@@ -13,5 +13,5 @@
 # define the plugin validation path used by required CI.
 /.github/actions/validate-plugins/** @netopsengineer
 /.github/workflows/bump-validate-action.yml @netopsengineer
-/release.config.js      @netopsengineer
+/plugins/*/release.config.js @netopsengineer
 /.claude-plugin/        @netopsengineer

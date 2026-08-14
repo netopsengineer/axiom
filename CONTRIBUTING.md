@@ -9,11 +9,9 @@ changelogs, releases, and dependency bumps per plugin.
 
 You need:
 
-- **Node** - the supported range is in `package.json` -> `engines` (CI runs the
-  current LTS). Installs Biome, the exact Codex CLI used by validation, and the
-  release tooling.
-- **The Claude Code CLI** (`claude` on your PATH) - for strict manifest
-  validation and the isolated Claude installation smoke.
+- **Node** - the supported range is in `package.json` -> `engines` (CI runs
+  Node 24). Installs Biome, the exact Claude and Codex CLIs used by validation,
+  and the release tooling.
 - **[`prek`](https://prek.j178.dev)** - runs the git hooks (a fast drop-in for
   pre-commit).
 
@@ -22,9 +20,12 @@ npm ci
 prek install
 ```
 
-The exact `@openai/codex` package in root `devDependencies` is repository
-validation tooling. It is invoked from `node_modules` by the isolated Codex
-smoke and is not a runtime dependency of any shipped plugin.
+The exact `@anthropic-ai/claude-code` and `@openai/codex` packages in root
+`devDependencies` are repository validation tooling. The strict validators and
+isolated smokes invoke them from `node_modules`; neither is a runtime dependency
+of a shipped plugin. Dependabot advances both through the normal PR gates. The
+name-only `allowScripts` entry permits the Claude wrapper to place its native
+binary; the exact dependency version and lockfile constrain what npm installs.
 
 ## Make a change
 
@@ -48,7 +49,7 @@ context, or live service credentials. Individually:
 | Branch                     | `.github/scripts/check-branch-name.mjs`                     | rename the PR source branch                |
 | Canonical generation       | `npm run generate:check`                                    | `npm run generate`, then stage outputs     |
 | Repository contract        | `npm run check:repo`                                        | fix canonical input or repository layout   |
-| Claude manifests and smoke | `npm run check:plugins:local`, `npm run check:claude:smoke` | fix canonical input, generate, rerun       |
+| Claude manifests and smoke | `npm run check:plugins:local`, `npm run check:claude:smoke` | fix canonical input or pinned CLI contract |
 | Codex manifest and smoke   | `npm run check:codex:static`, `npm run check:codex:smoke`   | fix canonical input or pinned CLI contract |
 | JavaScript                 | Biome (`biome.jsonc`)                                       | `npm run lint:fix`                         |
 | Markdown                   | markdownlint-cli2 (`.markdownlint-cli2.jsonc`)              | `npx -y markdownlint-cli2 --fix "**/*.md"` |
@@ -151,6 +152,7 @@ All workflows live in `.github/`; every third-party action is SHA-pinned.
 | `dependency-audit-fix.yml`                     | daily + manual                                     | classifies `npm audit fix` exits; opens an auto-merged PR for valid lockfile-only fixes when package files change; when nothing is fixable, reports the still-blocking advisories and the next step to the job summary |
 | `release.yml`                                  | push to `main`                                     | run semantic-release for each plugin; releasable plugin changes bump the canonical version, emit both manifests, update `CHANGELOG.md`, tag, and cut a GitHub Release                                                  |
 | `bump-validate-action.yml`                     | daily + manual                                     | re-pins the tagless validate action to the latest upstream SHA via an auto-merged PR, gated by Validate plus validator smoke tests                                                                                     |
+| `release-note-compatibility.yml`               | weekly + manual                                    | probes the newest conventional-commits preset against release-note fixtures and npm audit; keeps a tracking issue open while blocked and auto-promotes a green major through a required-check PR                       |
 | `dependabot.yml` + `dependabot-auto-merge.yml` | daily updates + scheduled merge scan               | bump GitHub Actions, npm tooling, and pre-commit hooks; the GitHub App enables protected auto-merge so the merge triggers main-branch workflows                                                                        |
 
 No Anthropic credentials are needed anywhere, and `claude plugin validate` runs
@@ -162,8 +164,9 @@ automation PRs are App-created intentionally because App/PAT-created events can
 trigger PR workflows normally; the built-in `GITHUB_TOKEN` is used only for
 `workflow_dispatch` calls from jobs that explicitly grant `actions: write`.
 `package.json` and `package-lock.json` are **repository tooling only**. They
-cover release, lint, validation, and the exact Codex CLI smoke dependency. This
-is not a published npm project, and shipped plugins carry no npm dependencies.
+cover release, lint, validation, and the exact Claude and Codex CLI smoke
+dependencies. This is not a published npm project, and shipped plugins carry no
+npm dependencies.
 The repository's Actions **default token permission is read-only**; every
 workflow declares explicit top-level permissions or explicit job-level
 permissions on every job (enforced by `npm run check:repo`), so none silently
@@ -202,7 +205,7 @@ directly.
 ### The eval gate
 
 The README promises that nothing here ships on vibes - that's a hard rule, not a
-slogan, and it's what makes a one-plugin marketplace worth trusting at ten. Every
+slogan, and it's what makes a focused marketplace worth trusting at ten. Every
 plugin lands with evals or it doesn't land:
 
 - **Eval definitions ship with the skill** - `skills/<name>/evals/evals.json`,
@@ -261,5 +264,10 @@ does not publish them as a release side effect.
   longer preserves this repo's expected pass/fail behavior and should not land
   hands-off.
 - **A Dependabot PR won't auto-merge.** Confirm "Allow auto-merge" is on and the
-  required checks pass. All update types auto-merge by default; to hold majors
-  back, uncomment the `update-type` guard in `dependabot-auto-merge.yml`.
+  required checks pass. All update types auto-merge by default except explicit
+  entries in `dependabot.yml`; the release-note preset major is intentionally
+  held and managed by `release-note-compatibility.yml`.
+- **The release-note compatibility issue remains open.** The newest preset is
+  still incompatible with the locked generator/writer path or its candidate
+  audit is not clean. Inspect the latest workflow summary. The automation opens
+  and auto-merges an upgrade PR only after both gates pass.

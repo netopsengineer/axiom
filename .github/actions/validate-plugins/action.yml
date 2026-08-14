@@ -39,9 +39,6 @@ inputs:
   validate-all-external:
     description: Validate every external entry, not just changed external entries
     default: "false"
-  claude-cli-version:
-    description: Version of @anthropic-ai/claude-code to install
-    default: latest
   external-timeout-secs:
     description: Per-plugin timeout for external clone and validate
     default: "120"
@@ -98,11 +95,6 @@ runs:
       shell: bash
       run: command -v jq >/dev/null || sudo apt-get install -y jq
 
-    - name: Install Node
-      uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
-      with:
-        node-version: "24"
-
     - name: Configure npm registry
       if: inputs.npm-registry != ''
       shell: bash
@@ -110,17 +102,13 @@ runs:
         NPM_REGISTRY: ${{ inputs.npm-registry }}
       run: npm config set registry "$NPM_REGISTRY"
 
-    # The CLI is installed globally at a caller-supplied version; there is no
-    # lockfile for a one-off tool install, so zizmor's adhoc-packages audit
-    # (added in v1.26) is a known false positive for this step.
-    - name: Install claude CLI # zizmor: ignore[adhoc-packages]
+    - name: Use repository Claude CLI
       shell: bash
       env:
-        CLAUDE_CLI_VERSION: ${{ inputs.claude-cli-version }}
+        CLAUDE_BIN_DIR: ${{ github.workspace }}/node_modules/.bin
       run: |
         set -euo pipefail
-        npm install -g --loglevel=error "@anthropic-ai/claude-code@${CLAUDE_CLI_VERSION}"
-        claude --version
+        "$CLAUDE_BIN_DIR/claude" --version
 
     - name: Detect changes
       id: detect
@@ -151,9 +139,10 @@ runs:
       shell: bash
       env:
         ACTION_PATH: ${{ github.action_path }}/upstream
+        CLAUDE_BIN_DIR: ${{ github.workspace }}/node_modules/.bin
         FAIL_ON_WARNINGS: ${{ inputs.fail-on-warnings }}
         VALIDATE_TMP: ${{ runner.temp }}/validate-plugins
-      run: "$ACTION_PATH/scripts/20-validate-cli-marketplace.sh"
+      run: PATH="$CLAUDE_BIN_DIR:$PATH" "$ACTION_PATH/scripts/20-validate-cli-marketplace.sh"
 
     - name: CLI validate external plugins
       if: inputs.skip-external != 'true'
@@ -161,19 +150,21 @@ runs:
       env:
         ACTION_PATH: ${{ github.action_path }}/upstream
         ALLOWED_HOSTS: ${{ inputs.allowed-hosts }}
+        CLAUDE_BIN_DIR: ${{ github.workspace }}/node_modules/.bin
         EXTERNAL_TIMEOUT_SECS: ${{ inputs.external-timeout-secs }}
         VALIDATE_TMP: ${{ runner.temp }}/validate-plugins
         VALIDATE_ALL_EXTERNAL: ${{ inputs.validate-all-external }}
-      run: "$ACTION_PATH/scripts/30-validate-cli-external.sh"
+      run: PATH="$CLAUDE_BIN_DIR:$PATH" "$ACTION_PATH/scripts/30-validate-cli-external.sh"
 
     - name: CLI validate changed in-repo folders
       if: inputs.skip-local-folders != 'true'
       shell: bash
       env:
         ACTION_PATH: ${{ github.action_path }}/upstream
+        CLAUDE_BIN_DIR: ${{ github.workspace }}/node_modules/.bin
         FAIL_ON_WARNINGS: ${{ inputs.fail-on-warnings }}
         VALIDATE_TMP: ${{ runner.temp }}/validate-plugins
-      run: "$ACTION_PATH/scripts/40-validate-cli-local.sh"
+      run: PATH="$CLAUDE_BIN_DIR:$PATH" "$ACTION_PATH/scripts/40-validate-cli-local.sh"
 
     - name: Aux-file JSON parse (changed in-repo folders)
       if: inputs.skip-local-folders != 'true'

@@ -1,13 +1,18 @@
 import { spawn } from "node:child_process";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import {
+  assertClaudePackageContract,
+  CLAUDE_BIN,
+} from "./lib/claude-package-contract.mjs";
 import { loadMarketplaceContract } from "./lib/marketplace-contract.mjs";
 
 const ROOT = fileURLToPath(new URL("../../", import.meta.url));
 const contract = await loadMarketplaceContract(ROOT);
+await assertClaudePackageContract();
 
 console.log("Validating .claude-plugin/marketplace.json");
-await run("claude", [
+await run(CLAUDE_BIN, [
   "plugin",
   "validate",
   "./.claude-plugin/marketplace.json",
@@ -17,7 +22,7 @@ await run("claude", [
 for (const { name } of contract.plugins) {
   const pluginDir = path.posix.join("plugins", name);
   console.log(`Validating ${pluginDir}`);
-  await run("claude", ["plugin", "validate", `./${pluginDir}`, "--strict"]);
+  await run(CLAUDE_BIN, ["plugin", "validate", `./${pluginDir}`, "--strict"]);
 }
 
 console.log(
@@ -36,7 +41,7 @@ function run(command, args) {
       if (error.code === "ENOENT") {
         reject(
           new Error(
-            `Could not find "${command}" on PATH. Install the Claude Code CLI before running local plugin validation.`,
+            `Could not find the repository Claude CLI at "${command}". Run npm ci before local plugin validation.`,
           ),
         );
         return;

@@ -1,4 +1,5 @@
 import { execFile } from "node:child_process";
+import { existsSync } from "node:fs";
 import path from "node:path";
 import { promisify } from "node:util";
 
@@ -63,6 +64,7 @@ function normalizeFiles(paths) {
   return [...new Set(paths.map(toPosixPath))]
     .filter((file) => MARKDOWN_FILE.test(file))
     .filter((file) => !DEFAULT_EXCLUDES.some((exclude) => exclude.test(file)))
+    .filter((file) => existsSync(path.join(ROOT, file)))
     .sort();
 }
 
