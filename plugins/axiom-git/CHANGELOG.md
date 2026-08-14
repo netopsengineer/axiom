@@ -1,5 +1,11 @@
 # Changelog
 
+## [axiom-git-v1.1.4](https://github.com/netopsengineer/axiom/compare/axiom-git-v1.1.3...axiom-git-v1.1.4) (2026-08-14)
+
+### Bug Fixes
+
+* 🐛 Reconcile release artifacts ([#130](https://github.com/netopsengineer/axiom/issues/130)) ([a26768c](https://github.com/netopsengineer/axiom/commit/a26768c1c18a6daa35b8d62888ce004ba31699e9))
+
 ## [axiom-git-v1.1.3](https://github.com/netopsengineer/axiom/compare/axiom-git-v1.1.2...axiom-git-v1.1.3) (2026-08-14)
 
 ### Bug Fixes
