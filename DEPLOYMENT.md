@@ -1,6 +1,6 @@
 # Dual Marketplace Deployment Plan
 
-Status: APPROVED - DEPLOYMENT IN PROGRESS
+Status: BLOCKED - AUTOMATED RELEASE GREEN; MANUAL HOST EVIDENCE INCOMPLETE
 
 Repository: `netopsengineer/axiom`
 
@@ -48,24 +48,23 @@ deployment and operational contract.
 
 ## Runtime values
 
-Resolve and record these values during execution. Do not continue while a value
-is blank, malformed, or inferred:
+The deployment recorded these verified values:
 
-| Name                  | Required form                          | Resolution point                          |
-|-----------------------|----------------------------------------|-------------------------------------------|
-| `DEPLOY_BASE_SHA`     | 40 lowercase hexadecimal characters    | Remote `main` before the final rebase     |
-| `DEPLOY_BRANCH`       | `feat/native-codex-marketplace`        | Before the first deployment commit        |
-| `DEPLOY_PR`           | Positive decimal pull request number   | After pull request creation               |
-| `DEPLOY_PR_SHA`       | 40 lowercase hexadecimal characters    | Final checked pull request head           |
-| `DEPLOY_MERGE_SHA`    | 40 lowercase hexadecimal characters    | Immediately after merge                   |
-| `DEPLOY_RELEASE_RUN`  | Positive decimal GitHub Actions run ID | Release run for the merge                 |
-| `DEPLOY_VALIDATE_RUN` | Positive decimal GitHub Actions run ID | Final-main validation dispatch            |
-| `DEPLOY_FINAL_SHA`    | 40 lowercase hexadecimal characters    | Remote `main` after release stabilization |
-| `DEPLOY_CANARY_ROOT`  | Absolute path returned by `mktemp -d`  | Before production-tree canaries           |
+| Name                  | Recorded value                                 | Resolution point                          |
+|-----------------------|------------------------------------------------|-------------------------------------------|
+| `DEPLOY_BASE_SHA`     | `e3170f9eb4c68babeb857dbe04a55cabbd031f99`     | Remote `main` before the final rebase     |
+| `DEPLOY_BRANCH`       | `feat/native-codex-marketplace`                | Before the first deployment commit        |
+| `DEPLOY_PR`           | `125`                                          | After pull request creation               |
+| `DEPLOY_PR_SHA`       | `aaa2e1bb7dd5fd055354110640be5336db12f004`     | Final checked pull request head           |
+| `DEPLOY_MERGE_SHA`    | `38399bc12861a1db9cfa75c1ff29c92fe9f955b1`     | Immediately after merge                   |
+| `DEPLOY_RELEASE_RUN`  | `31821223296`                                  | Release run for the merge                 |
+| `DEPLOY_VALIDATE_RUN` | `31832721011`                                  | Current final-main validation dispatch    |
+| `DEPLOY_FINAL_SHA`    | `48ec28db92783655542a107d996868348628813a`     | Remote `main` after release stabilization |
+| `DEPLOY_CANARY_ROOT`  | `/private/tmp/axiom-release-audit.bEpBAb/repo` | Production-tree audit clone               |
 
 Validate every recorded SHA against GitHub before using it as evidence.
 
-## Current readiness assessment
+## Recorded deployment assessment
 
 ### Ready evidence
 
@@ -108,7 +107,7 @@ Validate every recorded SHA against GitHub before using it as evidence.
 - Exact-version release preparation in that disposable repository changed only
   each plugin's canonical record and two generated vendor manifests, after
   which `npm run generate:check` remained green.
-- The active `main` ruleset required these checks:
+- The launch-time `main` ruleset required these checks:
 
     - `Branch name`;
     - `Plugin manifests`;
@@ -119,6 +118,11 @@ Validate every recorded SHA against GitHub before using it as evidence.
     - `Repository checks`;
     - `Workflow security lint`.
 
+- Post-audit hardening preserved those checks and the release-bot bypass, added
+  `Analyze (actions)`, `Analyze (javascript-typescript)`, and
+  `Analyze (python)`, required pull requests with squash merging, and enabled
+  strict up-to-date status checks. It requires zero approving reviews.
+
 - A Release run on 2026-08-14 successfully minted the GitHub App token and
   completed the existing release loop. Secret and variable names were not
   readable with the audit identity; the successful token-mint step is the
@@ -126,10 +130,15 @@ Validate every recorded SHA against GitHub before using it as evidence.
 
 ### Remaining execution gates
 
-No pre-push readiness blocker remains. Continue through the protected pull
-request, merge, release, production-install, behavior, and scheduled-automation
-phases below. Packaging evidence does not replace authenticated post-install
-behavior canaries in new Claude Code and Codex sessions.
+The pull request, merge, releases, final-main validation, production clone,
+remote CLI installations, dependency checks, and scheduled automation passed.
+The deployment remains `BLOCKED` because desktop marketplace discovery, all
+shipped behavior scenarios in both hosts, and the direct safety and recovery
+canaries were not recorded. CLI coverage does not waive those explicit gates.
+
+Retain the procedure below as the historical execution and recovery contract.
+Do not repeat its merge or release mutations. Resume only at the blocked manual
+host gates, then update the recorded report and status from new evidence.
 
 ## Deployment state model
 
@@ -295,7 +304,9 @@ This phase requires external-write authority.
 
 4. Record the pull request number as `DEPLOY_PR` and its head as
    `DEPLOY_PR_SHA`.
-5. Watch all checks. Require the eight ruleset checks plus CodeQL to pass.
+5. Watch all checks. Require every current ruleset check to pass. The launch
+   required eight repository checks plus CodeQL; the hardened ruleset requires
+   those eight checks and all three CodeQL analysis jobs directly.
 6. Inspect every skipped or cancelled job. Treat a required job that did not
    execute as a failure, even if GitHub presents the aggregate workflow as
    green.
@@ -343,13 +354,13 @@ Immediately before merge:
 4. Replace `DEPLOY_BASE_SHA` with the new verified base only after the branch is
    current and green.
 
-The ruleset does not require strict up-to-date status checks. Enforce this gate
-manually.
+The launch-time ruleset did not require strict up-to-date status checks, so the
+deployment enforced this gate manually. The hardened ruleset now enforces it.
 
 ### Phase 3 acceptance
 
 - Pull request is mergeable and not draft.
-- All eight required checks and CodeQL pass on `DEPLOY_PR_SHA`.
+- All 11 current required checks pass on `DEPLOY_PR_SHA`.
 - The branch contains the current remote `main`.
 - Both semantic-release dry runs agree with the intended minor versions.
 - No unresolved review comment or deployment blocker remains.
@@ -419,7 +430,8 @@ after the Release run stabilizes.
    `DEPLOY_VALIDATE_RUN`.
 2. Confirm its head SHA is exactly `DEPLOY_FINAL_SHA`.
 3. Watch every job to terminal status.
-4. Require the eight ruleset-equivalent jobs to pass again.
+4. Require the eight repository validation jobs and all CodeQL analyses to pass
+   again.
 5. Dispatch `Dependency audit` on `main` if the merge-triggered path run did not
    cover `DEPLOY_FINAL_SHA`.
 6. Do not declare final validation green while a workflow is queued, skipped
@@ -580,7 +592,7 @@ In addition, verify these operational gates directly:
 
 ### Phase 7 acceptance
 
-- All 13 shipped scenarios pass every expectation in both hosts, or an exact
+- All 16 shipped scenarios pass every expectation in both hosts, or an exact
   access dependency is marked `BLOCKED`.
 - All direct safety and recovery cases pass.
 - Every run names its actual host and model.
@@ -697,7 +709,7 @@ Declare `GREEN` only when one full pass makes no further edit and all of these
 conditions are true:
 
 - Deployment branch was current with remote `main` at merge time.
-- All eight required pull request checks and CodeQL passed on the final PR head.
+- All 11 current required pull request checks passed on the final PR head.
 - Both release dry runs matched the intended impact.
 - Merge Validate completed successfully or was explicitly dispatched.
 - Release completed successfully and each plugin group has a classified result.
@@ -710,8 +722,8 @@ conditions are true:
   plugins.
 - Desktop marketplace discovery passed. If the desktop surface is unavailable,
   the deployment remains `BLOCKED`; CLI coverage does not waive this gate.
-- All 13 shipped scenarios passed in Claude Code.
-- All 13 shipped scenarios passed in Codex.
+- All 16 shipped scenarios passed in Claude Code.
+- All 16 shipped scenarios passed in Codex.
 - Direct safety and recovery canaries passed.
 - The next complete scheduled automation cycle passed or produced valid green
   no-ops.
@@ -745,6 +757,54 @@ Record these fields when the deployment reaches `GREEN` or `BLOCKED`:
 
 Do not omit a failed, skipped, unavailable, or blocked check from the final
 report.
+
+### Recorded deployment report
+
+- `Outcome`: Repository release, generated artifacts, CLI distribution, and
+  automation are green. Overall completion is blocked on manual host evidence.
+- `Final state`: `BLOCKED`.
+- `DEPLOY_BASE_SHA`: `e3170f9eb4c68babeb857dbe04a55cabbd031f99`.
+- `DEPLOY_PR`: [#125](https://github.com/netopsengineer/axiom/pull/125).
+- `DEPLOY_PR_SHA`: `aaa2e1bb7dd5fd055354110640be5336db12f004`.
+- `DEPLOY_MERGE_SHA`: `38399bc12861a1db9cfa75c1ff29c92fe9f955b1`.
+- `DEPLOY_FINAL_SHA`: `48ec28db92783655542a107d996868348628813a`.
+- Required pull request checks and CodeQL: passed on `DEPLOY_PR_SHA`.
+- Release run: [31821223296](https://github.com/netopsengineer/axiom/actions/runs/31821223296)
+  released `axiom-git` `1.1.0` and `axiom-versioning` `1.2.0`.
+- Recovery releases: current tags are `axiom-git-v1.1.3` and
+  `axiom-versioning-v1.2.2`.
+- Final-main Validate:
+  [31832721011](https://github.com/netopsengineer/axiom/actions/runs/31832721011)
+  passed on `DEPLOY_FINAL_SHA`.
+- Canonical and generated versions: `axiom-git` `1.1.3` and
+  `axiom-versioning` `1.2.2`; both tags and GitHub Releases exist.
+- Claude Code: version `2.1.232`; isolated local and remote discovery and
+  installation passed for both plugins; installed skill hashes matched source.
+- Codex CLI: version `0.147.0`; static, coexistence, native-only, and remote
+  installation passed for both plugins; installed skill hashes matched source.
+- Behavior scenarios by host and plugin: `BLOCKED`; the 16 shipped scenarios
+  were not executed and recorded interactively in both hosts.
+- Desktop marketplace discovery: `BLOCKED`; no desktop evidence was recorded.
+- Direct safety and recovery canaries: `BLOCKED`; no complete run record was
+  captured for both hosts.
+- Dependency evidence: registry and tag checks passed; every action and hook
+  remained SHA-pinned; npm audit reported zero vulnerabilities; the recorded
+  OSV batches found no advisories.
+- Scheduled automation: current final-main Validate, Dependency audit,
+  Dependency audit fix, validator bump, Dependabot auto-merge, Release, and
+  CodeQL runs completed successfully or as green no-ops.
+- Failures and fixes: release-note generation emitted empty sections while the
+  10.x Conventional Commits preset was paired with writer 8. The repository
+  pinned the compatible 9.3.1 preset and added release-note fixtures. The
+  historical empty sections are repaired through the repository backfill tool,
+  and committed changelogs are now gated against empty release bodies.
+- Retained diagnostic root:
+  `/private/tmp/axiom-release-audit.bEpBAb/repo`.
+- Remaining dependency: execute desktop discovery, all 16 behavior scenarios
+  in both hosts, and direct safety and recovery canaries; record exact host,
+  model, output, retry, and grading evidence.
+- Public publication: none. No Anthropic public marketplace, OpenAI workspace,
+  or universal Plugins Directory submission occurred.
 
 ## Official contract references
 

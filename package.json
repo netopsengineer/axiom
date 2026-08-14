@@ -11,7 +11,7 @@
   "scripts": {
     "marketplaces:build": "node .github/scripts/build-marketplaces.mjs",
     "marketplaces:check": "node .github/scripts/build-marketplaces.mjs --check",
-    "test:marketplaces": "node --test .github/scripts/marketplace-contract.test.mjs .github/scripts/check-codex-marketplace.test.mjs .github/scripts/check-repo-invariants.test.mjs .github/scripts/marketplace-smoke-fixture.test.mjs .github/scripts/codex-package-contract.test.mjs .github/scripts/prepare-plugin-release.test.mjs",
+    "test:marketplaces": "node --test .github/scripts/marketplace-contract.test.mjs .github/scripts/check-codex-marketplace.test.mjs .github/scripts/check-repo-invariants.test.mjs .github/scripts/marketplace-smoke-fixture.test.mjs .github/scripts/codex-package-contract.test.mjs .github/scripts/prepare-plugin-release.test.mjs .github/scripts/commit-message-contract.test.mjs",
     "docs:badges": "node .github/scripts/sync-readme-badges.mjs",
     "docs:badges:check": "node .github/scripts/sync-readme-badges.mjs --check",
     "docs:evals": "node .github/scripts/sync-readme-evals.mjs",
@@ -48,6 +48,7 @@
     "@semantic-release/exec": "^7.1.0",
     "@semantic-release/git": "^11.0.1",
     "@semantic-release/npm": "file:.github/release-tooling/semantic-release-npm-disabled",
+    "@semantic-release/release-notes-generator": "^14.1.1",
     "conventional-changelog-conventionalcommits": "9.3.1",
     "cspell": "^10.0.1",
     "markdown-link-check": "^3.15.0",
