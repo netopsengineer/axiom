@@ -1,5 +1,11 @@
 # Changelog
 
+## [axiom-git-v1.1.3](https://github.com/netopsengineer/axiom/compare/axiom-git-v1.1.2...axiom-git-v1.1.3) (2026-08-14)
+
+### Bug Fixes
+
+* **commit-message:** preserve hook failure evidence ([#129](https://github.com/netopsengineer/axiom/issues/129)) ([29a58f9](https://github.com/netopsengineer/axiom/commit/29a58f9f5d38a425f24e11ee6b9621c89efaf513))
+
 ## [axiom-git-v1.1.2](https://github.com/netopsengineer/axiom/compare/axiom-git-v1.1.1...axiom-git-v1.1.2) (2026-08-14)
 
 ### Bug Fixes
