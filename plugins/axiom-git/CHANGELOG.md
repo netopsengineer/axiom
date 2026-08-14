@@ -1,5 +1,7 @@
 # Changelog
 
+## [axiom-git-v1.1.0](https://github.com/netopsengineer/axiom/compare/axiom-git-v1.0.0...axiom-git-v1.1.0) (2026-08-14)
+
 ## axiom-git-v1.0.0 (2026-06-09)
 
 ### Features
