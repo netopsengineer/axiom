@@ -1,5 +1,11 @@
 # Changelog
 
+## [axiom-git-v1.1.2](https://github.com/netopsengineer/axiom/compare/axiom-git-v1.1.1...axiom-git-v1.1.2) (2026-08-14)
+
+### Bug Fixes
+
+* **commit-message:** refuse hook bypasses ([#128](https://github.com/netopsengineer/axiom/issues/128)) ([71110bf](https://github.com/netopsengineer/axiom/commit/71110bf7ce1d3298ba43fa9f0ffdce0942497c58))
+
 ## [axiom-git-v1.1.1](https://github.com/netopsengineer/axiom/compare/axiom-git-v1.1.0...axiom-git-v1.1.1) (2026-08-14)
 
 ### Bug Fixes
