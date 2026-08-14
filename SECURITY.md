@@ -1,9 +1,9 @@
 # Security Policy
 
-Axiom is a marketplace of Claude Code plugins. The plugins ship Markdown skills
-and configuration — they run no services of their own — but a malicious or buggy
-skill can still steer what Claude Code does inside your repository, so we treat
-reports seriously.
+Axiom is a marketplace of Claude Code and Codex plugins. The plugins ship
+Markdown skills and configuration. They run no services of their own, but a
+malicious or buggy skill can still steer what the active coding agent does
+inside your repository, so we treat reports seriously.
 
 ## Reporting a vulnerability
 
@@ -21,7 +21,11 @@ few business days and will keep you updated on remediation.
 
 In scope:
 
-- The marketplace catalog (`.claude-plugin/marketplace.json`).
+- Canonical marketplace and plugin metadata under `.axiom/` and
+  `plugins/*/.axiom/`.
+- Generated Claude Code and Codex catalogs and manifests under
+  `.claude-plugin/`, `.agents/plugins/`, and `plugins/*/.claude-plugin/` or
+  `plugins/*/.codex-plugin/`.
 - Shipped plugins under `plugins/` (skills, references, manifests).
 - The release and validation automation under `.github/`.
 

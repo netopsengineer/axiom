@@ -1,19 +1,21 @@
 # Axiom
 
 [![Built for Claude Code](https://img.shields.io/badge/Built_for-Claude_Code-D97757?style=for-the-badge&logo=claude&logoColor=white&labelColor=1a1a1a)](https://docs.claude.com/en/docs/claude-code)
+[![Built for Codex](https://img.shields.io/badge/Built_for-Codex-4c6ef5?style=for-the-badge&logo=openai&logoColor=white&labelColor=1a1a1a)](https://developers.openai.com/codex)
 [![Marketplace](https://img.shields.io/github/actions/workflow/status/netopsengineer/axiom/validate.yml?branch=main&style=for-the-badge&logo=anthropic&logoColor=white&label=Marketplace&labelColor=1a1a1a)](https://github.com/netopsengineer/axiom/actions/workflows/validate.yml)
 [![Release](https://img.shields.io/github/actions/workflow/status/netopsengineer/axiom/release.yml?branch=main&style=for-the-badge&logo=semanticrelease&logoColor=white&label=Release&labelColor=1a1a1a)](https://github.com/netopsengineer/axiom/actions/workflows/release.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-3fb950?style=for-the-badge&labelColor=1a1a1a)](https://opensource.org/licenses/MIT)
 
 <!-- plugin-badges:start -->
-[![axiom-git](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fraw.githubusercontent.com%2Fnetopsengineer%2Faxiom%2Fmain%2Fplugins%2Faxiom-git%2F.claude-plugin%2Fplugin.json&query=%24.version&prefix=v&label=axiom-git&style=for-the-badge&logo=claude&logoColor=white&color=8957e5&labelColor=1a1a1a)](plugins/axiom-git/CHANGELOG.md)
-[![axiom-versioning](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fraw.githubusercontent.com%2Fnetopsengineer%2Faxiom%2Fmain%2Fplugins%2Faxiom-versioning%2F.claude-plugin%2Fplugin.json&query=%24.version&prefix=v&label=axiom-versioning&style=for-the-badge&logo=claude&logoColor=white&color=8957e5&labelColor=1a1a1a)](plugins/axiom-versioning/CHANGELOG.md)
+[![axiom-git](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fraw.githubusercontent.com%2Fnetopsengineer%2Faxiom%2Fmain%2Fplugins%2Faxiom-git%2F.axiom%2Fplugin.json&query=%24.version&prefix=v&label=axiom-git&style=for-the-badge&color=4c6ef5&labelColor=1a1a1a)](plugins/axiom-git/CHANGELOG.md)
+[![axiom-versioning](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fraw.githubusercontent.com%2Fnetopsengineer%2Faxiom%2Fmain%2Fplugins%2Faxiom-versioning%2F.axiom%2Fplugin.json&query=%24.version&prefix=v&label=axiom-versioning&style=for-the-badge&color=4c6ef5&labelColor=1a1a1a)](plugins/axiom-versioning/CHANGELOG.md)
 <!-- plugin-badges:end -->
 
-> **Claude Code plugins, built from first principles.**
+> **Claude Code and Codex plugins, built from first principles.**
 
-Axiom is a curated marketplace of plugins for Claude Code - solid ground for
-whatever you're building.
+Axiom is a curated marketplace of shared plugins for Claude Code and Codex.
+One canonical metadata contract generates each host's native catalog and plugin
+manifest while each skill remains a single behavioral source.
 
 ## Backed by evals, not vibes
 
@@ -25,9 +27,12 @@ measured, it doesn't ship.
 
 Want receipts? Each plugin keeps a scored eval history in its own README, and
 the index below is generated so new plugin evals surface here automatically.
+Those histories name the host and model that produced the scored behavior
+evidence. Separate deterministic static and CLI installation tests prove
+packaging compatibility with Claude Code and Codex; they are not model scores.
 
 <!-- eval-index:start -->
-The eval index is generated from `.claude-plugin/marketplace.json` and each
+The eval index is generated from `.axiom/marketplace.json` and each
 shipped skill's `evals/evals.json` manifest. Plugin READMEs are the canonical
 scored histories.
 
@@ -42,9 +47,20 @@ Current coverage: **2 plugins**, **2 evaluated skills**,
 
 ## Add the marketplace
 
+Claude Code:
+
 ```shell
 /plugin marketplace add netopsengineer/axiom
 ```
+
+Codex:
+
+```shell
+codex plugin marketplace add netopsengineer/axiom
+```
+
+After installing a plugin in Codex, start a new session before invoking its
+bundled skills.
 
 Plugin sources in this marketplace use relative paths, which resolve only when
 the marketplace is added from a Git host (GitHub, GitLab, or a git URL) - not
@@ -55,13 +71,24 @@ from a direct URL to `marketplace.json`.
 <!-- plugin-list:start -->
 ### [axiom-git](plugins/axiom-git/README.md)
 
-Composes Conventional Commits messages with gitmoji from the staged diff, with safety
-gates for protected branches, staged secrets, and pre-commit hooks.
+Composes Conventional Commits messages with gitmoji from the staged diff, deciding type,
+scope, emoji, subject, and body, and gating on protected branches, staged secrets, and
+pre-commit hooks.
 
-Category: `version-control`
+Claude Code category: `version-control`
+
+Codex category: `Productivity`
+
+Claude Code:
 
 ```shell
 /plugin install axiom-git@axiom
+```
+
+Codex:
+
+```shell
+codex plugin add axiom-git@axiom
 ```
 
 ### [axiom-versioning](plugins/axiom-versioning/README.md)
@@ -69,19 +96,34 @@ Category: `version-control`
 Audits and updates external versioned dependencies across application, infrastructure,
 and CI/CD configurations.
 
-Category: `dependency-management`
+Claude Code category: `dependency-management`
+
+Codex category: `Productivity`
+
+Claude Code:
 
 ```shell
 /plugin install axiom-versioning@axiom
+```
+
+Codex:
+
+```shell
+codex plugin add axiom-versioning@axiom
 ```
 <!-- plugin-list:end -->
 
 ## Repo layout
 
 ```text
-.claude-plugin/marketplace.json   # Marketplace catalog (lists all plugins)
-plugins/<name>/                   # One directory per plugin (its own plugin.json)
-dev/<name>/                       # Eval run data, not shipped with the plugin
+.axiom/marketplace.json                 # Canonical catalog and plugin order
+.agents/plugins/marketplace.json        # Generated native Codex catalog
+.claude-plugin/marketplace.json         # Generated Claude Code catalog
+plugins/<name>/.axiom/plugin.json       # Canonical plugin metadata and version
+plugins/<name>/.codex-plugin/           # Generated native Codex manifest
+plugins/<name>/.claude-plugin/          # Generated Claude Code manifest
+plugins/<name>/skills/                  # Shared skill behavior and shipped evals
+dev/<name>/                             # Eval run data, not shipped
 ```
 
 ## Contributing

@@ -23,13 +23,43 @@ repos:
         files: \.(js|mjs)$
         pass_filenames: false
 
+      # Canonical metadata owns every vendor marketplace artifact. Generated
+      # changes stop the commit for restaging.
+      - id: marketplace-generate
+        name: marketplace generation
+        entry: npm run marketplaces:build
+        language: system
+        files: ^(\.axiom/|\.agents/plugins/marketplace\.json|\.claude-plugin/marketplace\.json|plugins/|\.github/scripts/(build-marketplaces|prepare-plugin-release|lib/marketplace-contract)\.mjs)$
+        pass_filenames: false
+
       # Mirrors the "Plugin manifests" job's core local validation. Requires
       # the Claude Code CLI on PATH.
       - id: claude-plugin-validate
-        name: claude plugin validate
+        name: claude plugin validate (strict)
         entry: npm run check:plugins:local
         language: system
-        files: ^(plugins/|\.claude-plugin/)
+        files: ^(\.axiom/|\.claude-plugin/marketplace\.json|plugins/)
+        pass_filenames: false
+
+      - id: claude-marketplace-smoke
+        name: claude marketplace isolated smoke
+        entry: npm run check:claude:smoke
+        language: system
+        files: ^(\.axiom/|\.agents/plugins/marketplace\.json|\.claude-plugin/marketplace\.json|plugins/[^/]+/(\.claude-plugin/plugin\.json|\.codex-plugin/plugin\.json|skills/)|\.github/scripts/(smoke-claude-marketplace|lib/marketplace-smoke-fixture|lib/marketplace-contract)\.mjs)$
+        pass_filenames: false
+
+      - id: codex-marketplace-static
+        name: codex marketplace static validation
+        entry: npm run check:codex:static
+        language: system
+        files: ^(\.axiom/|\.agents/plugins/marketplace\.json|\.claude-plugin/marketplace\.json|plugins/|\.github/scripts/(check-codex-marketplace|lib/marketplace-contract)\.mjs)$
+        pass_filenames: false
+
+      - id: codex-marketplace-smoke
+        name: codex marketplace isolated smoke
+        entry: npm run check:codex:smoke
+        language: system
+        files: ^(\.axiom/|\.agents/plugins/marketplace\.json|\.claude-plugin/marketplace\.json|plugins/[^/]+/(\.claude-plugin/plugin\.json|\.codex-plugin/plugin\.json|skills/)|\.github/scripts/(smoke-codex-marketplace|lib/marketplace-smoke-fixture|lib/marketplace-contract)\.mjs|package\.json|package-lock\.json)$
         pass_filenames: false
 
       # Keeps local edits honest against repository-specific marketplace and
@@ -38,7 +68,14 @@ repos:
         name: repository invariants
         entry: npm run check:repo
         language: system
-        files: ^(\.claude-plugin/marketplace\.json|plugins/|\.github/scripts/check-repo-invariants\.mjs|\.github/workflows/.*\.ya?ml)$
+        files: ^(\.axiom/|\.agents/plugins/marketplace\.json|\.claude-plugin/marketplace\.json|plugins/|\.github/scripts/(check-repo-invariants|lib/marketplace-contract)\.mjs|\.github/workflows/.*\.ya?ml)$
+        pass_filenames: false
+
+      - id: marketplace-script-tests
+        name: marketplace script tests
+        entry: npm run test:marketplaces
+        language: system
+        files: ^(\.axiom/|\.agents/plugins/marketplace\.json|\.claude-plugin/marketplace\.json|plugins/|\.github/scripts/.*marketplace.*\.mjs|\.github/scripts/(check-repo-invariants|prepare-plugin-release).*\.mjs|package\.json|package-lock\.json)$
         pass_filenames: false
 
       - id: automation-script-tests
@@ -63,7 +100,7 @@ repos:
         name: README generated blocks
         entry: npm run docs:readme
         language: system
-        files: ^(\.claude-plugin/marketplace\.json|plugins/.*/README\.md|plugins/.*/\.claude-plugin/plugin\.json|plugins/.*/skills/.*/evals/evals\.json|README\.md|\.github/scripts/sync-readme-.*\.mjs)$
+        files: ^(\.axiom/|plugins/.*/README\.md|plugins/.*/skills/.*/evals/evals\.json|README\.md|\.github/scripts/sync-readme-.*\.mjs)$
         pass_filenames: false
 
       - id: yaml-syntax
@@ -87,7 +124,7 @@ repos:
 
   # Mirrors the "Markdown lint" job, using the repo's .markdownlint-cli2.jsonc.
   # markdownlint-cli2 is not an npm dependency here (CI uses the action), so the
-  # hook is pinned — SHA-frozen to v0.22.1, the latest tag (this project ships
+  # hook is pinned to the SHA for v0.23.2, the latest tag (this project ships
   # NO GitHub releases; tags are the only source).
   - repo: https://github.com/DavidAnson/markdownlint-cli2
     rev: b82a6c8896e491b9cb377a99ff3412131920681b # frozen: v0.23.2

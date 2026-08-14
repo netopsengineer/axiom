@@ -3,8 +3,10 @@
 ## Scope
 
 - Repository: `axiom`.
-- Product: Claude Code plugin marketplace.
-- Marketplace catalog: `.claude-plugin/marketplace.json`.
+- Product: Claude Code and Codex plugin marketplace.
+- Canonical catalog: `.axiom/marketplace.json`.
+- Generated catalogs: `.claude-plugin/marketplace.json` and
+  `.agents/plugins/marketplace.json`.
 - Plugins live under `plugins/<plugin>`. Do not assume a default current plugin;
   infer the relevant plugin from the user request or changed files.
 - Claude compatibility file: `CLAUDE.md` imports this file.
@@ -12,8 +14,12 @@
 ## Repository Map
 
 ```text
+.axiom/marketplace.json
+.agents/plugins/marketplace.json
 .claude-plugin/marketplace.json
+plugins/<plugin>/.axiom/plugin.json
 plugins/<plugin>/.claude-plugin/plugin.json
+plugins/<plugin>/.codex-plugin/plugin.json
 plugins/<plugin>/README.md
 plugins/<plugin>/CHANGELOG.md
 plugins/<plugin>/package.json
@@ -30,10 +36,15 @@ package-lock.json
 
 ## Canonical Sources
 
-- `.claude-plugin/marketplace.json` owns marketplace plugin order, plugin names,
-  plugin descriptions, categories, and `source: "./plugins/<plugin>"`.
-- `plugins/<plugin>/.claude-plugin/plugin.json` owns shipped plugin manifest
-  metadata. Semantic-release owns its `version`.
+- `.axiom/marketplace.json` owns marketplace identity and ordered plugin names.
+- `plugins/<plugin>/.axiom/plugin.json` owns common metadata, release version,
+  components, and platform-specific metadata. Semantic-release owns its
+  `version`.
+- Put Claude-only metadata under `platforms.claude` and Codex-only metadata
+  under `platforms.codex`. Do not place host-specific metadata in common fields.
+- `.agents/plugins/marketplace.json`, `.claude-plugin/marketplace.json`, and
+  both vendor manifests under `plugins/<plugin>/` are generated. Never author
+  them directly.
 - `plugins/<plugin>/README.md` owns plugin-level docs and must include a
   non-empty `## Eval history` section.
 - `plugins/<plugin>/skills/<skill>/evals/evals.json` owns shipped eval scenario
@@ -43,18 +54,33 @@ package-lock.json
 - The root `README.md` is partly generated from the sources above. Do not treat
   generated root README content as canonical data.
 
+## Ownership Matrix
+
+| Data                                        | Canonical owner                                    | Generated or runtime consumers                   |
+|---------------------------------------------|----------------------------------------------------|--------------------------------------------------|
+| Marketplace identity and plugin order       | `.axiom/marketplace.json`                          | both catalogs, README generators, invariants     |
+| Common plugin metadata, version, components | `plugins/<plugin>/.axiom/plugin.json`              | both manifests, catalogs, release preparation    |
+| Claude-only catalog metadata                | canonical `platforms.claude`                       | Claude catalog and Claude-facing docs            |
+| Codex-only catalog metadata and policy      | canonical `platforms.codex`                        | Codex catalog, Codex manifest, Codex-facing docs |
+| Skill behavior                              | `plugins/<plugin>/skills/<skill>/SKILL.md`         | Claude Code and Codex installs                   |
+| Eval scenarios                              | `plugins/<plugin>/skills/<skill>/evals/evals.json` | repository gates and eval index                  |
+| Scored eval provenance                      | plugin `README.md` `## Eval history`               | reviewers and generated eval index               |
+| Vendor catalogs and manifests               | canonical compiler output                          | Claude Code and Codex CLIs                       |
+
 ## Edit Rules
 
 - Keep plugin names, skill names, and directories lowercase kebab-case.
 - Use directory-format skills only: `skills/<skill>/SKILL.md`.
-- Register each plugin in `.claude-plugin/marketplace.json` with
-  `source: "./plugins/<plugin>"`.
-- Treat `package.json` and `package-lock.json` as release and lint tooling only.
-  Shipped plugins must not depend on root npm packages at runtime.
-- Do not hand-edit `plugins/<plugin>/.claude-plugin/plugin.json` `version`.
+- Register each plugin by adding only its name to `.axiom/marketplace.json`
+  after creating `plugins/<plugin>/.axiom/plugin.json`.
+- Treat `package.json` and `package-lock.json` as repository release, lint, and
+  validation tooling only. Shipped plugins must not depend on root npm packages
+  at runtime.
+- Do not hand-edit either vendor catalog or vendor manifest.
 - Do not hand-edit `plugins/<plugin>/CHANGELOG.md`.
 - Semantic-release owns plugin version bumps, changelog entries, tags, and
-  GitHub Releases.
+  GitHub Releases. Release preparation changes the canonical version and emits
+  both generated vendor manifests in one transaction.
 - Do not modify `dev/` or `plugins/` unless the user explicitly asks. Read them
   only as needed for validation, packaging context, or release wiring.
 - Ignore local scratch unless explicitly requested:
@@ -65,18 +91,20 @@ package-lock.json
   shipped plugin directory.
 - Do not hand-edit generated root `README.md` regions. Update their canonical
   sources, then run `npm run docs:readme`.
+- Treat public directory publication as an explicit external operation. A
+  repository release must not submit to or publish in a public directory.
 
 ## Generated README Regions
 
 The root `README.md` has three generated marker blocks:
 
 - `plugin-badges`: generated by `.github/scripts/sync-readme-badges.mjs` from
-  `.claude-plugin/marketplace.json` and plugin manifests.
-- `eval-index`: generated by `.github/scripts/sync-readme-evals.mjs` from
-  marketplace entries, shipped skill eval manifests, and plugin README eval
-  history sections.
+  canonical marketplace and plugin records.
+- `eval-index`: generated by `.github/scripts/sync-readme-evals.mjs` from the
+  canonical marketplace order, shipped skill eval manifests, and plugin README
+  eval history sections.
 - `plugin-list`: generated by `.github/scripts/sync-readme-plugins.mjs` from
-  marketplace entries and plugin manifests.
+  canonical marketplace and plugin records.
 
 Use these commands for generated README work:
 
@@ -96,8 +124,8 @@ the generated block directly.
 When adding a shipped plugin:
 
 - Create `plugins/<plugin>/` using lowercase kebab-case.
-- Add `plugins/<plugin>/.claude-plugin/plugin.json`; do not hand-edit
-  `version` after creation.
+- Add `plugins/<plugin>/.axiom/plugin.json`, README, changelog, package release
+  stub, and release config.
 - Add `plugins/<plugin>/README.md` with a non-empty `## Eval history` section.
 - Add at least one directory-format skill under
   `plugins/<plugin>/skills/<skill>/SKILL.md`.
@@ -105,10 +133,15 @@ When adding a shipped plugin:
   `plugins/<plugin>/skills/<skill>/evals/evals.json`.
 - Put eval run output, grading, and benchmarks under `dev/<plugin>/`, not under
   `plugins/<plugin>/`.
-- Register the plugin in `.claude-plugin/marketplace.json`; marketplace order is
-  root README display order.
-- Run `npm run docs:readme` after changing marketplace entries, plugin
-  manifests, plugin READMEs, or shipped eval manifests.
+- Add only the plugin name to the ordered `.axiom/marketplace.json` plugin
+  array.
+- Run `npm run generate` to produce both catalogs, both manifests, and generated
+  README blocks.
+- Run repository, Claude, Codex, eval, documentation, and release contract
+  checks.
+- Never author either vendor catalog or vendor manifest directly.
+- Do not add public-submission placeholders, publisher identity, legal URLs, or
+  listing assets unless the user explicitly supplies and requests them.
 
 ## Release Inputs
 
@@ -136,6 +169,16 @@ For generated root README blocks:
 
 ```bash
 npm run docs:readme:check
+```
+
+For all canonical and generated marketplace artifacts:
+
+```bash
+npm run generate
+```
+
+```bash
+npm run generate:check
 ```
 
 For branch-name convention changes or local testing of a branch name:
@@ -167,6 +210,26 @@ instead.
 
 ```bash
 claude plugin validate ./plugins/<plugin>
+```
+
+For isolated Claude marketplace discovery and installation:
+
+```bash
+npm run check:claude:smoke
+```
+
+For native Codex static validation and isolated discovery and installation:
+
+```bash
+npm run check:codex:static
+```
+
+```bash
+npm run check:codex:smoke
+```
+
+```bash
+npm run check:codex
 ```
 
 For workflow, Dependabot, pre-commit, or repository YAML changes:

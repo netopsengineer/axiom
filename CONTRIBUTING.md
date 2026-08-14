@@ -10,22 +10,28 @@ changelogs, releases, and dependency bumps per plugin.
 You need:
 
 - **Node** - the supported range is in `package.json` -> `engines` (CI runs the
-  current LTS). Installs Biome and the release tooling.
-- **The Claude Code CLI** (`claude` on your PATH) - for manifest validation.
+  current LTS). Installs Biome, the exact Codex CLI used by validation, and the
+  release tooling.
+- **The Claude Code CLI** (`claude` on your PATH) - for strict manifest
+  validation and the isolated Claude installation smoke.
 - **[`prek`](https://prek.j178.dev)** - runs the git hooks (a fast drop-in for
   pre-commit).
 
 ```bash
-npm install        # Biome + release tooling (dev-only; the shipped plugin has no deps)
-prek install       # install the local pre-commit checks
+npm ci
+prek install
 ```
+
+The exact `@openai/codex` package in root `devDependencies` is repository
+validation tooling. It is invoked from `node_modules` by the isolated Codex
+smoke and is not a runtime dependency of any shipped plugin.
 
 ## Make a change
 
 1. Branch off `main` using `feat/<short-kebab-slug>`,
    `fix/<short-kebab-slug>`, or `chore/<short-kebab-slug>`.
-2. Make your edit, following the conventions in `CLAUDE.md` (kebab-case names,
-   directory-format skills, register new plugins in `marketplace.json`, ...).
+2. Make your edit, following the canonical ownership and validation rules in
+   `AGENTS.md`. `CLAUDE.md` imports that same contract.
 3. Run the checks below until they pass.
 4. Open a PR whose **title is a valid Conventional Commit** - PRs squash-merge,
    so the title becomes the commit semantic-release reads.
@@ -37,19 +43,28 @@ also runs the automation script tests wired into pre-commit. It does not run
 every CI job, especially checks that depend on PR metadata, scheduled workflow
 context, or live service credentials. Individually:
 
-| Check              | Tool                                           | Auto-fix                                   |
-|--------------------|------------------------------------------------|--------------------------------------------|
-| Branch             | `.github/scripts/check-branch-name.mjs`        | rename the PR source branch                |
-| JavaScript         | Biome (`biome.jsonc`)                          | `npm run lint:fix`                         |
-| Markdown           | markdownlint-cli2 (`.markdownlint-cli2.jsonc`) | `npx -y markdownlint-cli2 --fix "**/*.md"` |
-| Manifests          | `claude plugin validate ./plugins/<name>`      | fix the flagged manifest                   |
-| Automation scripts | Node's built-in test runner                    | fix the flagged helper behavior            |
+| Check                      | Tool or command                                             | Auto-fix or recovery                       |
+|----------------------------|-------------------------------------------------------------|--------------------------------------------|
+| Branch                     | `.github/scripts/check-branch-name.mjs`                     | rename the PR source branch                |
+| Canonical generation       | `npm run generate:check`                                    | `npm run generate`, then stage outputs     |
+| Repository contract        | `npm run check:repo`                                        | fix canonical input or repository layout   |
+| Claude manifests and smoke | `npm run check:plugins:local`, `npm run check:claude:smoke` | fix canonical input, generate, rerun       |
+| Codex manifest and smoke   | `npm run check:codex:static`, `npm run check:codex:smoke`   | fix canonical input or pinned CLI contract |
+| JavaScript                 | Biome (`biome.jsonc`)                                       | `npm run lint:fix`                         |
+| Markdown                   | markdownlint-cli2 (`.markdownlint-cli2.jsonc`)              | `npx -y markdownlint-cli2 --fix "**/*.md"` |
+| Automation scripts         | Node's built-in test runner                                 | fix the flagged helper behavior            |
 
 The hook auto-fixes formatting on commit; if it rewrites a file, the commit
 stops so you can `git add` the result and commit again. Other useful commands:
 
 ```bash
-npm run lint           # Biome, read-only — exactly what CI runs
+npm run generate:check
+npm run check:repo
+npm run check:plugins:local
+npm run check:claude:smoke
+npm run check:codex
+npm run test
+npm run lint
 PR_BRANCH="$(git rev-parse --abbrev-ref HEAD)" npm run check:branch-name
 BR="$(git rev-parse --abbrev-ref HEAD)"
 cd plugins/<plugin>
@@ -96,8 +111,10 @@ into the commit body.
 | `<type>!:`                                                   | major (1.0.0 -> 2.0.0) |
 | `chore:` `ci:` `docs:` `refactor:` `test:` `style:` `build:` | no release             |
 
-Never hand-edit the plugin `version` or `CHANGELOG.md` - semantic-release owns
-both.
+Never hand-edit `.axiom/plugin.json` `version`, either generated vendor
+manifest, or `CHANGELOG.md`. Semantic-release owns the canonical version and
+changelog. Release preparation writes that version to both vendor manifests in
+one transaction.
 
 A release happens per plugin when both are true:
 
@@ -117,12 +134,12 @@ All workflows live in `.github/`; every third-party action is SHA-pinned.
 |------------------------------------------------|----------------------------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | `branch-name.yml`                              | PR                                                 | enforce predictable PR source branch names for human and agent branches                                                                                                                                                |
 | `pr-title.yml`                                 | PR                                                 | enforce Conventional Commit PR titles, which become squash commit subjects                                                                                                                                             |
-| `validate.yml`                                 | PR + push to `main`                                | plugin validation, markdownlint, Biome, secret scanning, repository invariants, YAML syntax, spelling, Markdown links, workflow security lint                                                                          |
-| `dependency-audit.yml`                         | daily + lockfile/allowlist push to `main` + manual | non-required audit gate (`npm run audit:ci`); fails only on high+ advisories not in `.github/npm-audit-allowlist.json`; advisory signal, not a merge gate                                                              |
+| `validate.yml`                                 | PR + push to `main`                                | generated drift, strict Claude validation, isolated Claude and Codex installs, Codex static validation, repository invariants, tests, markdownlint, Biome, secrets, YAML, spelling, links, and workflow security       |
+| `dependency-audit.yml`                         | daily + dependency-tooling push to `main` + manual | all-severity audit gate (`npm run audit:ci`); the same zero-vulnerability gate is required in `validate.yml` on every pull request                                                                                     |
 | `dependency-audit-fix.yml`                     | daily + manual                                     | classifies `npm audit fix` exits; opens an auto-merged PR for valid lockfile-only fixes when package files change; when nothing is fixable, reports the still-blocking advisories and the next step to the job summary |
-| `release.yml`                                  | push to `main`                                     | run semantic-release for each plugin; changed plugin paths with releasable titles bump the manifest, update `CHANGELOG.md`, tag, and cut a GitHub Release                                                              |
+| `release.yml`                                  | push to `main`                                     | run semantic-release for each plugin; releasable plugin changes bump the canonical version, emit both manifests, update `CHANGELOG.md`, tag, and cut a GitHub Release                                                  |
 | `bump-validate-action.yml`                     | daily + manual                                     | re-pins the tagless validate action to the latest upstream SHA via an auto-merged PR, gated by Validate plus validator smoke tests                                                                                     |
-| `dependabot.yml` + `dependabot-auto-merge.yml` | daily                                              | bump GitHub Actions + npm tooling, auto-merged once CI is green                                                                                                                                                        |
+| `dependabot.yml` + `dependabot-auto-merge.yml` | daily updates + scheduled merge scan               | bump GitHub Actions, npm tooling, and pre-commit hooks; the GitHub App enables protected auto-merge so the merge triggers main-branch workflows                                                                        |
 
 No Anthropic credentials are needed anywhere, and `claude plugin validate` runs
 offline. Releases run under a short-lived **GitHub App token** - the
@@ -132,18 +149,18 @@ app's ID and key live in the `APP_ID` variable and `APP_PRIVATE_KEY` secret. The
 automation PRs are App-created intentionally because App/PAT-created events can
 trigger PR workflows normally; the built-in `GITHUB_TOKEN` is used only for
 `workflow_dispatch` calls from jobs that explicitly grant `actions: write`.
-`package.json` / `package-lock.json` are **release- and lint-tooling only** -
-this is not an npm project, and the shipped plugin carries no npm dependencies.
+`package.json` and `package-lock.json` are **repository tooling only**. They
+cover release, lint, validation, and the exact Codex CLI smoke dependency. This
+is not a published npm project, and shipped plugins carry no npm dependencies.
 The repository's Actions **default token permission is read-only**; every
 workflow declares explicit top-level permissions or explicit job-level
 permissions on every job (enforced by `npm run check:repo`), so none silently
 rely on the default. Write scopes are granted only to jobs that need them.
 Dependency auditing is **self-managing**: `dependency-audit-fix.yml` classifies
-`npm audit fix` exits, auto-fixes and auto-merges valid lockfile-only updates,
-while the audit gate enforces allowlisted high+ leftovers. The few advisories
-that have no available fix (e.g. a dependency bundled inside `npm` itself) go in
-`.github/npm-audit-allowlist.json`, each with an **expiry** date and a reason so
-it is forced back through review.
+`npm audit fix` exits and auto-merges valid lockfile-only updates. The required
+audit gate rejects every vulnerability severity and permits no threshold or
+allowlist. An unresolved advisory stays red until its dependency is upgraded,
+replaced, or removed.
 Validator bumps are also automated: `bump-validate-action.yml` updates the
 vendored Anthropic validator scripts, dispatches `validate.yml` on the bump
 branch, and enables auto-merge. That required Validate run includes
@@ -152,12 +169,23 @@ rejects a known-bad plugin, and treats warnings as fatal when configured.
 
 ## Adding a plugin
 
-See `CLAUDE.md` -> "Adding a plugin": create
-`plugins/<name>/.claude-plugin/plugin.json` (plus `README.md` and `CHANGELOG.md`)
-and register it in `.claude-plugin/marketplace.json` with
-`source: "./plugins/<name>"`. Add the plugin release stub at
-`plugins/<name>/package.json` and the per-plugin release config at
-`plugins/<name>/release.config.js`.
+Use the one-registration workflow in `AGENTS.md`:
+
+1. Create `plugins/<name>/.axiom/plugin.json` with common metadata, components,
+   and namespaced Claude Code and Codex metadata.
+2. Add the plugin README, changelog seed, dependency-free release package stub,
+   release config, shared skill, and shipped eval manifest.
+3. Add only `<name>` to the ordered plugin array in
+   `.axiom/marketplace.json`.
+4. Run `npm run generate` to emit both catalogs, both vendor manifests, and the
+   generated root README blocks.
+5. Run `npm run generate:check`, `npm run check:repo`,
+   `npm run check:plugins:local`, `npm run check:claude:smoke`, and
+   `npm run check:codex` before the broader validation suite.
+
+Do not author `.claude-plugin/marketplace.json`,
+`.agents/plugins/marketplace.json`, or either per-plugin vendor manifest
+directly.
 
 ### The eval gate
 
@@ -172,13 +200,31 @@ plugin lands with evals or it doesn't land:
   measured pass rates (copy the shape from `axiom-versioning`). Run data
   (iteration outputs, grades, timings) goes in `dev/<plugin-name>/` and is never
   shipped.
-- **The bar: beat the baseline.** A skill has to measurably outperform Claude
-  *without* it - that's the entire reason to ship it. Evals that don't clear that
-  bar mean the skill isn't ready yet, not that the bar is wrong.
+- **The bar: beat the named baseline.** A skill has to measurably outperform
+  the same host and model without it. Evals that do not clear that bar mean the
+  skill is not ready yet.
 
-This is a review responsibility, not a CI check - evals need a live model and
-human judgment, so `validate.yml` can't run them. It's on the reviewer to confirm
-the evals exist and clear the bar before approving.
+This is an evidence responsibility, not a credential-free CI check. A capable
+agent may run and grade evals; a human grader is not required. Every recorded
+result must name the host, executor model, grader model or grading method, date,
+fixtures, score, and comparison baseline. Packaging smokes may prove Claude
+Code and Codex installation without being relabeled as scored model evidence.
+The reviewer must confirm that the evidence exists, is reproducible, and clears
+the named baseline before approval.
+
+Repository releases do not publish to a public plugin directory. Publisher
+identity, listing assets, legal URLs, portal submission, review, and publication
+are separate external operations requiring explicit authorization.
+
+## Public directory submission readiness
+
+Repository marketplace support does not complete a public directory
+submission. A later authorized submission still requires a verified publisher
+identity, listing assets, required legal and support URLs, portal entry, review,
+and an explicit publication action. The submission evidence must also include a
+portal-ready set of at least five positive and three negative tests. This
+repository does not contain empty placeholders for those external materials and
+does not publish them as a release side effect.
 
 ## Troubleshooting
 

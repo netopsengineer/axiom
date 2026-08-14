@@ -1,0 +1,47 @@
+{
+  "schemaVersion": 1,
+  "name": "axiom-git",
+  "version": "1.0.0",
+  "displayName": "Axiom Git",
+  "description": "Composes Conventional Commits messages with gitmoji from the staged diff, deciding type, scope, emoji, subject, and body, and gating on protected branches, staged secrets, and pre-commit hooks.",
+  "author": {
+    "name": "axiom-plugins",
+    "email": "enterprise.code.developer@gmail.com"
+  },
+  "license": "MIT",
+  "repository": "https://github.com/netopsengineer/axiom",
+  "keywords": [
+    "git",
+    "commit",
+    "commit-message",
+    "conventional-commits",
+    "gitmoji",
+    "semantic-commits",
+    "git-workflow",
+    "staged-diff",
+    "pre-commit-hooks",
+    "gitleaks",
+    "branch-safety",
+    "version-control"
+  ],
+  "components": {
+    "skills": "./skills/"
+  },
+  "platforms": {
+    "claude": {
+      "catalogDescription": "Composes Conventional Commits messages with gitmoji from the staged diff, with safety gates for protected branches, staged secrets, and pre-commit hooks.",
+      "category": "version-control"
+    },
+    "codex": {
+      "category": "Productivity",
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "shortDescription": "Compose safe Conventional Commit messages from staged changes.",
+      "defaultPrompt": [
+        "Compose and commit my staged changes safely."
+      ]
+    }
+  }
+}

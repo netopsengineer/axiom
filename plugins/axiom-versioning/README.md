@@ -1,22 +1,31 @@
 # Axiom Versioning
 
-> Part of the [axiom](../../README.md) Claude Code plugin marketplace.
+> Part of the [axiom](../../README.md) Claude Code and Codex plugin marketplace.
 
 Audits and updates external versioned dependencies across application,
-infrastructure, and CI/CD configurations. Teaches Claude to verify every version
-claim against live sources, check security advisories, use SHA pinning for
-GitHub Actions, and present version deltas in a structured decision format
-rather than silently preserving or upgrading.
+infrastructure, and CI/CD configurations. It directs the active agent to verify
+every version claim against live sources, check security advisories, use SHA
+pinning for GitHub Actions, and present version deltas in a structured decision
+format rather than silently preserving or upgrading.
 
 ## Install
 
-```shell
-# 1. Add the axiom marketplace
-/plugin marketplace add netopsengineer/axiom
+Claude Code:
 
-# 2. Install the plugin
+```shell
+/plugin marketplace add netopsengineer/axiom
 /plugin install axiom-versioning@axiom
 ```
+
+Codex:
+
+```shell
+codex plugin marketplace add netopsengineer/axiom
+codex plugin add axiom-versioning@axiom
+```
+
+Start a new Codex session after installation. In either host, ask to audit,
+review, or update versioned dependencies to invoke the skill.
 
 ## What's inside
 

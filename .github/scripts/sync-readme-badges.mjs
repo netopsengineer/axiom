@@ -1,25 +1,21 @@
 #!/usr/bin/env node
-// Keeps the top-level README plugin version badges in sync with the canonical
-// marketplace catalog. The badges read versions from each shipped plugin
-// manifest on main, which is the file semantic-release updates.
+// Keeps the top-level README plugin version badges in sync with canonical Axiom
+// metadata. The badges read canonical versions from main.
 import { readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { loadMarketplaceContract } from "./lib/marketplace-contract.mjs";
 
 const REPO_ROOT = fileURLToPath(new URL("../../", import.meta.url));
 const README_PATH = path.join(REPO_ROOT, "README.md");
-const MARKETPLACE_PATH = path.join(
-  REPO_ROOT,
-  ".claude-plugin/marketplace.json",
-);
 const START = "<!-- plugin-badges:start -->";
 const END = "<!-- plugin-badges:end -->";
 const BADGE_BRANCH = process.env.BADGE_BRANCH ?? "main";
 
 const checkMode = process.argv.includes("--check");
 
-const marketplace = await readJson(MARKETPLACE_PATH);
-const plugins = await collectPlugins(marketplace);
+const contract = await loadMarketplaceContract(REPO_ROOT);
+const plugins = collectPlugins(contract);
 const block = renderBadgeBlock(plugins);
 const readme = await readFile(README_PATH, "utf8");
 const nextReadme = syncBlock(readme, block);
@@ -44,58 +40,22 @@ if (nextReadme === readme) {
 await writeFile(README_PATH, nextReadme);
 console.log("Updated README.md plugin badge block.");
 
-async function readJson(filePath) {
-  const raw = await readFile(filePath, "utf8");
-
-  try {
-    return JSON.parse(raw);
-  } catch (error) {
-    throw new Error(
-      `Could not parse ${relativePath(filePath)}: ${error.message}`,
-    );
-  }
-}
-
-async function collectPlugins({ plugins }) {
-  if (!Array.isArray(plugins) || plugins.length === 0) {
-    throw new Error(
-      ".claude-plugin/marketplace.json must list at least one plugin.",
-    );
-  }
-
+function collectPlugins({ plugins }) {
   const result = [];
   let repositorySlug;
 
   for (const plugin of plugins) {
-    validateMarketplacePlugin(plugin);
-
-    const sourcePath = plugin.source.replace(/^\.\//u, "");
-    const manifestPath = path.join(
-      REPO_ROOT,
-      sourcePath,
-      ".claude-plugin/plugin.json",
-    );
-    const manifest = await readJson(manifestPath);
-
-    if (manifest.name !== plugin.name) {
-      throw new Error(
-        `${relativePath(manifestPath)} name "${manifest.name}" does not match marketplace entry "${plugin.name}".`,
-      );
-    }
-
-    const currentSlug = parseGitHubRepository(manifest.repository);
+    const sourcePath = `plugins/${plugin.name}`;
+    const currentSlug = parseGitHubRepository(plugin.metadata.repository);
     repositorySlug ??= currentSlug;
 
     if (currentSlug !== repositorySlug) {
       throw new Error(
-        `${relativePath(manifestPath)} repository "${manifest.repository}" does not match ${repositorySlug}.`,
+        `${plugin.canonicalPath} repository "${plugin.metadata.repository}" does not match ${repositorySlug}.`,
       );
     }
 
-    const manifestUrlPath = path.posix.join(
-      sourcePath,
-      ".claude-plugin/plugin.json",
-    );
+    const manifestUrlPath = path.posix.join(sourcePath, ".axiom/plugin.json");
 
     result.push({
       name: plugin.name,
@@ -105,27 +65,6 @@ async function collectPlugins({ plugins }) {
   }
 
   return result;
-}
-
-function validateMarketplacePlugin(plugin) {
-  if (!plugin || typeof plugin !== "object") {
-    throw new Error("Every marketplace plugin entry must be an object.");
-  }
-
-  if (
-    typeof plugin.name !== "string" ||
-    !/^[a-z0-9]+(?:-[a-z0-9]+)*$/u.test(plugin.name)
-  ) {
-    throw new Error(`Invalid marketplace plugin name: ${plugin.name}`);
-  }
-
-  const expectedSource = `./plugins/${plugin.name}`;
-
-  if (plugin.source !== expectedSource) {
-    throw new Error(
-      `Marketplace source for ${plugin.name} must be "${expectedSource}", got "${plugin.source}".`,
-    );
-  }
 }
 
 function parseGitHubRepository(repository) {
@@ -174,9 +113,7 @@ function renderBadgeUrl({ name, manifestUrl }) {
     prefix: "v",
     label: name,
     style: "for-the-badge",
-    logo: "claude",
-    logoColor: "white",
-    color: "8957e5",
+    color: "4c6ef5",
     labelColor: "1a1a1a",
   });
 
@@ -226,8 +163,4 @@ function findBadgeBlockInsertionIndex(lines) {
   throw new Error(
     "Could not find README.md badge section for plugin badge block.",
   );
-}
-
-function relativePath(filePath) {
-  return path.relative(REPO_ROOT, filePath);
 }

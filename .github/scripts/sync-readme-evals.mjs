@@ -5,13 +5,10 @@
 import { readdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { loadMarketplaceContract } from "./lib/marketplace-contract.mjs";
 
 const REPO_ROOT = fileURLToPath(new URL("../../", import.meta.url));
 const README_PATH = path.join(REPO_ROOT, "README.md");
-const MARKETPLACE_PATH = path.join(
-  REPO_ROOT,
-  ".claude-plugin/marketplace.json",
-);
 const START = "<!-- eval-index:start -->";
 const END = "<!-- eval-index:end -->";
 const EVAL_HISTORY_HEADING = /^## Eval history\s*$/mu;
@@ -19,8 +16,8 @@ const KEBAB_CASE = /^[a-z0-9]+(?:-[a-z0-9]+)*$/u;
 
 const checkMode = process.argv.includes("--check");
 
-const marketplace = await readJson(MARKETPLACE_PATH);
-const rows = await collectEvalRows(marketplace);
+const contract = await loadMarketplaceContract(REPO_ROOT);
+const rows = await collectEvalRows(contract);
 const block = renderEvalBlock(rows);
 const readme = await readFile(README_PATH, "utf8");
 const nextReadme = syncBlock(readme, block);
@@ -46,18 +43,10 @@ await writeFile(README_PATH, nextReadme);
 console.log("Updated README.md eval index.");
 
 async function collectEvalRows({ plugins }) {
-  if (!Array.isArray(plugins) || plugins.length === 0) {
-    throw new Error(
-      ".claude-plugin/marketplace.json must list at least one plugin.",
-    );
-  }
-
   const rows = [];
 
   for (const plugin of plugins) {
-    validateMarketplacePlugin(plugin);
-
-    const sourcePath = plugin.source.replace(/^\.\//u, "");
+    const sourcePath = `plugins/${plugin.name}`;
     const pluginPath = path.join(REPO_ROOT, sourcePath);
     const pluginReadmePath = path.join(pluginPath, "README.md");
     const pluginReadme = await readText(pluginReadmePath);
@@ -151,24 +140,6 @@ async function readJson(filePath) {
   } catch (error) {
     throw new Error(
       `Could not parse ${relativePath(filePath)}: ${error.message}`,
-    );
-  }
-}
-
-function validateMarketplacePlugin(plugin) {
-  if (!plugin || typeof plugin !== "object") {
-    throw new Error("Every marketplace plugin entry must be an object.");
-  }
-
-  if (typeof plugin.name !== "string" || !KEBAB_CASE.test(plugin.name)) {
-    throw new Error(`Invalid marketplace plugin name: ${plugin.name}`);
-  }
-
-  const expectedSource = `./plugins/${plugin.name}`;
-
-  if (plugin.source !== expectedSource) {
-    throw new Error(
-      `Marketplace source for ${plugin.name} must be "${expectedSource}", got "${plugin.source}".`,
     );
   }
 }
@@ -281,7 +252,7 @@ function renderEvalBlock(rows) {
   });
 
   return `${START}
-The eval index is generated from \`.claude-plugin/marketplace.json\` and each
+The eval index is generated from \`.axiom/marketplace.json\` and each
 shipped skill's \`evals/evals.json\` manifest. Plugin READMEs are the canonical
 scored histories.
 

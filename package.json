@@ -2,13 +2,16 @@
   "name": "axiom-marketplace-tooling",
   "version": "0.0.0-managed",
   "private": true,
-  "description": "CI/release tooling for the axiom Claude Code plugin marketplace. Not published — shipped plugins live under plugins/*.",
+  "description": "CI and release tooling for the axiom Claude Code and Codex plugin marketplace. Not published; shipped plugins live under plugins/*.",
   "license": "MIT",
   "type": "module",
   "engines": {
-    "node": "^22.14.0 || >=24.10.0"
+    "node": "^22.22.2 || >=24.15"
   },
   "scripts": {
+    "marketplaces:build": "node .github/scripts/build-marketplaces.mjs",
+    "marketplaces:check": "node .github/scripts/build-marketplaces.mjs --check",
+    "test:marketplaces": "node --test .github/scripts/marketplace-contract.test.mjs .github/scripts/check-codex-marketplace.test.mjs .github/scripts/check-repo-invariants.test.mjs .github/scripts/marketplace-smoke-fixture.test.mjs .github/scripts/codex-package-contract.test.mjs .github/scripts/prepare-plugin-release.test.mjs",
     "docs:badges": "node .github/scripts/sync-readme-badges.mjs",
     "docs:badges:check": "node .github/scripts/sync-readme-badges.mjs --check",
     "docs:evals": "node .github/scripts/sync-readme-evals.mjs",
@@ -17,13 +20,19 @@
     "docs:plugins:check": "node .github/scripts/sync-readme-plugins.mjs --check",
     "docs:readme": "npm run docs:badges && npm run docs:evals && npm run docs:plugins",
     "docs:readme:check": "npm run docs:badges:check && npm run docs:evals:check && npm run docs:plugins:check",
+    "generate": "npm run marketplaces:build && npm run docs:readme",
+    "generate:check": "npm run marketplaces:check && npm run docs:readme:check",
     "check:branch-name": "node .github/scripts/check-branch-name.mjs",
     "check:plugins:local": "node .github/scripts/validate-local-plugins.mjs",
+    "check:claude:smoke": "node .github/scripts/smoke-claude-marketplace.mjs",
+    "check:codex:static": "node .github/scripts/check-codex-marketplace.mjs",
+    "check:codex:smoke": "node .github/scripts/smoke-codex-marketplace.mjs",
+    "check:codex": "npm run check:codex:static && npm run check:codex:smoke",
     "check:repo": "node .github/scripts/check-repo-invariants.mjs",
     "audit:ci": "node .github/scripts/check-npm-audit.mjs",
-    "test:automation": "node --test .github/scripts/*.test.mjs",
+    "test:automation": "node --test .github/scripts/check-npm-audit.test.mjs .github/scripts/dual-marketplace-automation.test.mjs .github/scripts/release-tooling-contract.test.mjs .github/scripts/run-npm-audit-fix.test.mjs",
     "test:validate-plugins": "node .github/scripts/check-validate-plugins-smoke.mjs",
-    "test": "npm run test:automation",
+    "test": "npm run test:automation && npm run test:marketplaces",
     "check:precommit:security": "prek run actionlint --all-files && prek run shellcheck --all-files && prek run zizmor --all-files",
     "lint:links": "node .github/scripts/check-markdown-links.mjs",
     "lint:spelling": "cspell --no-progress --show-suggestions --gitignore",
@@ -34,14 +43,21 @@
   "devDependencies": {
     "@biomejs/biome": "^2.5.8",
     "@j178/prek": "^0.4.13",
-    "@semantic-release/changelog": "^6.0.3",
+    "@openai/codex": "0.147.0",
+    "@semantic-release/changelog": "^7.0.0",
     "@semantic-release/exec": "^7.1.0",
-    "@semantic-release/git": "^10.0.1",
-    "conventional-changelog-conventionalcommits": "^10.2.1",
+    "@semantic-release/git": "^11.0.1",
+    "@semantic-release/npm": "file:.github/release-tooling/semantic-release-npm-disabled",
+    "conventional-changelog-conventionalcommits": "^10.3.0",
     "cspell": "^10.0.1",
     "markdown-link-check": "^3.15.0",
-    "semantic-release": "^25.0.8",
+    "semantic-release": "^25.0.9",
     "semantic-release-monorepo": "8.0.2",
     "yaml": "^2.9.0"
+  },
+  "overrides": {
+    "semantic-release": {
+      "@semantic-release/npm": "$@semantic-release/npm"
+    }
   }
 }

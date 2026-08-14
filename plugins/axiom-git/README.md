@@ -1,26 +1,35 @@
 # Axiom Git
 
-> Part of the [axiom](../../README.md) Claude Code plugin marketplace.
+> Part of the [axiom](../../README.md) Claude Code and Codex plugin marketplace.
 
-Git-workflow craft for Claude Code. Today it ships one skill, `commit-message`,
-which reads your staged diff and composes a single Conventional Commits message
-with a gitmoji prefix — deciding type, scope, emoji, subject, body, and footer
-itself — then commits after one yes/no confirmation. It also enforces the
-guardrails a bare model skips: it refuses to commit to `main`/`master`, stops on
-credential-shaped lines in the diff, and never bypasses pre-commit hooks.
+Git-workflow craft for supported coding agents. Today it ships one skill,
+`commit-message`, which reads your staged diff and composes a single
+Conventional Commits message with a gitmoji prefix. It decides the type, scope,
+emoji, subject, body, and footer, then commits after one yes/no confirmation. It
+also refuses to commit to `main` or `master`, stops on credential-shaped lines
+in the diff, and never bypasses pre-commit hooks.
 
 > Status: `axiom-git` is installable from the marketplace. Its release line is
 > managed independently with namespaced `axiom-git-v*` tags.
 
 ## Install
 
-```shell
-# 1. Add the axiom marketplace
-/plugin marketplace add netopsengineer/axiom
+Claude Code:
 
-# 2. Install the plugin
+```shell
+/plugin marketplace add netopsengineer/axiom
 /plugin install axiom-git@axiom
 ```
+
+Codex:
+
+```shell
+codex plugin marketplace add netopsengineer/axiom
+codex plugin add axiom-git@axiom
+```
+
+Start a new Codex session after installation. In either host, ask to commit the
+staged changes or use an equivalent commit request to invoke the skill.
 
 ## What's inside
 

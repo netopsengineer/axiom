@@ -1,21 +1,11 @@
 name: Dependency audit
 
-# npm audit queries a live advisory feed, so a newly-disclosed advisory unrelated
-# to any PR could otherwise turn a required check red and block all merges. This
-# workflow keeps audit as an advisory signal, not a merge gate: it runs on a daily
-# schedule (offset from the bump-validate-action cron) plus manual dispatch, and is
-# intentionally NOT wired into pull_request, so it produces no PR status check.
+# The required Repository checks job runs this all-severity gate on every PR.
+# This daily and push-triggered workflow also detects advisories disclosed after
+# a merge and keeps the default branch's dependency signal current.
 #
-# The audit runs through .github/scripts/check-npm-audit.mjs (npm run audit:ci),
-# which fails only on at/above-high advisories that are not covered by a current
-# .github/npm-audit-allowlist.json entry. Fixable advisories are auto-patched by
-# dependency-audit-fix.yml; only genuinely unfixable ones (e.g. bundled inside npm)
-# are allowlisted, each with an expiry so it is re-reviewed.
-#
-# It also runs on push to main whenever the lockfile, manifest, or allowlist
-# changes, so a landed audit-fix or allowlist edit is re-verified immediately
-# instead of leaving the last scheduled failure standing until the next cron.
-# Push-on-main still produces no PR status check, so this stays advisory.
+# It also runs on push to main whenever the dependency graph or audit tooling
+# changes, so a landed audit fix is re-verified immediately.
 
 on:
   schedule:
@@ -25,7 +15,6 @@ on:
     paths:
       - package-lock.json
       - package.json
-      - .github/npm-audit-allowlist.json
       - .github/scripts/check-npm-audit.mjs
       - .github/workflows/dependency-audit.yml
   workflow_dispatch:

@@ -1,0 +1,32 @@
+{
+  "name": "axiom",
+  "interface": {
+    "displayName": "Axiom"
+  },
+  "plugins": [
+    {
+      "name": "axiom-git",
+      "source": {
+        "source": "local",
+        "path": "./plugins/axiom-git"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Productivity"
+    },
+    {
+      "name": "axiom-versioning",
+      "source": {
+        "source": "local",
+        "path": "./plugins/axiom-versioning"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Productivity"
+    }
+  ]
+}

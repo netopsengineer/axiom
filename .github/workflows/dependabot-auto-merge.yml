@@ -1,34 +1,62 @@
 name: Auto-merge Dependabot
 
-# Enables auto-merge on Dependabot PRs; they land once the required Validate
-# checks pass. Requires "Allow auto-merge" (Settings > General) and a branch
-# protection rule / ruleset on main that requires the Validate checks — without
-# required checks, auto-merge would land PRs before CI runs.
-#
-# Dependabot PRs DO trigger workflows (unlike GITHUB_TOKEN-created ones), so
-# no dispatch dance is needed here.
+# Dependabot-triggered workflows cannot access Actions secrets, and merges made
+# with GITHUB_TOKEN do not trigger push workflows. This trusted scheduled run
+# mints the repository GitHub App token and enables auto-merge only for
+# same-repository Dependabot PRs. The App-attributed merge triggers the normal
+# main-branch Validate and Release workflows.
 
-on: pull_request
+on:
+  schedule:
+    - cron: "17,47 * * * *"
+  workflow_dispatch:
 
 permissions:
-  contents: write
-  pull-requests: write
+  contents: read
+
+concurrency:
+  group: dependabot-auto-merge
+  cancel-in-progress: false
 
 jobs:
   auto-merge:
-    if: github.event.pull_request.user.login == 'dependabot[bot]' && github.repository == github.event.pull_request.head.repo.full_name
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
-      - name: Fetch Dependabot metadata
-        id: meta
-        uses: dependabot/fetch-metadata@25dd0e34f4fe68f24cc83900b1fe3fe149efef98 # v3.1.0
+      - name: Configure git defaults
+        run: git config --global init.defaultBranch main
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-      - name: Enable auto-merge
-        # Auto-merges all update types (maximally hands-off). To hold majors back
-        # for manual review, uncomment the guard below:
-        # if: steps.meta.outputs.update-type != 'version-update:semver-major'
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 24
+
+      - name: Mint GitHub App token
+        id: app-token
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          PR_URL: ${{ github.event.pull_request.html_url }}
-        run: gh pr merge --auto --squash "$PR_URL"
+          APP_ID: ${{ vars.APP_ID }}
+          APP_PRIVATE_KEY: ${{ secrets.APP_PRIVATE_KEY }}
+          TOKEN_PERMISSIONS: '{"contents":"write","pull_requests":"write"}'
+        run: node .github/scripts/create-app-token.mjs
+
+      - name: Enable App-attributed auto-merge
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+        run: |
+          set -euo pipefail
+          found=false
+          while IFS=$'\t' read -r url author head_repo; do
+            if [ "$author" != "dependabot[bot]" ] || [ "$head_repo" != "$GITHUB_REPOSITORY" ]; then
+              continue
+            fi
+            found=true
+            echo "Enabling protected auto-merge for $url"
+            gh pr merge --auto --squash "$url"
+          done < <(
+            gh api --paginate "repos/$GITHUB_REPOSITORY/pulls?state=open&per_page=100" \
+              --jq '.[] | [.html_url, .user.login, .head.repo.full_name] | @tsv'
+          )
+          if [ "$found" = false ]; then
+            echo "No same-repository Dependabot pull requests are open."
+          fi

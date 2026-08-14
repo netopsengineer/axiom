@@ -28,7 +28,7 @@ jobs:
           persist-credentials: false
       - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
-          node-version: 24 # current LTS; semantic-release@25 needs ^22.14 || >=24.10
+          node-version: 24 # current LTS; release plugins need ^22.22.2 || >=24.15
           cache: npm
       # Mint a short-lived token from the axiom-release-bot GitHub App. The
       # built-in GITHUB_TOKEN (github-actions[bot]) is not an admin and is rejected
@@ -59,3 +59,5 @@ jobs:
           # App-minted token (not the default GITHUB_TOKEN) — required to push to
           # protected main and to create the tag, Release, and success comments.
           GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
+      - name: Verify generated marketplaces
+        run: npm run marketplaces:check
