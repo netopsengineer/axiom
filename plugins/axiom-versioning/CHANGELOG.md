@@ -1,5 +1,11 @@
 # Changelog
 
+## [axiom-versioning-v1.2.3](https://github.com/netopsengineer/axiom/compare/axiom-versioning-v1.2.2...axiom-versioning-v1.2.3) (2026-08-14)
+
+### Bug Fixes
+
+* 🐛 Reconcile release artifacts ([#130](https://github.com/netopsengineer/axiom/issues/130)) ([a26768c](https://github.com/netopsengineer/axiom/commit/a26768c1c18a6daa35b8d62888ce004ba31699e9))
+
 ## [axiom-versioning-v1.2.2](https://github.com/netopsengineer/axiom/compare/axiom-versioning-v1.2.1...axiom-versioning-v1.2.2) (2026-08-14)
 
 ### Bug Fixes
