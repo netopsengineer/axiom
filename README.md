@@ -38,11 +38,11 @@ scored histories.
 
 | Plugin                                                 | Evaluated skill manifests                                                                   | Scenarios | Manifest expectations | Scored history                                                  |
 |--------------------------------------------------------|---------------------------------------------------------------------------------------------|----------:|----------------------:|-----------------------------------------------------------------|
-| [axiom-git](plugins/axiom-git/README.md)               | [commit-message](plugins/axiom-git/skills/commit-message/evals/evals.json)                  |         7 |                    29 | [Eval history](plugins/axiom-git/README.md#eval-history)        |
+| [axiom-git](plugins/axiom-git/README.md)               | [commit-message](plugins/axiom-git/skills/commit-message/evals/evals.json)                  |         7 |                    30 | [Eval history](plugins/axiom-git/README.md#eval-history)        |
 | [axiom-versioning](plugins/axiom-versioning/README.md) | [dependency-versions](plugins/axiom-versioning/skills/dependency-versions/evals/evals.json) |         7 |                    40 | [Eval history](plugins/axiom-versioning/README.md#eval-history) |
 
 Current coverage: **2 plugins**, **2 evaluated skills**,
-**14 scenarios**, **69 manifest expectations**.
+**14 scenarios**, **70 manifest expectations**.
 <!-- eval-index:end -->
 
 ## Add the marketplace
