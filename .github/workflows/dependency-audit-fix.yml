@@ -88,7 +88,8 @@ jobs:
             cat >> "$GITHUB_STEP_SUMMARY" <<'BLOCKED'
 
           **Next step:** upgrade, replace, or remove the dependency that pulls the
-          advisory in. The audit gate does not permit thresholds or allowlists.
+          advisory in. Every unaccepted advisory remains blocking; approved exact
+          exceptions must remain within their documented scope and expiry.
           BLOCKED
             echo "::warning::npm audit fix found no applicable fix and the audit gate is still blocking. See the job summary for the advisories and the next step."
           else
