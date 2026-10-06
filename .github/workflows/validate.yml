@@ -53,7 +53,7 @@ jobs:
       # schema check) plus the marketplace invariant lints. The local wrapper
       # keeps the untagged upstream action SHA-pinned and allows bumps without
       # editing this workflow file.
-      - uses: ./.github/actions/validate-plugins
+      - uses: $/.github/actions/validate-plugins
         with:
           marketplace-path: .claude-plugin/marketplace.json
           warn-invariants: ""
