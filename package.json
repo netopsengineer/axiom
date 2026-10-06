@@ -31,7 +31,7 @@
     "check:repo": "node .github/scripts/check-repo-invariants.mjs",
     "check:release-notes:compatibility": "node .github/scripts/probe-release-note-compatibility.mjs",
     "audit:ci": "node .github/scripts/check-npm-audit.mjs",
-    "test:automation": "node --test .github/scripts/check-markdown-links.test.mjs .github/scripts/check-npm-audit.test.mjs .github/scripts/dual-marketplace-automation.test.mjs .github/scripts/release-tooling-contract.test.mjs .github/scripts/run-npm-audit-fix.test.mjs",
+    "test:automation": "node --test .github/scripts/check-markdown-links.test.mjs .github/scripts/check-npm-audit.test.mjs .github/scripts/dual-marketplace-automation.test.mjs .github/scripts/release-tooling-contract.test.mjs .github/scripts/run-npm-audit-fix.test.mjs .github/scripts/codeql-workflow.test.mjs",
     "test:validate-plugins": "node .github/scripts/check-validate-plugins-smoke.mjs",
     "test": "npm run test:automation && npm run test:marketplaces",
     "check:precommit:security": "prek run actionlint --all-files && prek run shellcheck --all-files && prek run zizmor --all-files",

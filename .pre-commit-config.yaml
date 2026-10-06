@@ -82,7 +82,7 @@ repos:
         name: automation script tests
         entry: npm run test:automation
         language: system
-        files: ^(\.github/scripts/.*\.mjs|\.github/npm-audit-allowlist\.json|\.github/workflows/(dependency-audit.*|release-note-compatibility)\.yml|package\.json|package-lock\.json)
+        files: ^(\.github/scripts/.*\.mjs|\.github/npm-audit-allowlist\.json|\.github/workflows/(dependency-audit.*|release-note-compatibility|codeql)\.yml|package\.json|package-lock\.json)
         pass_filenames: false
 
       - id: validate-plugins-smoke-tests

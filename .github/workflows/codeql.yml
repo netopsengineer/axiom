@@ -1,0 +1,47 @@
+name: CodeQL
+
+# Advanced setup must replace default setup before this workflow can upload.
+# Default setup skips Dependabot-triggered updates. A pull_request workflow
+# scans those updates too, without checking out untrusted code in a privileged
+# pull_request_target context or giving Dependabot additional credentials.
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+  schedule:
+    - cron: "23 12 * * 5"
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  analyze:
+    # These names are required by the main ruleset; keep every language present.
+    name: Analyze (${{ matrix.language }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: read
+      # Upload access is limited to this job. GitHub also allows results from
+      # Dependabot pull_request runs with their restricted token permissions.
+      security-events: write
+    strategy:
+      fail-fast: false
+      matrix:
+        language: [actions, javascript-typescript, python]
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@2892aa5e19bbd11bc0cff5427e3b750a04d9e3c2 # v4.38.2
+        with:
+          languages: ${{ matrix.language }}
+          build-mode: none
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@2892aa5e19bbd11bc0cff5427e3b750a04d9e3c2 # v4.38.2
+        with:
+          category: /language:${{ matrix.language }}
+          wait-for-processing: true
