@@ -13,7 +13,7 @@ test("existing Plugin manifests job gates both marketplace hosts", async () => {
   assert.equal(job.name, "Plugin manifests");
   assert.deepEqual(workflow.permissions, { contents: "read" });
   const localValidatorIndex = job.steps.findIndex(
-    (step) => step.uses === "./.github/actions/validate-plugins",
+    (step) => step.uses === "$/.github/actions/validate-plugins",
   );
   assert.ok(localValidatorIndex >= 0);
   const commands = job.steps
@@ -36,6 +36,39 @@ test("existing Plugin manifests job gates both marketplace hosts", async () => {
       (step) =>
         step.uses ===
         "actions/setup-node@820762786026740c76f36085b0efc47a31fe5020",
+    ),
+  );
+});
+
+test("actionlint exception only covers the self-repository syntax diagnostic", async () => {
+  const config = await readYaml(".github/actionlint.yaml");
+  assert.deepEqual(Object.keys(config), ["paths"]);
+  assert.deepEqual(Object.keys(config.paths), [
+    ".github/workflows/validate.yml",
+  ]);
+  const exceptions = config.paths[".github/workflows/validate.yml"].ignore;
+  assert.equal(exceptions.length, 1);
+  const exception = new RegExp(exceptions[0], "u");
+  const diagnostic =
+    'specifying action "$/.github/actions/validate-plugins" in invalid format because ref is missing. available formats are "{owner}/{repo}@{ref}" or "{owner}/{repo}/{path}@{ref}"';
+  assert.match(diagnostic, exception);
+  for (const invalidDiagnostic of [
+    diagnostic.replace("validate-plugins", "other-action"),
+    diagnostic.replace("$/.github", "./.github"),
+    diagnostic.replace("ref is missing", "owner is missing"),
+    `${diagnostic} unexpected text`,
+  ]) {
+    assert.doesNotMatch(invalidDiagnostic, exception);
+  }
+
+  const hooks = await readYaml(".pre-commit-config.yaml");
+  assert.ok(
+    hooks.repos.some(({ hooks }) => hooks.some(({ id }) => id === "zizmor")),
+  );
+  const workflow = await readYaml(".github/workflows/validate.yml");
+  assert.ok(
+    workflow.jobs.workflows.steps.some(
+      ({ run }) => run === "npm run check:precommit:security",
     ),
   );
 });
