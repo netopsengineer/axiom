@@ -148,7 +148,7 @@ All workflows live in `.github/`; every third-party action is SHA-pinned.
 | `branch-name.yml`                              | PR                                                 | enforce predictable PR source branch names for human and agent branches                                                                                                                                                |
 | `pr-title.yml`                                 | PR                                                 | enforce Conventional Commit PR titles, which become squash commit subjects                                                                                                                                             |
 | `validate.yml`                                 | PR + push to `main`                                | generated drift, strict Claude validation, isolated Claude and Codex installs, Codex static validation, repository invariants, tests, markdownlint, Biome, secrets, YAML, spelling, links, and workflow security       |
-| `dependency-audit.yml`                         | daily + dependency-tooling push to `main` + manual | all-severity audit gate (`npm run audit:ci`); the same zero-vulnerability gate is required in `validate.yml` on every pull request                                                                                     |
+| `dependency-audit.yml`                         | daily + dependency-tooling push to `main` + manual | all-severity audit gate (`npm run audit:ci`); the same all-severity gate is required in `validate.yml` on every pull request                                                                                           |
 | `dependency-audit-fix.yml`                     | daily + manual                                     | classifies `npm audit fix` exits; opens an auto-merged PR for valid lockfile-only fixes when package files change; when nothing is fixable, reports the still-blocking advisories and the next step to the job summary |
 | `release.yml`                                  | push to `main`                                     | run semantic-release for each plugin; releasable plugin changes bump the canonical version, emit both manifests, update `CHANGELOG.md`, tag, and cut a GitHub Release                                                  |
 | `bump-validate-action.yml`                     | daily + manual                                     | re-pins the tagless validate action to the latest upstream SHA via an auto-merged PR, gated by Validate plus validator smoke tests                                                                                     |
@@ -173,9 +173,27 @@ permissions on every job (enforced by `npm run check:repo`), so none silently
 rely on the default. Write scopes are granted only to jobs that need them.
 Dependency auditing is **self-managing**: `dependency-audit-fix.yml` classifies
 `npm audit fix` exits and auto-merges valid lockfile-only updates. The required
-audit gate rejects every vulnerability severity and permits no threshold or
-allowlist. An unresolved advisory stays red until its dependency is upgraded,
-replaced, or removed.
+audit gate rejects every unaccepted advisory at every severity. A temporary
+exception requires explicit risk acceptance and an exact advisory, package,
+installed and locked version, rationale, upstream reference, and UTC expiry in
+`.github/npm-audit-allowlist.json`. No severity thresholds or wildcard exceptions
+are supported. Accepted findings remain visible and are not reported as fixed.
+
+Exceptions apply only while no compatible package fix is available. If npm
+suggests a breaking downgrade of a different direct dependency, the gate checks
+that downgrade against the lockfile and reports it explicitly. A matching
+advisory alone never clears unrelated or mixed dependency causes. Missing
+causes, malformed reports, unknown versions, and expired exceptions fail closed.
+The expiry timestamp is exclusive; `2026-10-21T00:00:00.000Z` accepts risk only
+through October 20 UTC. Remove an exception when its fix lands, and obtain
+explicit approval before adding or extending one. Daily audit runs enforce the
+expiry even when no pull requests change.
+
+The current exception accepts GHSA-vfj7-8cjw-p6xm only for `braces@3.0.3`,
+through October 20, 2026 UTC. This accepts a denial-of-service risk in development
+and release tooling while [upstream remediation](https://github.com/micromatch/braces/issues/70)
+is unavailable; it does not fix the vulnerability. Unaccepted advisories stay
+red until their dependencies are upgraded, replaced, or removed.
 Validator bumps are also automated: `bump-validate-action.yml` updates the
 vendored Anthropic validator scripts, dispatches `validate.yml` on the bump
 branch, and enables auto-merge. That required Validate run includes
