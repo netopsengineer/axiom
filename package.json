@@ -64,6 +64,9 @@
   "overrides": {
     "semantic-release": {
       "@semantic-release/npm": "$@semantic-release/npm"
+    },
+    "get-uri": {
+      "basic-ftp": "^6.2.2"
     }
   }
 }
