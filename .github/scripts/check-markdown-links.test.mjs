@@ -32,3 +32,40 @@ test("tracked Markdown deletions are not passed to the link checker", async () =
     await rm(fixture, { recursive: true, force: true });
   }
 });
+
+test("link-check FTP dependency rejects pathological listings promptly", async () => {
+  // get-uri's latest release still requests vulnerable basic-ftp 5.x.
+  // Keep the real 6.x implementation, rather than suppressing the audit:
+  // https://github.com/advisories/GHSA-c475-qrg2-pj4r
+  const { stdout } = await execFileAsync(
+    process.execPath,
+    [
+      "--input-type=module",
+      "-e",
+      `
+        import assert from "node:assert/strict";
+        import { createRequire } from "node:module";
+        const require = createRequire(import.meta.resolve("get-uri"));
+        const { Client, parseList } = require("basic-ftp");
+        const valid = "-rw-r--r-- 1 owner group 42 Jan 1 2026 file.txt";
+        const malformed = "-rw-r--r-- 1 " + "a ".repeat(65536) + "!";
+        const files = parseList(malformed + "\\r\\n" + valid + "\\r\\n");
+        assert.equal(files.length, 1);
+        assert.equal(files[0].name, "file.txt");
+        assert.equal(files[0].size, 42);
+        const client = new Client();
+        assert.equal(client.options.allowSeparateTransferHost, false);
+        for (const method of ["access", "lastMod", "list", "downloadTo", "close"]) {
+          assert.equal(typeof client[method], "function");
+        }
+        client.close();
+        console.log("safe FTP parser and get-uri API contract passed");
+      `,
+    ],
+    { cwd: path.resolve(path.dirname(SCRIPT), "../.."), timeout: 5000 },
+  );
+  assert.equal(
+    stdout.trim(),
+    "safe FTP parser and get-uri API contract passed",
+  );
+});

@@ -1,0 +1,13 @@
+{
+  "version": 1,
+  "exceptions": [
+    {
+      "advisory": "GHSA-vfj7-8cjw-p6xm",
+      "package": "braces",
+      "version": "3.0.3",
+      "expiresAt": "2026-10-21T00:00:00.000Z",
+      "reason": "Temporary user-approved acceptance through October 20, 2026 UTC of denial-of-service risk in development/release tooling. Shipped plugins have no runtime npm dependencies. No published upstream fix exists; this exception does not fix the vulnerability and must be removed when a fix is available.",
+      "upstream": "https://github.com/micromatch/braces/issues/70"
+    }
+  ]
+}
