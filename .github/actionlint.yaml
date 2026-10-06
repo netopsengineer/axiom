@@ -1,0 +1,7 @@
+# actionlint v1.7.12 does not yet recognize GitHub's self-repository syntax.
+# Remove this exact diagnostic exception when upstream support is released:
+# https://github.com/rhysd/actionlint/issues/711
+paths:
+  .github/workflows/validate.yml:
+    ignore:
+      - '^specifying action "\$/\.github/actions/validate-plugins" in invalid format because ref is missing\. available formats are "\{owner\}/\{repo\}@\{ref\}" or "\{owner\}/\{repo\}/\{path\}@\{ref\}"$'
