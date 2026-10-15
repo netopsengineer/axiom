@@ -31,14 +31,100 @@ test("existing Plugin manifests job gates both marketplace hosts", async () => {
     (step) => step.run === "npm ci --loglevel=error",
   );
   assert.ok(npmInstallIndex >= 0 && npmInstallIndex < localValidatorIndex);
-  assert.ok(
-    job.steps.some(
-      (step) =>
-        step.uses ===
-        "actions/setup-node@820762786026740c76f36085b0efc47a31fe5020",
-    ),
-  );
+  assertPinnedNodeSetup(job);
 });
+
+// Exercise the contract against dependency updates and unsafe workflow mutations.
+test("Node setup accepts updated immutable pins and rejects unsafe changes", async () => {
+  const workflow = await readYaml(".github/workflows/validate.yml");
+  const original = workflow.jobs.plugins;
+  const setupIndex = original.steps.findIndex((step) =>
+    step.uses?.startsWith("actions/setup-node@"),
+  );
+  for (const sha of [
+    "820762786026740c76f36085b0efc47a31fe5020",
+    "949feb2413d6458794dcd2491c4babbbce0c15c1",
+  ]) {
+    const job = structuredClone(original);
+    job.steps[setupIndex].uses = `actions/setup-node@${sha}`;
+    assert.doesNotThrow(() => assertPinnedNodeSetup(job));
+  }
+  for (const reference of [
+    "actions/setup-node@v7",
+    "actions/setup-node@main",
+    "actions/setup-node@949feb2",
+    `actions/setup-node@${"g".repeat(40)}`,
+    `other/setup-node@${"a".repeat(40)}`,
+    `actions/setup-node/extra@${"a".repeat(40)}`,
+  ]) {
+    const job = structuredClone(original);
+    job.steps[setupIndex].uses = reference;
+    assert.throws(() => assertPinnedNodeSetup(job), assert.AssertionError);
+  }
+  const mutations = [
+    (job) => job.steps.splice(setupIndex, 1),
+    (job) => job.steps.push(structuredClone(job.steps[setupIndex])),
+    (job) => {
+      job.steps[setupIndex].with["node-version"] = 22;
+    },
+    (job) => {
+      delete job.steps[setupIndex].with["node-version"];
+    },
+    (job) => {
+      delete job.steps[setupIndex].with.cache;
+    },
+    (job) => {
+      job.steps[setupIndex].with.cache = "yarn";
+    },
+    (job) => {
+      job.steps[setupIndex].if = "false";
+    },
+    (job) => {
+      job.steps[setupIndex]["continue-on-error"] = true;
+    },
+    (job) => {
+      job.steps.push(...job.steps.splice(setupIndex, 1));
+    },
+    (job) => {
+      job.steps = job.steps.filter(
+        (step) => step.run !== "npm ci --loglevel=error",
+      );
+    },
+  ];
+  for (const mutate of mutations) {
+    const job = structuredClone(original);
+    mutate(job);
+    assert.throws(() => assertPinnedNodeSetup(job), assert.AssertionError);
+  }
+});
+
+function assertPinnedNodeSetup(job) {
+  const setupSteps = job.steps.filter((step) =>
+    step.uses?.startsWith("actions/setup-node@"),
+  );
+  assert.equal(
+    setupSteps.length,
+    1,
+    "exactly one official Node setup is required",
+  );
+  const setup = setupSteps[0];
+  assert.match(setup.uses, /^actions\/setup-node@[a-f0-9]{40}$/u);
+  assert.equal(String(setup.with?.["node-version"]), "24");
+  assert.equal(setup.with?.cache, "npm");
+  assert.equal(setup.if, undefined, "Node setup must run unconditionally");
+  assert.ok(
+    setup["continue-on-error"] === undefined ||
+      setup["continue-on-error"] === false,
+    "Node setup must fail closed",
+  );
+  const npmInstallIndex = job.steps.findIndex(
+    (step) => step.run === "npm ci --loglevel=error",
+  );
+  assert.ok(
+    job.steps.indexOf(setup) < npmInstallIndex,
+    "Node setup must precede npm ci",
+  );
+}
 
 test("actionlint exception only covers the self-repository syntax diagnostic", async () => {
   const config = await readYaml(".github/actionlint.yaml");
