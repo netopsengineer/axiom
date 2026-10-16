@@ -48,7 +48,7 @@
     "@anthropic-ai/claude-code": "2.1.296",
     "@biomejs/biome": "^2.5.15",
     "@j178/prek": "^0.5.5",
-    "@openai/codex": "0.161.0",
+    "@openai/codex": "0.162.0",
     "@semantic-release/changelog": "^7.0.0",
     "@semantic-release/exec": "^7.1.0",
     "@semantic-release/git": "^11.0.1",
