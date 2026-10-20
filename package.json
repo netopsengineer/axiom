@@ -45,7 +45,7 @@
     "@anthropic-ai/claude-code": true
   },
   "devDependencies": {
-    "@anthropic-ai/claude-code": "2.1.301",
+    "@anthropic-ai/claude-code": "2.1.302",
     "@biomejs/biome": "^2.5.15",
     "@j178/prek": "^0.5.5",
     "@openai/codex": "0.162.1",
