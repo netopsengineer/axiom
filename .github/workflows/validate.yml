@@ -46,7 +46,8 @@ jobs:
           persist-credentials: false
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
-          node-version: 24
+          node-version: ^24.22.1
+          check-latest: true
           cache: npm
       - run: npm ci --loglevel=error
       # Canonical validator: runs `claude plugin validate` (source-of-truth
@@ -98,7 +99,8 @@ jobs:
           persist-credentials: false
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
-          node-version: 24
+          node-version: ^24.22.1
+          check-latest: true
           cache: npm
       - run: npm ci --loglevel=error
       - run: npm run audit:ci
@@ -119,7 +121,8 @@ jobs:
           persist-credentials: false
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
-          node-version: 24
+          node-version: ^24.22.1
+          check-latest: true
           cache: npm
       - run: npm ci --loglevel=error
       - run: npm run check:precommit:security
@@ -136,7 +139,8 @@ jobs:
           persist-credentials: false
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
-          node-version: 24
+          node-version: ^24.22.1
+          check-latest: true
           cache: npm
       # Biome lint + format check (read-only `biome ci`). Config in biome.jsonc,
       # scoped to the repo's hand-written JS. Installed via npm, so there is no
