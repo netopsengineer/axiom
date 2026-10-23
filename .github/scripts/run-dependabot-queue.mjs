@@ -32,16 +32,30 @@ export function runDependabotQueue({
     throw new Error("GITHUB_REPOSITORY must be an owner/repository name.");
   }
   const endpoint = `repos/${repository}/pulls`;
-  const pages = JSON.parse(
-    gh(["api", "--paginate", "--slurp", `${endpoint}?state=open&per_page=100`]),
-  );
-  const candidates = pages
-    .flat()
-    .filter((pr) => isEligiblePullRequest(pr, repository))
-    .sort((left, right) => left.number - right.number);
+  // Project only numbers before buffering stdout: PR bodies can be large and
+  // are never needed by this trusted automation. Each page emits one number
+  // per matching PR; all eligibility metadata is re-read below before acting.
+  const numbers = gh([
+    "api",
+    "--paginate",
+    `${endpoint}?state=open&per_page=100`,
+    "--jq",
+    '.[] | select(.user.login == "dependabot[bot]" and .user.type == "Bot") | .number',
+  ]);
+  const candidates = numbers
+    .split(/\s+/u)
+    .filter(Boolean)
+    .map((value) => {
+      const number = Number(value);
+      if (!/^[1-9]\d*$/u.test(value) || !Number.isSafeInteger(number)) {
+        throw new Error("GitHub returned an invalid pull request number.");
+      }
+      return number;
+    })
+    .sort((left, right) => left - right);
 
-  for (const candidate of candidates) {
-    const prEndpoint = `${endpoint}/${candidate.number}`;
+  for (const number of new Set(candidates)) {
+    const prEndpoint = `${endpoint}/${number}`;
     const pr = JSON.parse(gh(["api", prEndpoint]));
     if (!isEligiblePullRequest(pr, repository)) continue;
     if (pr.mergeable !== true) {

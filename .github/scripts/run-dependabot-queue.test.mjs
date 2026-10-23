@@ -33,8 +33,9 @@ function listCommand() {
   return [
     "api",
     "--paginate",
-    "--slurp",
     `${endpoint}?state=open&per_page=100`,
+    "--jq",
+    '.[] | select(.user.login == "dependabot[bot]" and .user.type == "Bot") | .number',
   ];
 }
 
@@ -75,6 +76,18 @@ function fixture(responses) {
     assert.ok(responses.length > 0, `Unexpected command: ${args.join(" ")}`);
     const response = responses.shift();
     if (response instanceof Error) throw response;
+    if (args.includes("--paginate")) {
+      if (typeof response === "string") return response;
+      // Simulate the CLI's paginated numeric projection, not raw PR bodies.
+      return response
+        .flat()
+        .filter(
+          (pr) =>
+            pr.user?.login === "dependabot[bot]" && pr.user?.type === "Bot",
+        )
+        .map((pr) => String(pr.number))
+        .join("\n");
+    }
     return JSON.stringify(response);
   };
   const run = () => {
@@ -117,7 +130,11 @@ test("eligibility requires authenticated same-repository Dependabot metadata", (
 });
 
 test("empty and ineligible queues do not mutate any pull request", () => {
-  for (const pages of [[], [[]], [[pullRequest(1, { draft: true })]]]) {
+  for (const pages of [
+    [],
+    [[]],
+    [[pullRequest(1, { user: { login: "someone-else", type: "User" } })]],
+  ]) {
     const { run, commands } = fixture([pages]);
     assert.equal(run(), "empty");
     assert.deepEqual(commands, [listCommand()]);
@@ -272,6 +289,20 @@ test("update rejection fails closed with no blind retry or second refresh", () =
   assert.throws(run, /HTTP 422/u);
   assert.deepEqual(commands.at(-1), updateCommand());
   assert.equal(commands.length, 5);
+});
+
+test("malformed projected numbers fail before reading or mutating a PR", () => {
+  for (const output of [
+    "1;exit",
+    "../123",
+    "-1",
+    "1.5",
+    "999999999999999999",
+  ]) {
+    const { run, commands } = fixture([output]);
+    assert.throws(run, /invalid pull request number/u);
+    assert.deepEqual(commands, [listCommand()]);
+  }
 });
 
 test("invalid repository values fail before any GitHub command", () => {
