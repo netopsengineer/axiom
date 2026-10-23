@@ -303,8 +303,7 @@ test("audit, audit-fix, validator-bump, and App auto-merge loops remain enabled"
     ".github/workflows/dependabot-auto-merge.yml",
   );
   assert.match(workflowText, /steps\.app-token\.outputs\.token/u);
-  assert.match(workflowText, /dependabot\[bot\]/u);
-  assert.match(workflowText, /head_repo.*GITHUB_REPOSITORY/u);
+  assert.match(workflowText, /run-dependabot-queue\.mjs/u);
 });
 
 test("the local validator wrapper uses the repository Claude dependency", async () => {
