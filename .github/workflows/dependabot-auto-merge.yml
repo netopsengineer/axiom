@@ -2,9 +2,10 @@ name: Auto-merge Dependabot
 
 # Dependabot-triggered workflows cannot access Actions secrets, and merges made
 # with GITHUB_TOKEN do not trigger push workflows. This trusted scheduled run
-# mints the repository GitHub App token and enables auto-merge only for
-# same-repository Dependabot PRs. The App-attributed merge triggers the normal
-# main-branch Validate and Release workflows.
+# mints the existing repository GitHub App token and processes same-repository
+# Dependabot PRs oldest-first. At most one stale branch is refreshed per run,
+# then the queue waits for its required checks and protected auto-merge before
+# advancing. App-attributed updates and merges trigger normal CI and releases.
 
 on:
   schedule:
@@ -40,23 +41,7 @@ jobs:
           TOKEN_PERMISSIONS: '{"contents":"write","pull_requests":"write"}'
         run: node .github/scripts/create-app-token.mjs
 
-      - name: Enable App-attributed auto-merge
+      - name: Advance protected Dependabot queue
         env:
           GH_TOKEN: ${{ steps.app-token.outputs.token }}
-        run: |
-          set -euo pipefail
-          found=false
-          while IFS=$'\t' read -r url author head_repo; do
-            if [ "$author" != "dependabot[bot]" ] || [ "$head_repo" != "$GITHUB_REPOSITORY" ]; then
-              continue
-            fi
-            found=true
-            echo "Enabling protected auto-merge for $url"
-            gh pr merge --auto --squash "$url"
-          done < <(
-            gh api --paginate "repos/$GITHUB_REPOSITORY/pulls?state=open&per_page=100" \
-              --jq '.[] | [.html_url, .user.login, .head.repo.full_name] | @tsv'
-          )
-          if [ "$found" = false ]; then
-            echo "No same-repository Dependabot pull requests are open."
-          fi
+        run: node .github/scripts/run-dependabot-queue.mjs
