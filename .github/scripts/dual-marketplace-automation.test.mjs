@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { readFile } from "node:fs/promises";
+import { readdir, readFile } from "node:fs/promises";
 import path from "node:path";
 import test from "node:test";
 import { fileURLToPath } from "node:url";
@@ -62,6 +62,12 @@ test("Node setup accepts updated immutable pins and rejects unsafe changes", asy
     assert.throws(() => assertPinnedNodeSetup(job), assert.AssertionError);
   }
   const mutations = [
+    (job) => {
+      delete job.steps[setupIndex].with["check-latest"];
+    },
+    (job) => {
+      job.steps[setupIndex].with["check-latest"] = false;
+    },
     (job) => job.steps.splice(setupIndex, 1),
     (job) => job.steps.push(structuredClone(job.steps[setupIndex])),
     (job) => {
@@ -109,7 +115,8 @@ function assertPinnedNodeSetup(job) {
   );
   const setup = setupSteps[0];
   assert.match(setup.uses, /^actions\/setup-node@[a-f0-9]{40}$/u);
-  assert.equal(String(setup.with?.["node-version"]), "24");
+  assert.equal(String(setup.with?.["node-version"]), "^24.22.1");
+  assert.equal(setup.with?.["check-latest"], true);
   assert.equal(setup.with?.cache, "npm");
   assert.equal(setup.if, undefined, "Node setup must run unconditionally");
   assert.ok(
@@ -375,3 +382,31 @@ async function readJson(relativePath) {
 async function readText(relativePath) {
   return readFile(path.join(REPOSITORY_ROOT, relativePath), "utf8");
 }
+
+test("every repository Node setup resolves the latest patched LTS", async () => {
+  const directory = path.join(REPOSITORY_ROOT, ".github/workflows");
+  let count = 0;
+  for (const file of await readdir(directory)) {
+    if (!file.endsWith(".yml") && !file.endsWith(".yaml")) continue;
+    const workflow = await readYaml(`.github/workflows/${file}`);
+    for (const job of Object.values(workflow.jobs ?? {})) {
+      for (const step of job.steps ?? []) {
+        if (!step.uses?.startsWith("actions/setup-node@")) continue;
+        count += 1;
+        assert.equal(step.with?.["node-version"], "^24.22.1", file);
+        assert.equal(step.with?.["check-latest"], true, file);
+      }
+    }
+  }
+  assert.ok(count >= 10, "all existing Node consumers remain covered");
+  const files = [
+    "package.json",
+    ".github/release-tooling/semantic-release-npm-disabled/package.json",
+  ];
+  for (const file of files) {
+    const manifest = JSON.parse(
+      await readFile(path.join(REPOSITORY_ROOT, file), "utf8"),
+    );
+    assert.equal(manifest.engines.node, "^22.23.4 || ^24.22.1 || >=26.12.1");
+  }
+});
