@@ -37,6 +37,9 @@ jobs:
     name: Plugin manifests
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    env:
+      # Local validation and isolated installs need no telemetry or feature flags.
+      CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC: "1"
     steps:
       - name: Configure git defaults
         run: git config --global init.defaultBranch main
