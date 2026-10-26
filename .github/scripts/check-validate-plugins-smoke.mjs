@@ -8,7 +8,26 @@ import {
   CLAUDE_SHIM_DIR,
 } from "./lib/claude-package-contract.mjs";
 
+// Valid 512-by-512 PNG for temporary test fixtures, not a shipped plugin asset.
+const FIXTURE_ICON = Buffer.from(
+  [
+    "iVBORw0KGgoAAAANSUhEUgAAAgAAAAIACAAAAADRE4smAAABFUlEQVR42u3BMQEA",
+    "AADCoPVP7WkJoAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+    "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+    "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+    "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+    "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+    "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA4AYCPAAByZWgVQAAAABJRU5ErkJggg==",
+  ].join(""),
+  "base64",
+);
+
 const ROOT = process.cwd();
+// Validation is local-only; do not send CLI telemetry or fetch feature flags.
+const VALIDATOR_ENV = {
+  ...process.env,
+  CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC: "1",
+};
 const ACTION_PATH = path.join(
   ROOT,
   ".github/actions/validate-plugins/upstream",
@@ -19,6 +38,7 @@ const cases = [
   ["known-good fixture passes", runGoodFixture],
   ["known-bad fixture fails", runBadFixture],
   ["warnings fail when fail-on-warnings is true", runWarningFixture],
+  ["CLI directory warnings still fail", runCliWarningFixture],
 ];
 
 await preflight();
@@ -90,6 +110,29 @@ function runWarningFixture() {
   }
 }
 
+function runCliWarningFixture() {
+  const fixture = createFixture("cli-warning", {
+    pluginName: "validator-smoke-cli-warning",
+    pluginDescription: "Valid plugin fixture for validator smoke testing.",
+    marketplaceDescription: "Valid plugin fixture for validator smoke testing.",
+  });
+
+  try {
+    rmSync(
+      path.join(
+        fixture.workspace,
+        "plugins/cli-warning/.claude-plugin/icon.png",
+      ),
+    );
+    runValidatorScript(fixture, "40-validate-cli-local.sh", {
+      expect: "fail",
+      includes: ["ICON_MISSING", "fail-on-warnings"],
+    });
+  } finally {
+    fixture.cleanup();
+  }
+}
+
 function createFixture(
   slug,
   {
@@ -122,6 +165,20 @@ function createFixture(
     author: { name: "axiom" },
     license: "MIT",
   });
+
+  // Current Claude CLI also reports directory readiness warnings. Keep the
+  // baseline fixture complete rather than disabling the strict warning gate.
+  writeFileSync(path.join(manifestDir, "icon.png"), FIXTURE_ICON);
+  writeFileSync(
+    path.join(workspace, pluginFolder, "README.md"),
+    `# Validator smoke fixture
+
+This temporary plugin exists only to exercise the repository validator. Run the
+validator smoke test from the repository root to check valid manifests, invalid
+manifests, and strict warning handling. It requires no credentials, external
+services, or user configuration and is deleted when the test completes.
+`,
+  );
 
   const marketplacePath = path.join(marketplaceDir, "marketplace.json");
   writeJson(marketplacePath, {
@@ -161,7 +218,7 @@ function runValidatorScript(fixture, scriptName, { expect, includes = [] }) {
     cwd: fixture.workspace,
     encoding: "utf8",
     env: {
-      ...process.env,
+      ...VALIDATOR_ENV,
       PATH: `${CLAUDE_SHIM_DIR}${path.delimiter}${process.env.PATH ?? ""}`,
       ACTION_PATH,
       BASE_REF: "HEAD",
@@ -196,6 +253,7 @@ async function preflight() {
   await assertClaudePackageContract();
   for (const command of ["bash", "jq", CLAUDE_BIN]) {
     const result = spawnSync(command, ["--version"], {
+      env: VALIDATOR_ENV,
       encoding: "utf8",
       stdio: ["ignore", "pipe", "pipe"],
     });
