@@ -240,3 +240,100 @@ function extractChangelogSection(changelog, releaseTag) {
   const sectionEnd = headings[targetIndex + 1]?.index ?? changelog.length;
   return changelog.slice(headings[targetIndex].index, sectionEnd);
 }
+
+test("monorepo temp directories use the scoped native adapter", async () => {
+  const { createRequire } = await import("node:module");
+  const { readdir } = await import("node:fs/promises");
+  const manifest = await readJson("package.json");
+  assert.equal(manifest.devDependencies["semantic-release-monorepo"], "8.0.2");
+  assert.equal(
+    manifest.devDependencies.tempy,
+    "file:.github/release-tooling/tempy-directory",
+  );
+  assert.equal(manifest.overrides["semantic-release-monorepo"].tempy, "$tempy");
+  const require = createRequire(import.meta.url);
+  const monorepoEntry = require.resolve("semantic-release-monorepo");
+  const monorepoRequire = createRequire(monorepoEntry);
+  assert.equal(monorepoRequire.resolve("tempy"), require.resolve("tempy"));
+  const adapterManifest = await readJson(
+    ".github/release-tooling/tempy-directory/package.json",
+  );
+  assert.deepEqual(adapterManifest.dependencies ?? {}, {});
+  assert.equal(adapterManifest.private, true);
+
+  // Fail closed on an upstream API expansion instead of silently substituting
+  // a partial tempy implementation for a new consumer or cleanup operation.
+  const sourceRoot = path.dirname(monorepoEntry);
+  let directoryCalls = 0;
+  for (const entry of await readdir(sourceRoot)) {
+    if (!entry.endsWith(".js")) continue;
+    const source = await readFile(path.join(sourceRoot, entry), "utf8");
+    if (!source.includes("tempy")) continue;
+    assert.equal(entry, "git-utils.js");
+    assert.match(source, /import tempy from 'tempy';/u);
+    directoryCalls += [...source.matchAll(/tempy\.directory\(\)/gu)].length;
+    const withoutSupportedUsage = source
+      .replace("import tempy from 'tempy';", "")
+      .replaceAll("tempy.directory()", "");
+    assert.doesNotMatch(withoutSupportedUsage, /tempy/u);
+  }
+  assert.equal(directoryCalls, 3);
+});
+
+test("native temp directories are unique, private and caller-cleaned", async () => {
+  const { lstat, rm, writeFile } = await import("node:fs/promises");
+  const { tmpdir } = await import("node:os");
+  const { default: tempy } = await import("tempy");
+  assert.deepEqual(Object.keys(tempy), ["directory"]);
+  assert.ok(Object.isFrozen(tempy));
+  assert.throws(() => tempy.directory({ prefix: "../escape" }), TypeError);
+  assert.throws(() => tempy.directory(undefined), TypeError);
+  const directories = [];
+  try {
+    for (let index = 0; index < 16; index += 1) {
+      directories.push(tempy.directory());
+    }
+    assert.equal(new Set(directories).size, directories.length);
+    for (const directory of directories) {
+      assert.equal(path.dirname(directory), path.resolve(tmpdir()));
+      const stat = await lstat(directory);
+      assert.ok(stat.isDirectory());
+      assert.equal(stat.isSymbolicLink(), false);
+      if (process.platform !== "win32") assert.equal(stat.mode & 0o077, 0);
+    }
+    const filename = path.join(directories[0], "literal-[*].txt");
+    await writeFile(filename, "caller-owned data");
+    await new Promise((resolve) => setImmediate(resolve));
+    assert.equal(await readFile(filename, "utf8"), "caller-owned data");
+  } finally {
+    await Promise.all(
+      directories.map((directory) =>
+        rm(directory, { recursive: true, force: true }),
+      ),
+    );
+  }
+});
+
+test("monorepo git initialization works with the native directory adapter", async () => {
+  const { execFile } = await import("node:child_process");
+  const { rm } = await import("node:fs/promises");
+  const { promisify } = await import("node:util");
+  const { initGit } = await import(
+    "semantic-release-monorepo/src/git-utils.js"
+  );
+  const exec = promisify(execFile);
+  for (const bare of [false, true]) {
+    const { cwd, repositoryUrl } = await initGit(bare);
+    try {
+      const { stdout } = await exec(
+        "git",
+        ["rev-parse", "--is-bare-repository"],
+        { cwd },
+      );
+      assert.equal(stdout.trim(), String(bare));
+      assert.equal(repositoryUrl, pathToFileURL(cwd).href);
+    } finally {
+      await rm(cwd, { recursive: true, force: true });
+    }
+  }
+});

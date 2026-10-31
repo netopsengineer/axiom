@@ -139,6 +139,20 @@ Files outside plugin paths, such as `.github/**`, `AGENTS.md`,
 anything by themselves. A single releasable PR that touches multiple plugin paths
 can release multiple plugins.
 
+The root tooling replaces `semantic-release-monorepo` 8.0.2's legacy `tempy`
+dependency with `.github/release-tooling/tempy-directory`. That adapter supports
+only the package's three no-argument `directory()` calls, using Node's atomic
+`mkdtempSync` instead of loading the unused deletion/globbing dependency chain
+that contains GHSA-g3hv-75wg-m249. It creates private directories under the OS
+temporary directory and leaves cleanup to the caller, just like the original
+`directory()` API. It does not implement file or task/automatic-cleanup APIs.
+
+The release-tooling contract tests check the installed consumer's API usage,
+module resolution, directory isolation and permissions, and actual bare and
+non-bare Git initialization. An upstream consumer/API change must be reviewed
+before updating the adapter; prefer removing this override when the upstream
+dependency graph is compatible and audit-clean. No advisory exception is used.
+
 ## How releases & CI work
 
 All workflows live in `.github/`; every third-party action is SHA-pinned.
